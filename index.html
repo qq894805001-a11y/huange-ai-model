@@ -4722,6 +4722,131 @@ const FD_CODES='PL,PD,SA,BL,FL1,ELC,CL,BSA,CLI,PPL,ERED,WC,EC';
 const AFB_KEY='ce2d77c10f8e8838ea47b98d24ae8ae7';
 const AFB_BASE='https://v3.football.api-sports.io';
 const AFB_DAILY_LIMIT=95; // 免费版100，留5个余量
+// ============================================================
+// 自建足球数据API（盘口/xG/阵容/伤停/11家博彩公司）
+// ============================================================
+const SELF_API_BASE='http://47.99.155.27:8321';
+const SELF_API_KEY='fmjwx8H7vbA6j8RiPD6sn9UOsrQSvPJ3d478dn4xwN';
+const SELF_API_ENABLED=true; // 设为false可禁用
+const SELF_CACHE={}; // 本地缓存
+// 自建API配额管理（500次/天，50次/分钟）
+const SELF_DAILY_LIMIT=480; // 留20次余量
+const SELF_MIN_LIMIT=45; // 每分钟45次，留5次余量
+const SELF_CALLS_TODAY=[]; // 今天的调用时间戳
+const SELF_MIN_CALLS=[]; // 最近60秒的调用时间戳
+function selfQuota(){
+  const today=new Date().toISOString().slice(0,10);
+  let raw=JSON.parse(localStorage.getItem('gc_self_quota')||'{}');
+  if(raw.date!==today){raw={date:today,count:0};}
+  // 清理60秒前的分钟级记录
+  const now=Date.now();
+  while(SELF_MIN_CALLS.length&&now-SELF_MIN_CALLS[0]>60000)SELF_MIN_CALLS.shift();
+  return {
+    today:raw.count||0,
+    todayLimit:SELF_DAILY_LIMIT,
+    min:SELF_MIN_CALLS.length,
+    minLimit:SELF_MIN_LIMIT,
+    remaining:SELF_DAILY_LIMIT-(raw.count||0)
+  };
+}
+function selfConsume(n){
+  const today=new Date().toISOString().slice(0,10);
+  let raw=JSON.parse(localStorage.getItem('gc_self_quota')||'{}');
+  if(raw.date!==today){raw={date:today,count:0};}
+  raw.count=(raw.count||0)+(n||1);
+  localStorage.setItem('gc_self_quota',JSON.stringify(raw));
+  SELF_MIN_CALLS.push(Date.now());
+  return raw;
+}
+// 自建API请求函数（带配额和限速）
+async function selfApiGet(path){
+  if(!SELF_API_ENABLED)throw new Error('SELF API disabled');
+  const cacheKey=path;
+  if(SELF_CACHE[cacheKey]&&Date.now()-SELF_CACHE[cacheKey].ts<120000){
+    return SELF_CACHE[cacheKey].data;
+  }
+  // 检查配额
+  const q=selfQuota();
+  if(q.today>=q.todayLimit)throw new Error('自建API每日配额已用完（'+q.todayLimit+'次/天）');
+  if(q.min>=q.minLimit)throw new Error('自建API每分钟限速，稍后重试');
+  const ctrl=new AbortController();
+  const timer=setTimeout(()=>ctrl.abort(),12000);
+  try{
+    const res=await fetch(SELF_API_BASE+path,{
+      headers:{'X-API-Token':SELF_API_KEY,'Accept':'application/json'},
+      signal:ctrl.signal
+    });
+    clearTimeout(timer);
+    selfConsume(1);
+    if(res.status===401)throw new Error('自建API token无效');
+    if(!res.ok)throw new Error('自建API HTTP '+res.status);
+    const body=await res.json();
+    SELF_CACHE[cacheKey]={ts:Date.now(),data:body};
+    return body;
+  }catch(e){
+    clearTimeout(timer);
+    throw e;
+  }
+}
+// 获取今日比赛列表（自建API）
+async function selfFetchToday(){
+  const data=await selfApiGet('/api/today');
+  return data;
+}
+// 获取单场完整详情（自建API）
+async function selfFetchMatchFull(eventId){
+  const data=await selfApiGet('/match_full/'+eventId);
+  return data;
+}
+// 获取赛前xG预期
+async function selfFetchExpectedXg(eventId){
+  try{
+    const data=await selfApiGet('/expected_xg/'+eventId);
+    return data;
+  }catch(e){return null;}
+}
+// 获取球队xG形态
+async function selfFetchTeamXg(teamName){
+  try{
+    const data=await selfApiGet('/team_xg_form/'+encodeURIComponent(teamName)+'?n=10');
+    return data;
+  }catch(e){return null;}
+}
+// 从自建API比赛列表提取盘口信息
+function selfExtractOdds(match){
+  if(!match||!match.odds||!match.odds_available)return null;
+  const o=match.odds;
+  const result={};
+  // 欧赔胜平负
+  if(o['胜平负']){
+    result.h=o['胜平负']['主胜'];
+    result.d=o['胜平负']['平局'];
+    result.a=o['胜平负']['客胜'];
+  }
+  // 亚盘让球
+  if(o['亚盘']){
+    // 解析让球盘口
+    for(const k in o['亚盘']){
+      if(k.startsWith('主-')||k.startsWith('主+')){
+        result.spreadLine=parseFloat(k.replace('主',''));
+        result.spP=o['亚盘'][k];
+        break;
+      }
+    }
+  }
+  // 大小球
+  for(const k in o){
+    if(k.startsWith('大小球')){
+      const m=k.match(/大小球\(([\d.]+)\)/);
+      if(m){
+        result.ouLine=parseFloat(m[1]);
+        result.ouOver=o[k]['大'+m[1]];
+        result.ouUnder=o[k]['小'+m[1]];
+      }
+    }
+  }
+  return result;
+}
 // 动态预算：根据今日总比赛数，平均分配配额，确保每场都能用到
 function afbBudget(){
  const q=afbQuota();
@@ -4854,6 +4979,108 @@ async function afbCheckLive(homeName,awayName,dateISO){
   if(!f)return null;
   return {status:f.fixture.status.short,elapsed:f.fixture.status.elapsed,homeScore:f.goals.home,awayScore:f.goals.away};
  }catch(e){return null;}
+}
+// AFB实时比分补充：对ESPN进行中但比分可能不准确的比赛，用AFB获取真实比分
+const AFB_LIVE_CACHE={};
+async function afbEnrichLiveScores(){
+ try{
+  if(!LAST_HOME||!LAST_HOME.all)return;
+  const q=afbQuota();
+  if(q.count>=q.limit)return;
+  const liveMatches=LAST_HOME.all.filter(f=>{
+   if(!LIVE_ST.includes(f.st))return false;
+   const hg=f.hg??0,ag=f.ag??0;
+   if(hg===0&&ag===0)return true;
+   const cached=AFB_LIVE_CACHE[f.id];
+   if(cached&&Date.now()-cached.ts<90000)return false;
+   return true;
+  });
+  if(!liveMatches.length)return;
+  const toProcess=liveMatches.slice(0,5);
+  let updated=0;
+  for(const f of toProcess){
+   try{
+    const result=await afbCheckLive(f.home.name,f.away.name,f.dateISO);
+    AFB_LIVE_CACHE[f.id]={ts:Date.now(),data:result};
+    if(result&&result.status){
+     if(['1H','2H','HT','ET','BT','P','SUSP','INT','AET','PEN','FT','FINISHED'].includes(result.status)){
+      f.st=result.status;
+      if(result.elapsed!=null)f.elapsed=result.elapsed;
+     }
+     if(result.homeScore!=null)f.hg=result.homeScore;
+     if(result.awayScore!=null)f.ag=result.awayScore;
+     updated++;
+    }
+   }catch(e){}
+  }
+  if(updated>0){
+   renderHomeList();
+   console.log('[AFB-Live] 已更新'+updated+'场比赛的实时比分');
+  }
+ }catch(e){console.log('[AFB-Live] 补充失败:',e.message);}
+}
+// 自建API首页数据补充：获取盘口、xG、中文队名
+async function selfApiEnrichHome(){
+ try{
+  if(!LAST_HOME||!LAST_HOME.all)return;
+  console.log('[SELF-API] 开始获取自建API数据...');
+  const data=await selfFetchToday();
+  const matches=data.matches||data||[];
+  if(!Array.isArray(matches)||!matches.length){
+    console.log('[SELF-API] 无比赛数据');
+    return;
+  }
+  console.log('[SELF-API] 获取到'+matches.length+'场比赛');
+  // 建立队名匹配索引
+  const norm=n=>String(n||'').toLowerCase().replace(/[^a-z0-9\u4e00-\u9fa5]/g,'');
+  let enriched=0;
+  matches.forEach(sm=>{
+    const sh=norm(sm.home_team),sa=norm(sm.away_team);
+    // 在现有比赛列表中匹配
+    const match=LAST_HOME.all.find(f=>{
+      const fh=norm(f.home.name),fa=norm(f.away.name);
+      return (fh.includes(sh)||sh.includes(fh)||fa.includes(sa)||sa.includes(fa));
+    });
+    if(match){
+      // 补充盘口数据
+      const odds=selfExtractOdds(sm);
+      if(odds){
+        HOME_ODDS_CACHE[match.id]={
+          ouLine:odds.ouLine||null,
+          ouP:odds.ouOver?Math.min(0.9,odds.ouOver/(odds.ouOver+odds.ouUnder)):null,
+          ouSim:false,
+          spreadLine:odds.spreadLine||null,
+          spP:odds.spP||null,
+          spSim:false,
+          none:false
+        };
+      }
+      // 补充比分和状态
+      if(sm.status){
+        if(sm.status==='live'||sm.status==='inplay'){
+          match.st='2H';
+          if(sm.minute)match.elapsed=sm.minute;
+        }
+        if(sm.home_score!=null)match.hg=sm.home_score;
+        if(sm.away_score!=null)match.ag=sm.away_score;
+      }
+      // 补充中文队名（如果当前队名是英文）
+      if(sm.home_team_zh&&/^[a-zA-Z\s]+$/.test(match.home.name)){
+        match.home.name=sm.home_team_zh;
+      }
+      if(sm.away_team_zh&&/^[a-zA-Z\s]+$/.test(match.away.name)){
+        match.away.name=sm.away_team_zh;
+      }
+      enriched++;
+    }
+  });
+  if(enriched>0){
+    renderHomeList();
+    console.log('[SELF-API] 已补充'+enriched+'场比赛的盘口和数据');
+  }
+ }catch(e){
+  console.log('[SELF-API] 补充失败:',e.message);
+ }
 }
 function getProv(){return 'espn';}
 const getKey=()=>'';
@@ -6787,6 +7014,10 @@ async function loadFixtures(silent){
  const standingsCache=Object.assign({},(LAST_HOME&&LAST_HOME.standingsCache)||{});
  LAST_HOME={d0:fmtDate(d0),all,standingsCache};
  renderHomeList();
+ // AFB实时比分补充（异步，不阻塞）：对ESPN进行中但比分0-0的比赛，用AFB获取真实比分
+ if(prov==='espn'&&HOME_OFFSET===0){setTimeout(()=>afbEnrichLiveScores(),2000);}
+ // 自建API数据补充（异步，不阻塞）：获取盘口/xG/中文队名
+ if(SELF_API_ENABLED&&HOME_OFFSET===0){setTimeout(()=>selfApiEnrichHome(),3000);}
  const hasLive=all.some(f=>LIVE_ST.includes(f.st));
  const tip=document.getElementById('home-refresh-tip');
  if(tip){
