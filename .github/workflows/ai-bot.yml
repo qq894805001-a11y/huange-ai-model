@@ -1,0 +1,43 @@
+name: AI模型自动运行
+
+# 定时运行：每30分钟一次
+# 也可以手动触发
+on:
+  schedule:
+    - cron: '*/30 * * * *'  # 每30分钟
+  workflow_dispatch:  # 允许手动触发
+
+jobs:
+  ai-bot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 设置Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 安装依赖
+        run: |
+          cd scripts
+          npm init -y
+          npm install puppeteer
+
+      - name: 运行AI机器人
+        run: |
+          cd scripts
+          node ai-bot.js
+        env:
+          TZ: Asia/Shanghai
+
+      - name: 上传截图（排查问题用）
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots
+          path: scripts/screenshot-*.png
+          retention-days: 7
