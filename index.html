@@ -96,20 +96,24 @@ const Cloud = {
   async githubWriteFile(path, content, message) {
     try {
       const gh = this.github;
-      // 先获取现有文件的sha
       let sha = null;
       const resp = await fetch(`https://api.github.com/repos/${gh.owner}/${gh.repo}/contents/${path}`, {
         headers: {'Authorization': 'token ' + gh.token}
       });
       if (resp.ok) { const data = await resp.json(); sha = data.sha; }
-      // 写入文件
-      await fetch(`https://api.github.com/repos/${gh.owner}/${gh.repo}/contents/${path}`, {
+      const writeResp = await fetch(`https://api.github.com/repos/${gh.owner}/${gh.repo}/contents/${path}`, {
         method: 'PUT',
         headers: {'Authorization': 'token ' + gh.token, 'Content-Type': 'application/json'},
         body: JSON.stringify({ message: message || 'Update data', content: btoa(JSON.stringify(content, null, 2)), sha: sha })
       });
+      if (!writeResp.ok) {
+        const errText = await writeResp.text();
+        console.error('[Cloud] GitHub写入失败:', path, writeResp.status, errText);
+        return false;
+      }
+      console.log('[Cloud] GitHub写入成功:', path);
       return true;
-    } catch(e) { console.warn('github write failed', e); return false; }
+    } catch(e) { console.error('[Cloud] github write exception', e); return false; }
   },
 
   // 从云端加载学习数据（GitHub仓库 data/learn_data.json）
@@ -149,6 +153,8 @@ const Cloud = {
       if (ok) {
         this.dirty = false;
         console.log('[Cloud] 学习数据已同步到云端', Object.keys(data).length, '项');
+      } else {
+        console.error('[Cloud] 学习数据同步失败！');
       }
     } catch(e) { console.warn('cloud save failed', e); }
   },
