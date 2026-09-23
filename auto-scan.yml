@@ -1,0 +1,30 @@
+name: 自动扫描比赛并预测
+
+on:
+  schedule:
+    - cron: '0 * * * *'  # 每小时运行一次
+  workflow_dispatch:  # 手动触发
+
+jobs:
+  scan-and-predict:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: 运行预测脚本
+        env:
+          AFB_KEY: ${{ secrets.AFB_KEY }}
+        run: node .github/scripts/auto-scan.js
+
+      - name: 提交更新
+        run: |
+          git config --local user.email "ai-bot@huange.com"
+          git config --local user.name "AI Bot"
+          git add data/
+          git diff --staged --quiet || git commit -m "自动更新预测数据 $(date)"
+          git push

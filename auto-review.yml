@@ -1,0 +1,30 @@
+name: 自动复盘已结束比赛
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'  # 每30分钟运行一次
+  workflow_dispatch:
+
+jobs:
+  review-matches:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: 运行复盘脚本
+        env:
+          AFB_KEY: ${{ secrets.AFB_KEY }}
+        run: node .github/scripts/auto-review.js
+
+      - name: 提交更新
+        run: |
+          git config --local user.email "ai-bot@huange.com"
+          git config --local user.name "AI Bot"
+          git add data/
+          git diff --staged --quiet || git commit -m "自动更新复盘数据 $(date)"
+          git push
