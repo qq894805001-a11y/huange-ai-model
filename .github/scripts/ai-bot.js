@@ -16,9 +16,84 @@ const CONFIG = {
   waitLogin: 5000,        // 等待登录页面加载
   waitHomeLoad: 15000,    // 等待首页比赛数据加载
   waitPredict: 180000,    // 等待自动预测完成（比赛多时需要更久，3分钟）
-  waitSync: 30000,        // 等待数据同步到云端
+  waitSync: 15000,        // 等待数据同步到云端
   headless: true,
+  // GitHub配置（用于Node.js直接写入，绕过浏览器CORS）
+  github: {
+    token: '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',
+    owner: 'qq894805001-a11y',
+    repo: 'huange-ai-model',
+  }
 };
+
+// Node.js直接写入GitHub（绕过浏览器CORS限制）
+async function syncToGithub(page) {
+  console.log('[AI-Bot] 开始用Node.js同步数据到GitHub...');
+  try {
+    // 1. 从浏览器获取所有gc_开头的学习数据
+    const learnData = await page.evaluate(() => {
+      const data = {};
+      const syncKeys = ['gc_learn_v1','gc_self_learn','gc_odds_learner','gc_live_snap_v1',
+                        'gc_dyn','gc_zhcache_v1','gc_espn_codes','gc_backtest',
+                        'gc_afb_map','gc_afb_quota','gc_quota_v2','gc_users_v1',
+                        'gc_odds_history_v1'];
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && (syncKeys.includes(k) || k.startsWith('gc_afb_extra_'))) {
+          data[k] = localStorage.getItem(k);
+        }
+      }
+      return data;
+    });
+    console.log('[AI-Bot] 从浏览器获取到', Object.keys(learnData).length, '项学习数据');
+
+    // 2. 用Node.js调用GitHub API写入
+    const gh = CONFIG.github;
+    const path = 'data/learn_data.json';
+    const apiUrl = `https://api.github.com/repos/${gh.owner}/${gh.repo}/contents/${path}`;
+
+    // 先获取现有文件的sha
+    let sha = null;
+    const getResp = await fetch(apiUrl, {
+      headers: {'Authorization': 'token ' + gh.token, 'User-Agent': 'ai-bot'}
+    });
+    if (getResp.ok) {
+      const getRespJson = await getResp.json();
+      sha = getRespJson.sha;
+      console.log('[AI-Bot] 文件已存在，sha:', sha.substring(0,8) + '...');
+    } else {
+      console.log('[AI-Bot] 文件不存在，将创建新文件');
+    }
+
+    // 写入文件（用Buffer处理中文）
+    const content = Buffer.from(JSON.stringify(learnData, null, 2), 'utf-8').toString('base64');
+    const putResp = await fetch(apiUrl, {
+      method: 'PUT',
+      headers: {
+        'Authorization': 'token ' + gh.token,
+        'Content-Type': 'application/json',
+        'User-Agent': 'ai-bot'
+      },
+      body: JSON.stringify({
+        message: 'Auto-sync learn data by ai-bot',
+        content: content,
+        sha: sha
+      })
+    });
+
+    if (putResp.ok) {
+      console.log('[AI-Bot] ✅ 学习数据已成功同步到GitHub！共', Object.keys(learnData).length, '项');
+      return true;
+    } else {
+      const errText = await putResp.text();
+      console.error('[AI-Bot] ❌ GitHub写入失败:', putResp.status, errText);
+      return false;
+    }
+  } catch (e) {
+    console.error('[AI-Bot] ❌ 同步异常:', e.message);
+    return false;
+  }
+}
 
 async function run() {
   console.log('[AI-Bot] 启动...');
@@ -124,21 +199,10 @@ async function run() {
     await page.screenshot({ path: 'screenshot-03-predicted.png', fullPage: false });
     console.log('[AI-Bot] 预测完成截图已保存');
 
-    // 步骤5：强制同步数据到云端（即使没有变化也创建文件）
-    console.log('[AI-Bot] 步骤5：强制同步数据到云端...');
-    try {
-      await page.evaluate(() => {
-        if (typeof Cloud !== 'undefined' && Cloud.token) {
-          Cloud.markDirty();
-          console.log('[AI-Bot-页面] 已标记dirty，5秒后开始同步');
-        } else {
-          console.log('[AI-Bot-页面] Cloud或token不存在，无法同步');
-        }
-      });
-    } catch (e) {
-      console.log('[AI-Bot] 强制同步失败:', e.message);
-    }
-    await sleep(CONFIG.waitSync);
+    // 步骤5：用Node.js直接同步数据到GitHub（绕过浏览器CORS限制）
+    console.log('[AI-Bot] 步骤5：同步数据到GitHub...');
+    await syncToGithub(page);
+    await sleep(3000);
 
     // 最终截图
     await page.screenshot({ path: 'screenshot-04-final.png', fullPage: false });
