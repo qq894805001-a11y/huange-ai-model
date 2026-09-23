@@ -23,13 +23,13 @@ jobs:
 
       - name: 安装依赖
         run: |
-          cd scripts
+          cd .github/scripts
           npm init -y
           npm install puppeteer
 
       - name: 运行AI机器人
         run: |
-          cd scripts
+          cd .github/scripts
           node ai-bot.js
         env:
           TZ: Asia/Shanghai
@@ -39,5 +39,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: screenshots
-          path: scripts/screenshot-*.png
+          path: .github/scripts/screenshot-*.png
           retention-days: 7
