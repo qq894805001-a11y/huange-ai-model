@@ -39,12 +39,9 @@ async function run() {
     const page = await browser.newPage();
     await page.setViewport({ width: 1920, height: 1080 });
 
-    // 捕获控制台日志
+    // 捕获控制台日志（全部输出，方便排查）
     page.on('console', msg => {
-      const text = msg.text();
-      if (text.includes('[AutoPred]') || text.includes('[Cloud]') || text.includes('学习') || text.includes('复盘')) {
-        console.log('[页面]', text);
-      }
+      console.log('[页面]', msg.text());
     });
 
     // 步骤1：打开网页
@@ -85,6 +82,19 @@ async function run() {
     }
     await sleep(5000);
 
+    // 检查登录是否成功
+    const loginCheck = await page.evaluate(() => {
+      return {
+        token: localStorage.getItem('gc_token'),
+        username: localStorage.getItem('gc_username'),
+        role: localStorage.getItem('gc_role')
+      };
+    });
+    console.log('[AI-Bot] 登录状态检查:', JSON.stringify(loginCheck));
+    if (!loginCheck.token) {
+      console.log('[AI-Bot] 警告：登录可能失败，token为空！');
+    }
+
     // 截图：首页
     await page.screenshot({ path: 'screenshot-02-home.png', fullPage: false });
     console.log('[AI-Bot] 首页截图已保存');
@@ -101,8 +111,20 @@ async function run() {
     await page.screenshot({ path: 'screenshot-03-predicted.png', fullPage: false });
     console.log('[AI-Bot] 预测完成截图已保存');
 
-    // 步骤5：等待数据同步到云端
-    console.log('[AI-Bot] 步骤5：等待数据同步到云端...');
+    // 步骤5：强制同步数据到云端（即使没有变化也创建文件）
+    console.log('[AI-Bot] 步骤5：强制同步数据到云端...');
+    try {
+      await page.evaluate(() => {
+        if (typeof Cloud !== 'undefined' && Cloud.token) {
+          Cloud.markDirty();
+          console.log('[AI-Bot-页面] 已标记dirty，5秒后开始同步');
+        } else {
+          console.log('[AI-Bot-页面] Cloud或token不存在，无法同步');
+        }
+      });
+    } catch (e) {
+      console.log('[AI-Bot] 强制同步失败:', e.message);
+    }
     await sleep(CONFIG.waitSync);
 
     // 最终截图
