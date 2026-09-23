@@ -227,9 +227,81 @@ async function run() {
     await syncToGithub(page);
     await sleep(3000);
 
+    // 步骤5.5：调用自建API获取比赛数据并保存到GitHub
+    await fetchSelfApiAndUpload();
+    await sleep(2000);
+
     // 最终截图
     await page.screenshot({ path: 'screenshot-04-final.png', fullPage: false });
     console.log('[AI-Bot] 最终截图已保存');
+
+// 调用自建API并把数据保存到GitHub（Node.js不受HTTP混合内容限制）
+async function fetchSelfApiAndUpload() {
+  console.log('[AI-Bot] 步骤5.5：调用自建API获取比赛数据...');
+  const SELF_API_BASE = 'http://47.99.155.27:8321';
+  const SELF_API_KEY = 'fmjwx8H7vbA6j8RiPD6sn9UOsrQSvPJ3d478dn4xwN';
+  const gh = CONFIG.github;
+
+  try {
+    // 1. 调用自建API获取今日比赛
+    console.log('[AI-Bot] 请求', SELF_API_BASE + '/api/today');
+    const resp = await fetch(SELF_API_BASE + '/api/today', {
+      headers: {'X-API-Token': SELF_API_KEY, 'Accept': 'application/json'}
+    });
+    if (!resp.ok) {
+      console.log('[AI-Bot] 自建API请求失败:', resp.status);
+      return;
+    }
+    const data = await resp.json();
+    const matchCount = data.matches ? data.matches.length : (Array.isArray(data) ? data.length : 0);
+    console.log('[AI-Bot] ✅ 自建API返回', matchCount, '场比赛');
+
+    // 2. 保存到GitHub的data/self_api_today.json
+    const path = 'data/self_api_today.json';
+    const apiUrl = `https://api.github.com/repos/${gh.owner}/${gh.repo}/contents/${path}`;
+    const content = JSON.stringify({
+      fetched_at: new Date().toISOString(),
+      matches: data.matches || data,
+      odds_coverage: data.odds_coverage || null
+    });
+
+    // 获取现有文件sha
+    let sha = null;
+    try {
+      const getResp = await fetch(apiUrl, {
+        headers: {'Authorization': 'token ' + gh.token, 'User-Agent': 'ai-bot'}
+      });
+      if (getResp.ok) {
+        const existing = await getResp.json();
+        sha = existing.sha;
+      }
+    } catch(e) {}
+
+    // 上传
+    const putResp = await fetch(apiUrl, {
+      method: 'PUT',
+      headers: {
+        'Authorization': 'token ' + gh.token,
+        'User-Agent': 'ai-bot',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        message: 'Auto-sync self API data by ai-bot',
+        content: Buffer.from(content).toString('base64'),
+        sha: sha
+      })
+    });
+
+    if (putResp.ok) {
+      console.log('[AI-Bot] ✅ 自建API数据已保存到GitHub: data/self_api_today.json');
+    } else {
+      const err = await putResp.text();
+      console.log('[AI-Bot] ❌ 保存自建API数据失败:', putResp.status, err.substring(0,200));
+    }
+  } catch (e) {
+    console.log('[AI-Bot] 自建API调用失败:', e.message);
+  }
+}
 
     console.log('[AI-Bot] 完成！所有操作已执行。');
 
