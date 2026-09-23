@@ -31,6 +31,8 @@ async function run() {
       '--disable-setuid-sandbox',
       '--disable-dev-shm-usage',
       '--disable-gpu',
+      '--disable-web-security',
+      '--disable-features=IsolateOrigins,site-per-process',
       '--window-size=1920,1080',
     ],
   });
@@ -39,9 +41,20 @@ async function run() {
     const page = await browser.newPage();
     await page.setViewport({ width: 1920, height: 1080 });
 
-    // 捕获控制台日志（全部输出，方便排查）
+    // 捕获控制台日志（只输出关键信息，避免被CORS错误淹没）
     page.on('console', msg => {
-      console.log('[页面]', msg.text());
+      const text = msg.text();
+      // 只输出关键日志
+      if (text.includes('[AutoPred]') ||
+          text.includes('[Cloud]') ||
+          text.includes('AI-Bot') ||
+          text.includes('登录') ||
+          text.includes('同步') ||
+          text.includes('预测') ||
+          text.includes('复盘') ||
+          text.includes('学习')) {
+        console.log('[页面]', text);
+      }
     });
 
     // 步骤1：打开网页
