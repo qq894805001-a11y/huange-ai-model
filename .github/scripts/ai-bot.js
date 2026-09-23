@@ -18,9 +18,9 @@ const CONFIG = {
   waitPredict: 180000,    // 等待自动预测完成（比赛多时需要更久，3分钟）
   waitSync: 15000,        // 等待数据同步到云端
   headless: true,
-  // GitHub配置（用于Node.js直接写入，绕过浏览器CORS）
+  // GitHub配置（token从环境变量GH_TOKEN读取，不硬编码在代码里）
   github: {
-    token: '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',
+    token: process.env.GH_TOKEN || '',
     owner: 'qq894805001-a11y',
     repo: 'huange-ai-model',
   }
