@@ -1380,8 +1380,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         var pw = document.getElementById('new-password').value;
         if (!un || !pw) { alert('请输入用户名和密码'); return; }
         try {
-          var r = await Cloud.api('/api/admin/create-user', {method:'POST', body:{username:un, password:pw}});
-          if (r.error) { alert(r.error); return; }
+          // 用localStorage存储用户数据
+          var users = JSON.parse(localStorage.getItem('gc_users_v1') || '{}');
+          users[un] = {password: pw, role: 'user', createdAt: Date.now()};
+          localStorage.setItem('gc_users_v1', JSON.stringify(users));
           alert('创建成功：' + un);
           document.getElementById('new-username').value = '';
           document.getElementById('new-password').value = '';
@@ -1397,23 +1399,29 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   window.loadUserList = async function() {
     try {
-      var r = await Cloud.api('/api/admin/list-users');
-      if (r.users) {
-        var el = document.getElementById('user-list');
-        el.innerHTML = r.users.map(function(u) {
-          var delBtn = u.role !== 'admin' ? '<button onclick="delUser(\'' + u.username + '\')" style="padding:4px 8px;background:transparent;border:1px solid #4a3a3a;border-radius:4px;color:#ff6b6b;font-size:11px;cursor:pointer;">删除</button>' : '';
-          return '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #2a3a4a;">' +
-            '<span style="font-size:13px;color:#e8eef2;">' + u.username + ' <span style="color:#7a8a9a;font-size:11px;">(' + u.role + ')</span></span>' +
-            delBtn + '</div>';
+      // 从localStorage读取用户列表
+      var users = JSON.parse(localStorage.getItem('gc_users_v1') || '{}');
+      var userList = Object.entries(users).map(function([username, data]) {
+        return {username: username, role: data.role || 'user'};
+      });
+      // 加上管理员
+      userList.unshift({username: 'hjh', role: 'admin'});
+      
+      var el = document.getElementById('user-list');
+      el.innerHTML = userList.map(function(u) {
+        var delBtn = u.role !== 'admin' ? '<button onclick="delUser(\'' + u.username + '\')" style="padding:4px 8px;background:transparent;border:1px solid #4a3a3a;border-radius:4px;color:#ff6b6b;font-size:11px;cursor:pointer;">删除</button>' : '';
+        return '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #2a3a4a;">' +
+          '<span style="font-size:13px;color:#e8eef2;">' + u.username + ' <span style="color:#7a8a9a;font-size:11px;">(' + u.role + ')</span></span>' +
+          delBtn + '</div>';
         }).join('');
-      }
     } catch(e) { console.warn(e); }
   };
   window.delUser = async function(name) {
     if (!confirm('确定删除用户 ' + name + ' ？')) return;
     try {
-      var r = await Cloud.api('/api/admin/delete-user', {method:'POST', body:{username:name}});
-      if (r.error) { alert(r.error); return; }
+      var users = JSON.parse(localStorage.getItem('gc_users_v1') || '{}');
+      delete users[name];
+      localStorage.setItem('gc_users_v1', JSON.stringify(users));
       loadUserList();
     } catch(e) { alert('删除失败：' + e.message); }
   };
