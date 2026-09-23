@@ -5019,13 +5019,21 @@ async function afbEnrichLiveScores(){
   }
  }catch(e){console.log('[AFB-Live] 补充失败:',e.message);}
 }
-// 自建API首页数据补充：获取盘口、xG、中文队名
+// 自建API首页数据补充：从GitHub读取机器人预取的盘口、xG、中文队名
 async function selfApiEnrichHome(){
  try{
   if(!LAST_HOME||!LAST_HOME.all)return;
-  console.log('[SELF-API] 开始获取自建API数据...');
-  const data=await selfFetchToday();
-  const matches=data.matches||data||[];
+  console.log('[SELF-API] 开始从GitHub读取预取数据...');
+  // 从GitHub Raw读取机器人预取的自建API数据（避免HTTP混合内容限制）
+  const ghUrl='https://raw.githubusercontent.com/qq894805001-a11y/huange-ai-model/main/data/self_api_today.json?t='+Date.now();
+  const resp=await fetch(ghUrl,{cache:'no-store'});
+  if(!resp.ok){
+    console.log('[SELF-API] GitHub预取文件不存在:',resp.status,'（机器人下次运行后自动生成）');
+    return;
+  }
+  const ghData=await resp.json();
+  console.log('[SELF-API] GitHub预取时间:',ghData.fetched_at);
+  const matches=ghData.matches||[];
   if(!Array.isArray(matches)||!matches.length){
     console.log('[SELF-API] 无比赛数据');
     return;
