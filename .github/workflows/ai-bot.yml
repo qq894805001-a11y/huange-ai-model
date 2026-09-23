@@ -33,6 +33,7 @@ jobs:
           node ai-bot.js
         env:
           TZ: Asia/Shanghai
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
       - name: 上传截图（排查问题用）
         if: always()
