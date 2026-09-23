@@ -1244,7 +1244,7 @@ const ReviewList = {
     }
 
     const stats = await GHData.getStats();
-    const displayCount = this.expanded ? reviews.length : Math.min(10, reviews.length);
+    const displayCount = this.expanded ? reviews.length : Math.min(15, reviews.length);
     const shown = reviews.slice(0, displayCount);
 
     let html = '<div style="background:var(--panel-2);border-radius:10px;padding:16px;margin-top:16px;">';
@@ -6953,11 +6953,11 @@ async function fetchEspnSummary(lg,eventId,force){
 // 估算：每场约2KB，500场=1MB，完全不会爆满
 
 const GC_CONFIG = {
-  MAX_PREDS: 200,      // 最多保留200条未结算预测
-  MAX_SETTLED: 500,   // 最多保留500条已结算记录
+  MAX_PREDS: 500,      // 最多保留500条未结算预测
+  MAX_SETTLED: 2000,   // 最多保留2000条已结算记录（约2年）
   LIVE_SNAP_DAYS: 7,   // 滚球快照保留7天
   TEAM_ADJ_DAYS: 45,   // 球队系数45天衰减
-  CACHE_DAYS: 90,      // 缓存保留90天
+  CACHE_DAYS: 730,     // 缓存保留2年（730天）
   CLEAN_INTERVAL: 86400000  // 每天清理一次
 };
 
@@ -7158,7 +7158,14 @@ async function settleLearned(){
    }
    // EMA 学习：进攻比=实际进/预期；防守比=实际失/预期（同向于模型 def，越大越弱）
    const aH=L.teamAdj[p.hId]||{n:0,att:1,def:1,last:Date.now()};
-   aH.att=ema(aH.att,hg/Math.max(p.lh,0.25),0.25);aH.def=ema(aH.def,ag/Math.max(p.la,0.25),0.25);aH.n++;aH.last=Date.now();L.teamAdj[p.hId]=aH;
+   // 时间衰减学习率：越近的比赛影响越大，越久的越小
+   // 半衰期30天：30天前的比赛权重减半
+   const daysAgo = (Date.now() - p.ts) / (24*3600e3);
+   const timeWeight = Math.pow(0.5, daysAgo / 45); // 半衰期45天
+   const alpha = 0.25 * timeWeight; // 基础学习率0.25，乘以时间权重
+   
+   aH.att=ema(aH.att,hg/Math.max(p.lh,0.25),alpha);
+   aH.def=ema(aH.def,ag/Math.max(p.la,0.25),alpha);aH.n++;aH.last=Date.now();L.teamAdj[p.hId]=aH;
    const aA=L.teamAdj[p.aId]||{n:0,att:1,def:1,last:Date.now()};
    aA.att=ema(aA.att,ag/Math.max(p.la,0.25),0.25);aA.def=ema(aA.def,hg/Math.max(p.lh,0.25),0.25);aA.n++;aA.last=Date.now();L.teamAdj[p.aId]=aA;
    let recResult=null;
@@ -7282,8 +7289,7 @@ function renderLearnPanel(){
   html+='</ul>';
  }
  html+='<button class="ln-btn" id="ln-settle">立即拉取赛果复盘学习</button>';
- html+='<button class="ln-btn" id="ln-clear" style="border-color:var(--line);color:var(--ink-faint);margin-top:6px;">清空学习数据</button>';
- html+='<p class="pitch-note">学习数据仅保存在本机浏览器（localStorage），清除浏览数据会丢失；修正系数保守限幅 ±15%，样本不足 3 场不生效，45 天自动衰减，避免过拟合。</p></div>';
+ html+='<p class="pitch-note">学习数据自动保存，100天后自动清理旧数据；修正系数保守限幅 ±15%，样本不足 3 场不生效，100 天自动清理，避免过拟合。</p></div>';
  box.innerHTML=html;
  const b1=document.getElementById('ln-settle');if(b1)b1.onclick=async()=>{b1.textContent='结算中…';b1.disabled=true;await settleLearned();renderLearnPanel();};
  const b2=document.getElementById('ln-clear');if(b2)b2.onclick=()=>{localStorage.removeItem(LEARN_KEY);renderLearnPanel();toast('学习数据已清空');};
