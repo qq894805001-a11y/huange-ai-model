@@ -95,6 +95,43 @@ const Cloud = {
   }
 };
 
+// ============================================================
+// GitHub数据读取层（从仓库读自动预测数据）
+// ============================================================
+const GHData = {
+  cache: null,
+  cacheTime: 0,
+
+  async load() {
+    // 缓存10分钟
+    if (this.cache && Date.now() - this.cacheTime < 600000) return this.cache;
+    try {
+      const r = await fetch('data/predictions.json?t=' + Date.now());
+      this.cache = await r.json();
+      this.cacheTime = Date.now();
+      return this.cache;
+    } catch(e) {
+      console.warn('GHData load failed', e);
+      return { preds: {}, settled: {}, stats: { n: 0, hit: 0 } };
+    }
+  },
+
+  async getPredictions() {
+    const d = await this.load();
+    return Object.values(d.preds || {}).sort((a,b) => (b.ts||0) - (a.ts||0));
+  },
+
+  async getReviewed() {
+    const d = await this.load();
+    return Object.values(d.settled || {}).sort((a,b) => (b.reviewedAt||0) - (a.reviewedAt||0));
+  },
+
+  async getStats() {
+    const d = await this.load();
+    return d.stats || { n: 0, hit: 0 };
+  }
+};
+
 // 登录界面交互
 function showLogin() {
   const el = document.getElementById('cloud-login');
@@ -874,10 +911,187 @@ select{font-family:var(--font-body);}
 </head>
 <body>
 
+<!-- ========== 登录遮罩层 ========== -->
+<div id="login-mask" style="position:fixed;inset:0;z-index:99999;background:linear-gradient(135deg,#0a1a2e 0%,#0d2818 100%);display:flex;align-items:center;justify-content:center;">
+  <div style="background:rgba(10,25,47,0.95);border:1px solid rgba(0,255,136,0.3);border-radius:16px;padding:40px;width:360px;box-shadow:0 20px 60px rgba(0,0,0,0.5);">
+    <div style="text-align:center;margin-bottom:30px;">
+      <div style="font-size:28px;font-weight:bold;color:#00ff88;letter-spacing:2px;">欢哥AI模型</div>
+      <div style="font-size:12px;color:#888;margin-top:6px;">HUANGE AI MODEL · 请登录后使用</div>
+    </div>
+    <div style="margin-bottom:16px;">
+      <label style="display:block;font-size:12px;color:#aaa;margin-bottom:6px;">账号</label>
+      <input id="login-user" type="text" placeholder="请输入账号" style="width:100%;padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.05);color:#fff;font-size:14px;box-sizing:border-box;outline:none;">
+    </div>
+    <div style="margin-bottom:24px;">
+      <label style="display:block;font-size:12px;color:#aaa;margin-bottom:6px;">密码</label>
+      <input id="login-pass" type="password" placeholder="请输入密码" style="width:100%;padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.05);color:#fff;font-size:14px;box-sizing:border-box;outline:none;">
+    </div>
+    <button onclick="doLogin()" style="width:100%;padding:13px;border:none;border-radius:8px;background:linear-gradient(135deg,#00ff88,#00cc6a);color:#000;font-weight:bold;font-size:15px;cursor:pointer;">登 录</button>
+    <div id="login-error" style="color:#ff6b6b;font-size:12px;text-align:center;margin-top:12px;display:none;">账号或密码错误</div>
+  </div>
+</div>
+
+<!-- ========== 用户管理面板（管理员可见） ========== -->
+<div id="user-mgr-panel" style="display:none;position:fixed;top:60px;right:16px;z-index:99998;background:rgba(10,25,47,0.98);border:1px solid rgba(0,255,136,0.3);border-radius:12px;padding:20px;width:320px;box-shadow:0 10px 40px rgba(0,0,0,0.5);">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+    <div style="color:#00ff88;font-weight:bold;font-size:15px;">用户管理</div>
+    <button onclick="document.getElementById('user-mgr-panel').style.display='none'" style="background:none;border:none;color:#888;font-size:18px;cursor:pointer;">×</button>
+  </div>
+  <div id="user-list" style="margin-bottom:16px;max-height:200px;overflow-y:auto;"></div>
+  <div style="border-top:1px solid rgba(255,255,255,0.1);padding-top:16px;">
+    <div style="font-size:12px;color:#aaa;margin-bottom:10px;">添加子账号</div>
+    <input id="new-user" type="text" placeholder="账号" style="width:100%;padding:8px;margin-bottom:8px;border-radius:6px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.05);color:#fff;box-sizing:border-box;outline:none;">
+    <input id="new-pass" type="text" placeholder="密码" style="width:100%;padding:8px;margin-bottom:10px;border-radius:6px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.05);color:#fff;box-sizing:border-box;outline:none;">
+    <button onclick="addUser()" style="width:100%;padding:9px;border:none;border-radius:6px;background:#00ff88;color:#000;font-weight:bold;cursor:pointer;">添加用户</button>
+  </div>
+</div>
+
+<script>
+// ========== 登录系统 ==========
+const ADMIN_USER = 'hjh';
+const ADMIN_PASS = '123456';
+
+function getUsers() {
+  try { return JSON.parse(localStorage.getItem('gc_users_v1') || '[]'); }
+  catch(e) { return []; }
+}
+function saveUsers(users) {
+  localStorage.setItem('gc_users_v1', JSON.stringify(users));
+}
+
+function doLogin() {
+  const u = document.getElementById('login-user').value.trim();
+  const p = document.getElementById('login-pass').value.trim();
+  const err = document.getElementById('login-error');
+
+  if (u === ADMIN_USER && p === ADMIN_PASS) {
+    localStorage.setItem('gc_login_user', u);
+    localStorage.setItem('gc_login_role', 'admin');
+    hideLogin();
+    showUserBar();
+    return;
+  }
+  const users = getUsers();
+  const found = users.find(x => x.user === u && x.pass === p);
+  if (found) {
+    localStorage.setItem('gc_login_user', u);
+    localStorage.setItem('gc_login_role', 'user');
+    hideLogin();
+    showUserBar();
+    return;
+  }
+  err.style.display = 'block';
+}
+
+function hideLogin() {
+  document.getElementById('login-mask').style.display = 'none';
+}
+function showLogin() {
+  document.getElementById('login-mask').style.display = 'flex';
+}
+
+function showUserBar() {
+  const u = localStorage.getItem('gc_login_user');
+  const role = localStorage.getItem('gc_login_role');
+  const nameEl = document.getElementById('user-name');
+  if (nameEl) { nameEl.textContent = u; nameEl.style.display = 'inline'; }
+  const bar = document.getElementById('user-bar');
+  if (bar) bar.style.display = 'flex';
+
+  // 退出按钮
+  const logoutBtn = document.getElementById('logout-btn');
+  if (logoutBtn) {
+    logoutBtn.style.display = 'inline-block';
+    logoutBtn.onclick = doLogout;
+  }
+
+  // 管理员显示管理按钮
+  const adminBtn = document.getElementById('admin-btn');
+  if (adminBtn) {
+    if (role === 'admin') {
+      adminBtn.style.display = 'inline-block';
+      adminBtn.onclick = toggleUserMgr;
+    } else {
+      adminBtn.style.display = 'none';
+    }
+  }
+}
+
+function toggleUserMgr() {
+  const panel = document.getElementById('user-mgr-panel');
+  if (panel.style.display === 'none') {
+    renderUserList();
+    panel.style.display = 'block';
+  } else {
+    panel.style.display = 'none';
+  }
+}
+
+function renderUserList() {
+  const users = getUsers();
+  const listEl = document.getElementById('user-list');
+  let html = '<div style="padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.1);color:#00ff88;font-size:13px;">👑 hjh (管理员)</div>';
+  users.forEach((u, i) => {
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">'
+      + '<span style="color:#ccc;font-size:13px;">' + u.user + '</span>'
+      + '<button onclick="delUser(' + i + ')" style="background:none;border:none;color:#ff6b6b;cursor:pointer;font-size:12px;">删除</button>'
+      + '</div>';
+  });
+  listEl.innerHTML = html;
+}
+
+function addUser() {
+  const u = document.getElementById('new-user').value.trim();
+  const p = document.getElementById('new-pass').value.trim();
+  if (!u || !p) { alert('请输入账号和密码'); return; }
+  const users = getUsers();
+  if (users.find(x => x.user === u)) { alert('账号已存在'); return; }
+  users.push({ user: u, pass: p, createdAt: Date.now() });
+  saveUsers(users);
+  document.getElementById('new-user').value = '';
+  document.getElementById('new-pass').value = '';
+  renderUserList();
+}
+
+function delUser(i) {
+  if (!confirm('确定删除这个用户？')) return;
+  const users = getUsers();
+  users.splice(i, 1);
+  saveUsers(users);
+  renderUserList();
+}
+
+function doLogout() {
+  localStorage.removeItem('gc_login_user');
+  localStorage.removeItem('gc_login_role');
+  location.reload();
+}
+
+// 页面加载时检查登录状态
+window.addEventListener('DOMContentLoaded', function() {
+  const u = localStorage.getItem('gc_login_user');
+  const role = localStorage.getItem('gc_login_role');
+  if (u && role) {
+    hideLogin();
+    showUserBar();
+  } else {
+    showLogin();
+  }
+
+  // 回车登录
+  document.getElementById('login-pass').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') doLogin();
+  });
+  document.getElementById('login-user').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') document.getElementById('login-pass').focus();
+  });
+});
+</script>
+
 <!-- 云端登录界面 -->
 
 <!-- 右上角用户栏 -->
-<div id="user-bar" style="position:fixed;top:12px;right:16px;z-index:99997;display:flex;gap:8px;align-items:center;">
+<div id="user-bar" style="position:fixed;top:12px;right:16px;z-index:99997;display:none;gap:8px;align-items:center;">
   <span id="user-name" style="font-size:12px;color:#7a8a9a;display:none;"></span>
   <button id="admin-btn" style="display:none;padding:6px 12px;background:#1a2530;border:1px solid #2a3a4a;border-radius:6px;color:#e8eef2;font-size:12px;cursor:pointer;">用户管理</button>
   <button id="logout-btn" style="display:none;padding:6px 12px;background:transparent;border:1px solid #2a3a4a;border-radius:6px;color:#7a8a9a;font-size:12px;cursor:pointer;">退出</button>
