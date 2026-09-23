@@ -4,6 +4,9 @@
 
 const puppeteer = require('puppeteer');
 
+// 兼容新版Puppeteer的等待函数
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
 // 配置
 const CONFIG = {
   url: 'https://qq894805001-a11y.github.io/huange-ai-model/?autopred=1',
@@ -47,7 +50,7 @@ async function run() {
     // 步骤1：打开网页
     console.log('[AI-Bot] 步骤1：打开网页...');
     await page.goto(CONFIG.url, { waitUntil: 'networkidle2', timeout: 60000 });
-    await page.waitForTimeout(CONFIG.waitLogin);
+    await sleep(CONFIG.waitLogin);
 
     // 截图：登录页
     await page.screenshot({ path: 'screenshot-01-login.png', fullPage: false });
@@ -67,7 +70,7 @@ async function run() {
     }
 
     // 等待登录完成和页面跳转
-    await page.waitForTimeout(8000);
+    await sleep(8000);
 
     // 截图：首页
     await page.screenshot({ path: 'screenshot-02-home.png', fullPage: false });
@@ -75,11 +78,11 @@ async function run() {
 
     // 步骤3：等待首页比赛数据加载
     console.log('[AI-Bot] 步骤3：等待比赛数据加载...');
-    await page.waitForTimeout(CONFIG.waitHomeLoad);
+    await sleep(CONFIG.waitHomeLoad);
 
     // 步骤4：等待自动预测完成
     console.log('[AI-Bot] 步骤4：等待自动预测完成（最多' + (CONFIG.waitPredict/1000) + '秒）...');
-    await page.waitForTimeout(CONFIG.waitPredict);
+    await sleep(CONFIG.waitPredict);
 
     // 截图：预测完成
     await page.screenshot({ path: 'screenshot-03-predicted.png', fullPage: false });
@@ -87,7 +90,7 @@ async function run() {
 
     // 步骤5：等待数据同步到云端
     console.log('[AI-Bot] 步骤5：等待数据同步到云端...');
-    await page.waitForTimeout(CONFIG.waitSync);
+    await sleep(CONFIG.waitSync);
 
     // 最终截图
     await page.screenshot({ path: 'screenshot-04-final.png', fullPage: false });
