@@ -7884,6 +7884,16 @@ async function settleLearned(){
    L.settled[p.fid]=Object.assign({},p,{hg,ag,res,brier,hit,goalErr,reasons,recResult,setTs:Date.now()});
    delete L.preds[p.fid];
    L.stats.n++;L.stats.brier+=brier;if(hit)L.stats.hit++;
+   // 更新大小球统计
+   if(recResult&&recResult.ouHit!=null){
+    L.stats.ouN=(L.stats.ouN||0)+1;
+    if(recResult.ouHit)L.stats.ouHit=(L.stats.ouHit||0)+1;
+   }
+   // 更新让球统计
+   if(recResult&&recResult.spHit!=null){
+    L.stats.spN=(L.stats.spN||0)+1;
+    if(recResult.spHit)L.stats.spHit=(L.stats.spHit||0)+1;
+   }
    changed=true;
   }catch(e){}
  }
@@ -7919,8 +7929,8 @@ function renderLearnPanel(){
   '<span class="line-deco"></span></h3>';
  html+='<div class="ln-stats"><div class="ln-stat"><b>'+n+'</b><span>已复盘场次</span></div>'+
   '<div class="ln-stat"><b>'+(n?(hitRate*100).toFixed(0)+'%':'—')+'</b><span>方向命中率</span></div>'+
-  '<div class="ln-stat"><b>'+(L.stats.ouN?(L.stats.ouHit/L.stats.ouN*100).toFixed(0)+'%':'—')+'</b><span>大小球命中</span><small style="font-size:10px;opacity:.7">'+L.stats.ouN+'场</small></div>'+
-  '<div class="ln-stat"><b>'+(L.stats.spN?(L.stats.spHit/L.stats.spN*100).toFixed(0)+'%':'—')+'</b><span>让球命中</span><small style="font-size:10px;opacity:.7">'+L.stats.spN+'场</small></div>'+
+  '<div class="ln-stat"><b>'+((L.stats.ouHit||0)/(L.stats.ouN||1)*100).toFixed(0)+'%</b><span>大小球命中</span><small style="font-size:10px;opacity:.7">'+(L.stats.ouN||0)+'场</small></div>'+
+  '<div class="ln-stat"><b>'+((L.stats.spHit||0)/(L.stats.spN||1)*100).toFixed(0)+'%</b><span>让球命中</span><small style="font-size:10px;opacity:.7">'+(L.stats.spN||0)+'场</small></div>'+
   '<div class="ln-stat"><b>'+(brier!=null?brier.toFixed(2):'—')+'</b><span>Brier 误差↓</span></div></div>';
  // 概率校准（5 桶，三向概率-结局对）
  if(n>=3){
