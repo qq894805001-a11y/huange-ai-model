@@ -7101,6 +7101,25 @@ async function autoRecordAllPredictions(){
   const prov=getProv();
   const standingsCache=LAST_HOME.standingsCache||{};
   const matches=LAST_HOME.all.filter(f=>f&&f.st==='NS'&&f.id&&f.lg&&f.lg.code);
+  // 临场前30分钟重新模拟：对即将开始的比赛，删除旧预测，用最新数据重新预测
+  const now=Date.now();
+  let rePred=0;
+  for(const f of matches){
+    try{
+      const L2=loadLearn();
+      if(!L2.preds[f.id])continue;
+      let matchTime=null;
+      if(f.date){matchTime=new Date(f.date).getTime();}
+      if(!matchTime||isNaN(matchTime))continue;
+      const minsToStart=(matchTime-now)/60000;
+      if(minsToStart>30||minsToStart<-5)continue;
+      delete L2.preds[f.id];
+      saveLearn(L2);
+      rePred++;
+      console.log('[AutoPred] 临场重新模拟:', f.home.name+' vs '+f.away.name, '('+Math.round(minsToStart)+'分钟后开始)');
+    }catch(e){}
+  }
+  if(rePred>0)console.log('[AutoPred] 临场重新模拟', rePred, '场比赛');
   console.log('[AutoPred] 开始自动预测，共', matches.length, '场未开赛比赛');
   let recorded=0, skipped=0;
   for(const f of matches){
@@ -7112,8 +7131,11 @@ async function autoRecordAllPredictions(){
       let ed=null;
       try{
         const ck=f.lg.code+'_'+f.id;
-        ed=ENRICH_CACHE[ck]&&Date.now()-ENRICH_CACHE[ck].t<90000?ENRICH_CACHE[ck].d:null;
+        let isPrematchLive=false;
+        if(f.date){const mt=new Date(f.date).getTime();const mins=(mt-Date.now())/60000;isPrematchLive=mins<=30&&mins>=-5;}
+        ed=(!isPrematchLive&&ENRICH_CACHE[ck]&&Date.now()-ENRICH_CACHE[ck].t<90000)?ENRICH_CACHE[ck].d:null;
         if(!ed){ed=await fetchEspnSummary(f.lg.code,f.id);ENRICH_CACHE[ck]={d:ed,t:Date.now()};}
+        if(isPrematchLive)console.log('[AutoPred] 临场数据已刷新:', f.home.name+' vs '+f.away.name);
       }catch(e){}
       if(!ed){skipped++;continue;}
       // 构建球队对象
@@ -7599,6 +7621,8 @@ function renderLearnPanel(){
   '<span class="line-deco"></span></h3>';
  html+='<div class="ln-stats"><div class="ln-stat"><b>'+n+'</b><span>已复盘场次</span></div>'+
   '<div class="ln-stat"><b>'+(n?(hitRate*100).toFixed(0)+'%':'—')+'</b><span>方向命中率</span></div>'+
+  '<div class="ln-stat"><b>'+(L.stats.ouN?(L.stats.ouHit/L.stats.ouN*100).toFixed(0)+'%':'—')+'</b><span>大小球命中</span><small style="font-size:10px;opacity:.7">'+L.stats.ouN+'场</small></div>'+
+  '<div class="ln-stat"><b>'+(L.stats.spN?(L.stats.spHit/L.stats.spN*100).toFixed(0)+'%':'—')+'</b><span>让球命中</span><small style="font-size:10px;opacity:.7">'+L.stats.spN+'场</small></div>'+
   '<div class="ln-stat"><b>'+(brier!=null?brier.toFixed(2):'—')+'</b><span>Brier 误差↓</span></div></div>';
  // 概率校准（5 桶，三向概率-结局对）
  if(n>=3){
