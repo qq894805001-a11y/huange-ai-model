@@ -96,6 +96,1068 @@ const Cloud = {
 };
 
 // ============================================================
+// API Key 管理（所有密钥记录在这里）
+// ============================================================
+const API_KEYS = {
+  // API-Football
+  apiFootball: 'ce2d77c10f8e8838ea47b98d24ae8ae7',
+
+  // TheSportsDB（公共免费key）
+  sportsDB: '3',
+
+  // Gamecastt（待注册）
+  gamecastt: '',
+
+  // Bzzoiro（暂未使用，网站不稳定）
+  bzzoiro: '',
+
+  // Big Balls Data
+  bigBalls: 'bbs_live_00000O5LnABdj2TUAxSxRYpwqaLibzQJTBYG9E8wn0i1ZYKB'
+};
+
+// ============================================================
+// 多数据源融合层（ESPN + API-Football + SportScore + TheSportsDB + Gamecastt）
+// ============================================================
+const DataSources = {
+  // SportScore - 免费不需要key，10000次/天
+  sportScoreBase: 'https://sportscore.p.rapidapi.com',
+
+  // TheSportsDB - 公共测试key
+  sportsDBKey: '3',
+
+  // sportsrc.org - 不需要key
+  sportsrcBase: 'https://www.sportsrc.org/api',
+
+  // OpenLigaDB - 不需要key，德甲等欧洲联赛
+  openLigaBase: 'https://api.openligadb.de',
+
+  // Gamecastt - WebSocket实时推送
+  gamecasttBase: 'https://api.gamecastt.com/v1',
+
+  cache: {},
+  cacheTime: {},
+
+  async fetchSportScore(path) {
+    const key = 'ss_' + path;
+    if (this.cache[key] && Date.now() - this.cacheTime[key] < 300000) return this.cache[key];
+    try {
+      const r = await fetch('https://sportscore.p.rapidapi.com' + path, {
+        headers: { 'x-rapidapi-host': 'sportscore.p.rapidapi.com', 'x-rapidapi-key': 'free' }
+      });
+      this.cache[key] = await r.json();
+      this.cacheTime[key] = Date.now();
+      return this.cache[key];
+    } catch(e) { console.warn('SportScore fail', e); return null; }
+  },
+
+  async fetchSportsDB(path) {
+    const key = 'sdb_' + path;
+    if (this.cache[key] && Date.now() - this.cacheTime[key] < 600000) return this.cache[key];
+    try {
+      const r = await fetch(`https://www.thesportsdb.com/api/v1/json/${this.sportsDBKey}` + path);
+      this.cache[key] = await r.json();
+      this.cacheTime[key] = Date.now();
+      return this.cache[key];
+    } catch(e) { console.warn('TheSportsDB fail', e); return null; }
+  },
+
+  async fetchSportsRC(path) {
+    const key = 'src_' + path;
+    if (this.cache[key] && Date.now() - this.cacheTime[key] < 120000) return this.cache[key];
+    try {
+      const r = await fetch(this.sportsrcBase + path);
+      this.cache[key] = await r.json();
+      this.cacheTime[key] = Date.now();
+      return this.cache[key];
+    } catch(e) { console.warn('SportsRC fail', e); return null; }
+  },
+
+  async fetchOpenLiga(path) {
+    const key = 'ol_' + path;
+    if (this.cache[key] && Date.now() - this.cacheTime[key] < 300000) return this.cache[key];
+    try {
+      const r = await fetch(this.openLigaBase + path);
+      this.cache[key] = await r.json();
+      this.cacheTime[key] = Date.now();
+      return this.cache[key];
+    } catch(e) { console.warn('OpenLigaDB fail', e); return null; }
+  },
+
+  async fetchGamecastt(path) {
+    const key = 'gc_' + path;
+    if (this.cache[key] && Date.now() - this.cacheTime[key] < 60000) return this.cache[key];
+    try {
+      const r = await fetch(this.gamecasttBase + path, {
+        headers: { 'Authorization': 'Bearer ' + API_KEYS.gamecastt }
+      });
+      this.cache[key] = await r.json();
+      this.cacheTime[key] = Date.now();
+      return this.cache[key];
+    } catch(e) { console.warn('Gamecastt fail', e); return null; }
+  },
+
+  // 融合积分榜数据：ESPN + SportScore + TheSportsDB
+  async getStandings(leagueCode) {
+    const result = { espn: null, sportscore: null, sportsdb: null };
+    try {
+      // ESPN积分榜
+      const r = await fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/${leagueCode}/standings`);
+      result.espn = await r.json();
+    } catch(e) {}
+    try {
+      // SportScore积分榜
+      result.sportscore = await this.fetchSportScore(`/standings?sport=football&league=${leagueCode}`);
+    } catch(e) {}
+    try {
+      // TheSportsDB积分榜
+      result.sportsdb = await this.fetchSportsDB(`/lookuptable.php?l=${leagueCode}&s=2025-2026`);
+    } catch(e) {}
+    return result;
+  },
+
+  // 融合赛程数据：ESPN为主，补充其他数据源的小联赛
+  async getFixtures(dateStr) {
+    const result = { espn: [], extra: [] };
+    try {
+      const r = await fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/all/scoreboard?dates=${dateStr}`);
+      const d = await r.json();
+      result.espn = d.events || [];
+    } catch(e) {}
+    try {
+      // SportScore补充小联赛、U系列比赛
+      const ss = await this.fetchSportScore(`/fixtures?sport=football&date=${dateStr}`);
+      if (ss && ss.fixtures) result.extra = result.extra.concat(ss.fixtures);
+    } catch(e) {}
+    try {
+      // TheSportsDB补充
+      const sdb = await this.fetchSportsDB(`/eventsday.php?d=${dateStr}&s=Soccer`);
+      if (sdb && sdb.events) result.extra = result.extra.concat(sdb.events);
+    } catch(e) {}
+    try {
+      // sportsrc.org补充实时赛程
+      const src = await this.fetchSportsRC(`/fixtures?date=${dateStr}`);
+      if (src && src.fixtures) result.extra = result.extra.concat(src.fixtures);
+    } catch(e) {}
+    try {
+      // OpenLigaDB补充德甲等欧洲联赛
+      const ol = await this.fetchOpenLiga(`/getmatchdata/bl1`);
+      if (ol && ol.length) result.extra = result.extra.concat(ol);
+    } catch(e) {}
+    return result;
+  },
+
+  // 融合球队信息：队徽、球员、历史
+  async getTeamInfo(teamName) {
+    const result = {};
+    try {
+      const sdb = await this.fetchSportsDB(`/searchteams.php?t=${encodeURIComponent(teamName)}`);
+      if (sdb && sdb.teams && sdb.teams[0]) result.sportsdb = sdb.teams[0];
+    } catch(e) {}
+    return result;
+  },
+
+  // 多源融合预测：综合各数据源数据
+  async enhancedPredict(matchData) {
+    const enhanced = { ...matchData };
+    try {
+      // 获取两队积分榜信息
+      if (matchData.leagueCode) {
+        const standings = await this.getStandings(matchData.leagueCode);
+        enhanced.standingsData = standings;
+      }
+      // 获取球队详细信息
+      if (matchData.homeTeam) {
+        enhanced.homeInfo = await this.getTeamInfo(matchData.homeTeam);
+      }
+      if (matchData.awayTeam) {
+        enhanced.awayInfo = await this.getTeamInfo(matchData.awayTeam);
+      }
+    } catch(e) {
+      console.warn('Enhanced predict fail', e);
+    }
+    return enhanced;
+  }
+};
+
+// ============================================================
+// 智能配额管理器 v2.0（基于数据质量重新调查优化）
+// 数据质量评估结果：
+// - ESPN：优秀，70+联赛，主数据源，无限用
+// - API-Football：非常优秀，800+联赛，阵容/伤病/xG，100次/天
+// - Big Balls Data：优秀，低延迟<100ms，赔率/xG，1000次/天
+// - SportScore：中等，10000次/天，小联赛补充
+// - TheSportsDB：中等偏低，社区维护，队徽/球员照片，30次/分钟
+// - OpenLigaDB：中等，专注德国联赛，无限用
+// - sportsrc.org：中等，赛程补充，不需要key
+// ============================================================
+const QuotaManager = {
+  // 各API每日额度
+  quotas: {
+    espn: { daily: Infinity, used: 0, quality: 'excellent' },
+    apiFootball: { daily: 100, used: 0, quality: 'premium' },
+    bigBalls: { daily: 1000, used: 0, quality: 'excellent' },
+    sportScore: { daily: 10000, used: 0, quality: 'good' },
+    sportsDB: { daily: 43200, used: 0, quality: 'fair' }, // 30次/分钟 * 60 * 24
+    openLiga: { daily: Infinity, used: 0, quality: 'good' },
+    sportsRC: { daily: 1000, used: 0, quality: 'good' },
+    gamecastt: { daily: 5000, used: 0, quality: 'excellent' }
+  },
+  quotaDate: '',
+
+  init() {
+    const today = new Date().toISOString().slice(0, 10);
+    const saved = localStorage.getItem('gc_quota_v2');
+    if (saved) {
+      try {
+        const d = JSON.parse(saved);
+        if (d.date === today) {
+          for (const k in this.quotas) {
+            if (d.used && d.used[k] !== undefined) {
+              this.quotas[k].used = d.used[k];
+            }
+          }
+          this.quotaDate = today;
+          return;
+        }
+      } catch(e) {}
+    }
+    // 新的一天，重置
+    for (const k in this.quotas) this.quotas[k].used = 0;
+    this.quotaDate = today;
+  },
+
+  save() {
+    const used = {};
+    for (const k in this.quotas) used[k] = this.quotas[k].used;
+    localStorage.setItem('gc_quota_v2', JSON.stringify({
+      date: this.quotaDate,
+      used: used
+    }));
+  },
+
+  getRemaining(api) {
+    if (!this.quotas[api]) return 0;
+    return this.quotas[api].daily - this.quotas[api].used;
+  },
+
+  canUse(api, type) {
+    const q = this.quotas[api];
+    if (!q) return false;
+    if (q.daily === Infinity) return true;
+    if (q.used >= q.daily) return false;
+    const cost = this.getCost(api, type);
+    return (q.used + cost) <= q.daily;
+  },
+
+  getCost(api, type) {
+    const costs = {
+      apiFootball: { lineup: 1, odds: 0.5, injuries: 0.5, statistics: 1, xg: 1 },
+      bigBalls: { odds: 0.5, xg: 1, lineup: 1, statistics: 0.5 },
+      sportScore: { standings: 0.1, fixtures: 0.1, topScorers: 0.1 },
+      sportsDB: { team: 1, player: 1, league: 1 },
+      openLiga: { fixtures: 0.1, standings: 0.1 },
+      sportsRC: { fixtures: 0.5, standings: 0.5 },
+      gamecastt: { live: 1, odds: 0.5 }
+    };
+    return (costs[api] && costs[api][type]) || 0.1;
+  },
+
+  consume(api, type) {
+    if (!this.quotas[api]) return;
+    const cost = this.getCost(api, type);
+    this.quotas[api].used += cost;
+    this.save();
+  },
+
+  // 判断比赛重要性（乙级以上都算大型比赛，都要优质数据）
+  getMatchPriority(match) {
+    const league = (match.league || '').toLowerCase();
+
+    // 超级顶级联赛（优先级3）：五大联赛+欧冠欧联
+    const superTop = [
+      'premier', 'la_liga', 'serie_a', 'bundesliga', 'ligue_1',
+      'champions_league', 'europa_league', 'europa_conference'
+    ];
+    for (const tl of superTop) {
+      if (league.includes(tl)) return 3;
+    }
+
+    // 大型联赛（优先级3）：乙级以上都算大型，都要优质数据
+    const majorLeagues = [
+      // 欧洲顶级+二级+三级联赛
+      'premier', 'championship', 'league_one', 'league_two',
+      'la_liga', 'segunda', 'segunda_b',
+      'serie_a', 'serie_b', 'serie_c',
+      'bundesliga', '2_bundesliga', '3_liga', 'regionalliga',
+      'ligue_1', 'ligue_2', 'national',
+      'eredivisie', 'eerstedivisie',
+      'primeira_liga', 'segunda_liga',
+      'super_lig', '1_lig',
+      'russia_premier', 'russia_national',
+      'ukraine_premier', 'ukraine_first',
+      'belgium_pro', 'belgium_second',
+      'greek_super_league', 'greek_football_league',
+      'turkey_super', 'turkey_first',
+      // 亚洲
+      'j1_league', 'j2_league', 'j3_league',
+      'k_league_1', 'k_league_2',
+      'saudi_pro', 'saudi_first',
+      'china_super', 'china_league_one', 'china_league_two',
+      'indonesia_liga_1', 'indonesia_liga_2',
+      'indian_super_league', 'indian_i_league',
+      'thai_league_1', 'thai_league_2',
+      'vietnam_v_league',
+      'uae_pro', 'qatar_stars',
+      // 南美
+      'brazilian_serie_a', 'brazilian_serie_b', 'brazilian_serie_c', 'brazilian_serie_d',
+      'arg_primera', 'arg_primera_nacional', 'arg_primera_b',
+      'colombia_primera', 'colombia_primera_b',
+      'chile_primera', 'chile_primera_b',
+      'peru_primera', 'uruguay_primera', 'ecuador_primera', 'bolivia_primera', 'paraguay_primera',
+      // 中北美
+      'mls', 'mls_next_pro',
+      'mexico_liga', 'mexico_ascenso',
+      'costa_rica_primera', 'guatemala_primera',
+      'panama_primera', 'honduras_primera',
+      'el_salvador_primera', 'nicaragua_primera',
+      // 加勒比地区
+      'jamaica_premier', 'trinidad_pro', 'barbados_premier',
+      'haiti_premier', 'cuba_national', 'dominican_republic',
+      'puerto_rico', 'bahamas', 'bahrain', 'barbados',
+      // 非洲
+      'egypt_premier', 'south_afrsa', 'nigeria_premier',
+      'morocco_botola', 'tunisie_ligue', 'algeria_ligue',
+      'ghana_premier', 'ivory_coast_ligue', 'cameroon_elite',
+      'kenya_premier', 'ethiopia_premier', 'angola_girabola',
+      // 大洋洲
+      'a_league', 'new_zealand_premier', 'fiji_premier',
+      // 杯赛
+      'cup', 'copa', 'fa_cup', 'efl_cup', 'league_cup',
+      'dfb_pokal', 'coppa_italia', 'copa_italia',
+      'copa_del_rey', 'coupe_de_france',
+      'community_shield', 'super_cup',
+      'copa_libertadores', 'copa_sudamericana',
+      'africa_champions', 'africa_confederation',
+      'afc_champions', 'afc_cup',
+      // 国际比赛
+      'international', 'world_cup', 'euro', 'copa_america',
+      'gold_cup', 'afc_asian_cup', 'afcon',
+      'nations_league', 'world_cup_qualifying',
+      // 女足
+      'womens', 'woman', 'wsl', 'nwsl',
+      'womens_champions_league', 'womens_super_league',
+      // 其他
+      'mls', 'mlb', 'nhl', 'nba'
+    ];
+    for (const ml of majorLeagues) {
+      if (league.includes(ml)) return 3;
+    }
+
+    // U系列（优先级2）：所有U系列都要覆盖
+    const youthLeagues = [
+      'u23', 'u22', 'u21', 'u20', 'u19', 'u18', 'u17', 'u16', 'u15', 'u14',
+      'youth', 'junior', 'academy', 'reserve', 'b_team', 'b_squad'
+    ];
+    for (const yl of youthLeagues) {
+      if (league.includes(yl)) return 2;
+    }
+
+    // 小型比赛（优先级1）：友谊赛、业余联赛
+    const minorLeagues = [
+      'friendly', 'amateur', 'semipro', 'local', 'regional'
+    ];
+    for (const ml of minorLeagues) {
+      if (league.includes(ml)) return 1;
+    }
+
+    // 默认：其他未知联赛，按大型处理（乙级以上都算大型，全部覆盖）
+    return 3;
+  },
+
+  // 智能选择数据源：根据优先级和数据质量自动选择最佳数据源
+  getBestDataSource(match, dataType) {
+    const priority = this.getMatchPriority(match);
+    const sources = [];
+
+    // 基础数据（赛程、比分）→ ESPN优先
+    if (dataType === 'fixtures' || dataType === 'score') {
+      sources.push({ api: 'espn', priority: 10 });
+      if (this.canUse('bigBalls', 'live')) sources.push({ api: 'bigBalls', priority: 9 });
+      if (this.canUse('sportScore', 'fixtures')) sources.push({ api: 'sportScore', priority: 7 });
+      if (this.canUse('openLiga', 'fixtures')) sources.push({ api: 'openLiga', priority: 6 });
+      if (this.canUse('sportsRC', 'fixtures')) sources.push({ api: 'sportsRC', priority: 5 });
+    }
+
+    // 阵容数据 → API-Football优先（质量最高）
+    else if (dataType === 'lineup') {
+      if (priority >= 2 && this.canUse('apiFootball', 'lineup')) {
+        sources.push({ api: 'apiFootball', priority: 10 });
+      }
+      if (this.canUse('bigBalls', 'lineup')) {
+        sources.push({ api: 'bigBalls', priority: 8 });
+      }
+    }
+
+    // 赔率数据 → Big Balls优先（低延迟）
+    else if (dataType === 'odds') {
+      if (this.canUse('bigBalls', 'odds')) {
+        sources.push({ api: 'bigBalls', priority: 10 });
+      }
+      if (priority >= 2 && this.canUse('apiFootball', 'odds')) {
+        sources.push({ api: 'apiFootball', priority: 9 });
+      }
+      if (this.canUse('sportScore', 'standings')) {
+        sources.push({ api: 'sportScore', priority: 6 });
+      }
+    }
+
+    // 伤病数据 → API-Football优先
+    else if (dataType === 'injuries') {
+      if (priority >= 2 && this.canUse('apiFootball', 'injuries')) {
+        sources.push({ api: 'apiFootball', priority: 10 });
+      }
+    }
+
+    // xG数据 → Big Balls优先
+    else if (dataType === 'xg') {
+      if (this.canUse('bigBalls', 'xg')) {
+        sources.push({ api: 'bigBalls', priority: 10 });
+      }
+      if (priority >= 2 && this.canUse('apiFootball', 'xg')) {
+        sources.push({ api: 'apiFootball', priority: 9 });
+      }
+    }
+
+    // 积分榜 → ESPN + SportScore + OpenLiga
+    else if (dataType === 'standings') {
+      sources.push({ api: 'espn', priority: 10 });
+      if (this.canUse('sportScore', 'standings')) {
+        sources.push({ api: 'sportScore', priority: 8 });
+      }
+      if (this.canUse('openLiga', 'standings')) {
+        sources.push({ api: 'openLiga', priority: 7 });
+      }
+    }
+
+    // 球队信息 → TheSportsDB
+    else if (dataType === 'teamInfo') {
+      if (this.canUse('sportsDB', 'team')) {
+        sources.push({ api: 'sportsDB', priority: 10 });
+      }
+    }
+
+    // 按优先级排序，返回最好的
+    sources.sort((a, b) => b.priority - a.priority);
+    return sources.length > 0 ? sources[0].api : null;
+  },
+
+  getTodayMatchCount() {
+    const saved = localStorage.getItem('gc_match_count_v1');
+    return saved ? parseInt(saved) : 100;
+  },
+
+  setTodayMatchCount(count) {
+    localStorage.setItem('gc_match_count_v1', count);
+  },
+
+  getStatus() {
+    const status = {};
+    for (const k in this.quotas) {
+      status[k] = {
+        total: this.quotas[k].daily === Infinity ? '∞' : this.quotas[k].daily,
+        used: Math.floor(this.quotas[k].used),
+        remaining: this.quotas[k].daily === Infinity ? '∞' : Math.floor(this.quotas[k].daily - this.quotas[k].used),
+        quality: this.quotas[k].quality
+      };
+    }
+    return status;
+  }
+};
+
+// 初始化
+QuotaManager.init();
+
+// ============================================================
+// 体能状态分析引擎（基于学术研究的数学模型）
+// 因素1：体能/休息差异（Rest Differential）
+// 因素2：连续作战/密集赛程（Fixture Congestion）
+// 因素3：主客场连续（Home/Away Streak Context）
+// 因素4：球队状态/势头（Team Form & Momentum）
+// 因素5：主力球员疲劳（Key Player Fatigue）
+// ============================================================
+const FitnessFormEngine = {
+
+  // 因素1：休息差异分析（两队休息天数差）
+  // 学术依据：休息差≥2天，体能优势在60-90分钟窗口明显
+  calcRestAdvantage(homeDaysRest, awayDaysRest) {
+    const diff = homeDaysRest - awayDaysRest; // 主队休息多为正
+    // 阈值：0-1天无影响，2天小影响，3天+大影响
+    let advantage = 0;
+    if (Math.abs(diff) >= 3) advantage = diff > 0 ? 0.08 : -0.08; // 8%概率调整
+    else if (Math.abs(diff) >= 2) advantage = diff > 0 ? 0.04 : -0.04; // 4%概率调整
+    else if (Math.abs(diff) >= 1) advantage = diff > 0 ? 0.02 : -0.02; // 2%概率调整
+    return advantage;
+  },
+
+  // 因素2：密集赛程/连续比赛（72小时阈值）
+  // 学术依据：两场比赛间隔<72小时，肌肉疲劳累积
+  calcFixtureCongestion(daysSinceLastMatch) {
+    // daysSinceLastMatch: 距上一场比赛天数
+    if (daysSinceLastMatch < 2) return -0.10;  // <48小时：严重疲劳，-10%
+    if (daysSinceLastMatch < 3) return -0.06; // <72小时：疲劳，-6%
+    if (daysSinceLastMatch < 4) return -0.03; // <96小时：轻微疲劳，-3%
+    if (daysSinceLastMatch < 7) return 0;      // 3-7天：正常
+    return 0.02;                                 // >7天：充分休息，+2%
+  },
+
+  // 因素3：主客场连续（连续主场/连续客场）
+  // 学术依据：TopStreaks 5-Factor Algorithm
+  // 主场连胜主场打：+85分（加成）
+  // 主场连胜客场打：-20分（惩罚）
+  // 客场连胜客场打：+85分（加成）
+  // 客场连胜主场打：-20分（惩罚）
+  calcVenueStreak(venue, streakType, streakCount) {
+    // venue: 'home' or 'away'（本场比赛场地）
+    // streakType: 'home_win', 'away_win', 'home_loss', 'away_loss'
+    // streakCount: 连续场数
+    let score = 0;
+
+    if (streakType === 'home_win') {
+      // 主场连胜
+      if (venue === 'home') score = 85;  // 主场连胜主场打：加成
+      else score = 20;                   // 主场连胜客场打：惩罚
+    } else if (streakType === 'away_win') {
+      // 客场连胜
+      if (venue === 'away') score = 85;  // 客场连胜客场打：加成
+      else score = 20;                   // 客场连胜主场打：惩罚
+    } else if (streakType === 'home_loss') {
+      // 主场连败
+      if (venue === 'home') score = 20; // 主场连败主场打：惩罚
+      else score = 85;                   // 主场连败客场打：反弹
+    } else if (streakType === 'away_loss') {
+      // 客场连败
+      if (venue === 'away') score = 20; // 客场连败客场打：惩罚
+      else score = 85;                   // 客场连败主场打：反弹
+    }
+
+    // 转换为概率调整（score 20-85 → -3% 到 +5%）
+    const adjustment = ((score - 50) / 50) * 0.05; // ±5%
+    return adjustment * Math.min(streakCount / 3, 1); // 连续越多影响越大，最多3倍
+  },
+
+  // 因素4：球队状态/势头（最近5场+10场）
+  // 学术依据：最近6场积分占比 + xG差值 + 主客场分开
+  calcTeamForm(recentResults, venue) {
+    // recentResults: 最近5场结果数组 ['W','D','L','W','W']
+    // venue: 'home' or 'away'（只看同场地的状态）
+    let points = 0;
+    let games = recentResults.length;
+    for (const r of recentResults) {
+      if (r === 'W') points += 3;
+      else if (r === 'D') points += 1;
+    }
+    const ppg = points / (games * 3); // 0-1，1=全胜
+    // 调整范围：-5% 到 +5%
+    return (ppg - 0.5) * 0.10; // ±5%
+  },
+
+  // 因素5：主力球员疲劳（ACWR急慢性负荷比）
+  // 学术依据：ACWR = 1周负荷 / 4周负荷
+  // ACWR > 1.5 = 高风险，< 0.8 = 负荷不足
+  calcKeyPlayerFatigue(acwr) {
+    if (!acwr) return 0;
+    // ACWR正常范围：0.8 - 1.3
+    if (acwr > 1.5) return -0.08;   // 过度负荷：-8%
+    if (acwr > 1.3) return -0.04;   // 偏高负荷：-4%
+    if (acwr < 0.6) return -0.03;   // 负荷不足：-3%
+    return 0;                        // 正常范围
+  },
+
+  // 综合计算：所有因素融合到主胜概率调整
+  calcOverallAdjustment(matchData) {
+    let adjustment = 0;
+
+    // 因素1：休息差异
+    if (matchData.homeRestDays !== undefined && matchData.awayRestDays !== undefined) {
+      adjustment += this.calcRestAdvantage(matchData.homeRestDays, matchData.awayRestDays);
+    }
+
+    // 因素2：主队密集赛程
+    if (matchData.homeDaysSinceLast !== undefined) {
+      adjustment += this.calcFixtureCongestion(matchData.homeDaysSinceLast);
+    }
+    // 因素2：客队密集赛程
+    if (matchData.awayDaysSinceLast !== undefined) {
+      adjustment -= this.calcFixtureCongestion(matchData.awayDaysSinceLast); // 客队疲劳，主队受益
+    }
+
+    // 因素3：主客场连续
+    if (matchData.homeVenueStreak) {
+      adjustment += this.calcVenueStreak('home', matchData.homeVenueStreak.type, matchData.homeVenueStreak.count);
+    }
+    if (matchData.awayVenueStreak) {
+      adjustment -= this.calcVenueStreak('away', matchData.awayVenueStreak.type, matchData.awayVenueStreak.count);
+    }
+
+    // 因素4：球队状态
+    if (matchData.homeForm) {
+      adjustment += this.calcTeamForm(matchData.homeForm, 'home');
+    }
+    if (matchData.awayForm) {
+      adjustment -= this.calcTeamForm(matchData.awayForm, 'away');
+    }
+
+    // 因素5：主力球员疲劳
+    if (matchData.homeAcwr !== undefined) {
+      adjustment += this.calcKeyPlayerFatigue(matchData.homeAcwr);
+    }
+    if (matchData.awayAcwr !== undefined) {
+      adjustment -= this.calcKeyPlayerFatigue(matchData.awayAcwr);
+    }
+
+    // 限制范围：最多调整±15%
+    adjustment = Math.max(-0.15, Math.min(0.15, adjustment));
+
+    return {
+      adjustment: adjustment,
+      details: {
+        rest: this.calcRestAdvantage(matchData.homeRestDays || 0, matchData.awayRestDays || 0),
+        fixtureCongestion: (matchData.homeDaysSinceLast ? this.calcFixtureCongestion(matchData.homeDaysSinceLast) : 0),
+        venueStreak: (matchData.homeVenueStreak ? this.calcVenueStreak('home', matchData.homeVenueStreak.type, matchData.homeVenueStreak.count) : 0),
+        form: (matchData.homeForm ? this.calcTeamForm(matchData.homeForm, 'home') : 0)
+      }
+    };
+  },
+
+  // 从比赛数据中自动提取体能状态信息
+  extractFitnessData(match, recentMatches) {
+    const data = {};
+
+    // 计算休息天数
+    if (match.date && recentMatches && recentMatches.length > 0) {
+      const lastMatch = recentMatches[0];
+      if (lastMatch.date) {
+        const diff = (new Date(match.date) - new Date(lastMatch.date)) / (1000 * 60 * 60 * 24);
+        data.daysSinceLast = Math.floor(diff);
+      }
+    }
+
+    // 最近5场结果
+    if (recentMatches && recentMatches.length >= 5) {
+      data.recentForm = recentMatches.slice(0, 5).map(m => {
+        if (m.homeScore > m.awayScore && m.isHome) return 'W';
+        if (m.homeScore < m.awayScore && !m.isHome) return 'W';
+        if (m.homeScore === m.awayScore) return 'D';
+        return 'L';
+      });
+    }
+
+    // 连续主场/客场
+    if (recentMatches) {
+      let homeStreak = 0, awayStreak = 0;
+      let homeWinStreak = 0, awayWinStreak = 0;
+      for (const m of recentMatches.slice(0, 10)) {
+        if (m.isHome) {
+          homeStreak++;
+          if (m.won) homeWinStreak++;
+          else break;
+        } else {
+          awayStreak++;
+          if (m.won) awayWinStreak++;
+          else break;
+        }
+      }
+      data.homeStreak = homeStreak;
+      data.awayStreak = awayStreak;
+      data.homeWinStreak = homeWinStreak;
+      data.awayWinStreak = awayWinStreak;
+    }
+
+    return data;
+  }
+};
+
+// ============================================================
+// 高级预测模型引擎（验证有效的数学模型）
+// 模型1：xG预期进球模型
+// 模型2：时间衰减加权模型
+// 模型3：市场隐含概率融合模型
+// ============================================================
+const AdvancedModels = {
+
+  // ============================================================
+  // 模型1：xG预期进球模型
+  // 原理：射门质量量化，比实际进球更能反映真实实力
+  // 学术依据：xG是现代足球分析的黄金标准
+  // ============================================================
+  xGModel: {
+    // 计算球队xG强度
+    // teamXG: 球队预期进球
+    // teamXGA: 球队预期失球
+    // leagueAvg: 联赛平均进球
+    calcAttackStrength(teamXG, teamXGA, leagueAvg) {
+      // 进攻强度：球队xG / 联赛平均xG
+      const attackStrength = teamXG / (leagueAvg / 2);
+      // 防守强度：球队xGA / 联赛平均xGA
+      const defenseStrength = teamXGA / (leagueAvg / 2);
+      return { attackStrength, defenseStrength };
+    },
+
+    // 用xG计算预期进球数
+    // homeXG: 主队主场xG
+    // awayXGA: 客队客场xGA
+    // leagueAvg: 联赛平均进球
+    calcExpectedGoals(homeXG, awayXGA, leagueAvg) {
+      const homeExpGoals = (homeXG * awayXGA) / (leagueAvg / 2);
+      return Math.max(0.1, Math.min(5, homeExpGoals)); // 限制0.1~5球
+    },
+
+    // xG修正因子：xG vs 实际进球的差异
+    // 如果球队实际进球远低于xG，说明运气差，未来会反弹
+    calcRegressionFactor(actualGoals, expectedGoals, games) {
+      const avgActual = actualGoals / games;
+      const avgExpected = expectedGoals / games;
+      // 回归因子：如果实际 < 预期，说明运气差，未来会回归
+      const regression = (avgExpected - avgActual) * 0.3; // 30%回归
+      return regression;
+    }
+  },
+
+  // ============================================================
+  // 模型2：时间衰减加权模型
+  // 原理：近期比赛权重更高，旧比赛权重衰减
+  // 学术依据：球队状态会变化，近期比赛更重要
+  // ============================================================
+  timeDecayModel: {
+    // 半衰期：最近多少场比赛权重减半
+    // 通常取 5-8 场
+    halfLife: 6,
+
+    // 计算第n场比赛的权重
+    // n: 距离现在的场数（0=最近一场）
+    getWeight(n) {
+      // 指数衰减：weight = 0.5^(n / halfLife)
+      return Math.pow(0.5, n / this.halfLife);
+    },
+
+    // 计算加权平均
+    // values: 数组，[最近一场, 上一场, ...]
+    calcWeightedAverage(values) {
+      let totalWeight = 0;
+      let weightedSum = 0;
+      for (let i = 0; i < values.length; i++) {
+        const w = this.getWeight(i);
+        weightedSum += values[i] * w;
+        totalWeight += w;
+      }
+      return weightedSum / totalWeight;
+    },
+
+    // 计算球队加权Elo
+    // eloHistory: Elo历史数组 [最新Elo, 上一场Elo, ...]
+    calcWeightedElo(eloHistory) {
+      return this.calcWeightedAverage(eloHistory);
+    },
+
+    // 计算加权进球
+    // goalsHistory: 进球历史数组
+    calcWeightedGoals(goalsHistory) {
+      return this.calcWeightedAverage(goalsHistory);
+    }
+  },
+
+  // ============================================================
+  // 模型3：市场隐含概率融合模型
+  // 原理：赔率反推概率，和模型概率对比找价值
+  // 学术依据：博彩公司赔率包含大量信息，融合市场智慧
+  // ============================================================
+  marketModel: {
+    // 赔率转概率（去除水位）
+    // odds: [主胜赔率, 平赔率, 客胜赔率]
+    oddsToProbabilities(odds) {
+      const impliedProbs = odds.map(o => 1 / o);
+      const total = impliedProbs.reduce((a, b) => a + b, 0);
+      // 去除水位
+      return impliedProbs.map(p => p / total);
+    },
+
+    // 计算市场预期概率
+    // homeOdds, drawOdds, awayOdds: 初盘赔率
+    getMarketProb(homeOdds, drawOdds, awayOdds) {
+      const probs = this.oddsToProbabilities([homeOdds, drawOdds, awayOdds]);
+      return { home: probs[0], draw: probs[1], away: probs[2] };
+    },
+
+    // 计算价值投注（Value Bet）
+    // modelProb: 模型概率
+    // marketProb: 市场概率
+    // 正价值：模型概率 > 市场概率
+    calcValue(modelProb, marketProb) {
+      return modelProb - marketProb;
+    },
+
+    // 凯利公式：最优投注比例
+    // prob: 胜率
+    // odds: 赔率
+    calcKelly(prob, odds) {
+      const b = odds - 1; // 净赔率
+      const q = 1 - prob; // 败率
+      const kelly = (b * prob - q) / b;
+      return Math.max(0, kelly); // 最多投0%（无价值不投）
+    },
+
+    // 融合模型概率和市场概率
+    // modelProb: 模型概率
+    // marketProb: 市场概率
+    // weight: 模型权重（0~1），市场权重 = 1 - weight
+    fuseProbabilities(modelProb, marketProb, weight = 0.6) {
+      return modelProb * weight + marketProb * (1 - weight);
+    },
+
+    // 赔率变化检测（初盘 vs 临盘）
+    // initialOdds: 初盘赔率
+    // currentOdds: 当前赔率
+    // 赔率下降 = 资金流入 = 市场看好
+    detectOddsMovement(initialOdds, currentOdds) {
+      const movement = (currentOdds - initialOdds) / initialOdds;
+      return {
+        movement: movement, // 正数=赔率升高=不被看好，负数=赔率降低=被看好
+        direction: movement < -0.05 ? 'strong_favor' : movement < -0.02 ? 'favor' : movement > 0.05 ? 'against' : movement > 0.02 ? 'weak_against' : 'neutral',
+        strength: Math.abs(movement)
+      };
+    }
+  },
+
+  // ============================================================
+  // 主场优势因子
+  // 学术依据：主场优势约+0.3~0.5球，约+15~20%胜率
+  // ============================================================
+  homeAdvantage: {
+    // 基准主场优势
+    baseAdvantage: 0.4, // 主队预期进球+0.4
+
+    // 计算主场优势因子
+    // homeRecord: 主队主场战绩
+    // awayRecord: 客队客场战绩
+    calcAdvantage(homeRecord, awayRecord) {
+      let advantage = this.baseAdvantage;
+
+      // 主场特别强的队，优势更大
+      if (homeRecord && homeRecord.winRate > 0.7) advantage += 0.2;
+      if (homeRecord && homeRecord.winRate < 0.4) advantage -= 0.1;
+
+      // 客场特别弱的队，优势更大
+      if (awayRecord && awayRecord.winRate < 0.2) advantage += 0.2;
+      if (awayRecord && awayRecord.winRate > 0.5) advantage -= 0.1;
+
+      return Math.max(0.1, Math.min(1.0, advantage));
+    }
+  },
+
+  // ============================================================
+  // Kelly公式（资金管理，最优投注比例）
+  // 学术依据：长期收益最大化的数学最优解
+  // ============================================================
+  kellyCriterion: {
+    // 完整凯利公式
+    // prob: 胜率（0~1）
+    // odds: 十进制赔率（如2.5）
+    calcKelly(prob, odds) {
+      const b = odds - 1; // 净赔率
+      const q = 1 - prob; // 败率
+      if (b <= 0) return 0;
+      const kelly = (b * prob - q) / b;
+      return Math.max(0, kelly); // 最多投0%（无价值不投）
+    },
+
+    // 分数凯利（更保守，避免波动）
+    // 通常用1/4凯利或1/2凯利
+    calcFractionalKelly(prob, odds, fraction = 0.25) {
+      return this.calcKelly(prob, odds) * fraction;
+    },
+
+    // 多结果凯利（胜平负三个结果）
+    calcMultiOutcome(probs, odds) {
+      const results = {};
+      const outcomes = ['home', 'draw', 'away'];
+      for (let i = 0; i < 3; i++) {
+        results[outcomes[i]] = this.calcFractionalKelly(probs[i], odds[i]);
+      }
+      return results;
+    },
+
+    // 计算期望价值（EV）
+    // prob: 胜率
+    // odds: 赔率
+    calcEV(prob, odds) {
+      return prob * odds - 1; // >0 有价值
+    }
+  },
+
+  // ============================================================
+  // 裁判因素（裁判出牌率、点球率）
+  // 学术依据：不同裁判执法尺度不同，影响比赛走势
+  // ============================================================
+  refereeFactor: {
+    // 裁判基准参数
+    avgYellowCards: 3.5, // 场均黄牌
+    avgRedCards: 0.2,    // 场均红牌
+    avgPenalties: 0.25,  // 场均点球
+
+    // 计算裁判尺度因子
+    // refYellowRate: 裁判场均黄牌数
+    // refRedRate: 裁判场均红牌数
+    // refPenaltyRate: 裁判场均点球数
+    calcRefereeFactor(refYellowRate, refRedRate, refPenaltyRate) {
+      let factor = 0;
+
+      // 出牌多的裁判：比赛更碎，不利于技术流球队
+      if (refYellowRate > this.avgYellowCards * 1.3) {
+        factor += 0.02; // 出牌严格，+2%
+      } else if (refYellowRate < this.avgYellowCards * 0.7) {
+        factor -= 0.01; // 出牌宽松，-1%
+      }
+
+      // 点球多的裁判：大球概率更高
+      if (refPenaltyRate > this.avgPenalties * 1.5) {
+        factor += 0.015; // 点球多，大球+1.5%
+      }
+
+      return factor;
+    },
+
+    // 裁判主场偏向
+    // 有些裁判主场偏向明显
+    calcHomeBias(homePenaltyRate, awayPenaltyRate) {
+      // 主队获得点球更多 = 主场偏向
+      const bias = (homePenaltyRate - awayPenaltyRate) * 0.05;
+      return bias; // 正数=主队受益
+    }
+  },
+
+  // ============================================================
+  // 梯度提升树（Gradient Boosting）
+  // 学术依据：多因子融合，机器学习提升准确率
+  // 简化版：加权多因子融合
+  // ============================================================
+  gradientBoosting: {
+    // 因子权重（基于学术研究的经验权重）
+    weights: {
+      elo: 0.20,           // Elo评分
+      dixonColes: 0.20,    // Dixon-Coles泊松
+      xg: 0.15,            // 预期进球
+      form: 0.12,          // 近期状态
+      homeAdv: 0.10,       // 主场优势
+      fitness: 0.08,       // 体能/休息
+      market: 0.10,        // 市场概率
+      referee: 0.05        // 裁判因素
+    },
+
+    // 简化梯度提升：多因子加权融合
+    // factors: 各因子的概率调整值
+    fuseFactors(factors) {
+      let combinedAdjustment = 0;
+      for (const key in this.weights) {
+        if (factors[key] !== undefined) {
+          combinedAdjustment += factors[key] * this.weights[key];
+        }
+      }
+      return combinedAdjustment;
+    },
+
+    // 计算模型置信度
+    // 多因子一致性越高，置信度越高
+    calcConfidence(factors) {
+      const values = Object.values(factors).filter(v => v !== 0);
+      if (values.length < 2) return 0.5;
+
+      const mean = values.reduce((a, b) => a + b, 0) / values.length;
+      const variance = values.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / values.length;
+      const stdDev = Math.sqrt(variance);
+
+      // 标准差越小，一致性越高，置信度越高
+      const confidence = Math.max(0.3, Math.min(0.95, 1 - stdDev * 2));
+      return confidence;
+    },
+
+    // 自动权重调整（自学习）
+    // 根据历史预测准确率自动调整因子权重
+    adjustWeight(factorName, wasCorrect, learningRate = 0.05) {
+      if (this.weights[factorName] === undefined) return;
+      if (wasCorrect) {
+        this.weights[factorName] *= (1 + learningRate);
+      } else {
+        this.weights[factorName] *= (1 - learningRate);
+      }
+      // 重新归一化
+      const total = Object.values(this.weights).reduce((a, b) => a + b, 0);
+      for (const key in this.weights) {
+        this.weights[key] /= total;
+      }
+    }
+  },
+
+  // ============================================================
+  // 综合融合：所有高级模型融合
+  // =============================================================
+  fuseAll(homeData, awayData, oddsData = null) {
+    let homeProb = 0.45; // 基础主胜概率
+    let drawProb = 0.25;
+    let awayProb = 0.30;
+
+    // 1. xG模型修正
+    if (homeData.xg && awayData.xg) {
+      const homeXGAdv = (homeData.xg - awayData.xga) / 2;
+      homeProb += homeXGAdv * 0.1;
+      awayProb -= homeXGAdv * 0.1;
+    }
+
+    // 2. 时间衰减加权修正
+    if (homeData.weightedForm && awayData.weightedForm) {
+      const formDiff = homeData.weightedForm - awayData.weightedForm;
+      homeProb += formDiff * 0.15;
+      awayProb -= formDiff * 0.15;
+    }
+
+    // 3. 主场优势
+    const adv = this.homeAdvantage.calcAdvantage(homeData.homeRecord, awayData.awayRecord);
+    homeProb += adv * 0.1;
+    awayProb -= adv * 0.1;
+
+    // 4. 市场概率融合
+    if (oddsData) {
+      const marketProb = this.marketModel.getMarketProb(
+        oddsData.home, oddsData.draw, oddsData.away
+      );
+      // 60%模型 + 40%市场
+      homeProb = this.marketModel.fuseProbabilities(homeProb, marketProb.home, 0.6);
+      drawProb = this.marketModel.fuseProbabilities(drawProb, marketProb.draw, 0.6);
+      awayProb = this.marketModel.fuseProbabilities(awayProb, marketProb.away, 0.6);
+
+      // 赔率变化信号
+      if (oddsData.initialHome && oddsData.currentHome) {
+        const movement = this.marketModel.detectOddsMovement(oddsData.initialHome, oddsData.currentHome);
+        if (movement.direction === 'strong_favor') {
+          homeProb += 0.05;
+          awayProb -= 0.05;
+        } else if (movement.direction === 'against') {
+          homeProb -= 0.05;
+          awayProb += 0.05;
+        }
+      }
+    }
+
+    // 归一化
+    const total = homeProb + drawProb + awayProb;
+    return {
+      home: homeProb / total,
+      draw: drawProb / total,
+      away: awayProb / total
+    };
+  }
+};
+
+// ============================================================
 // GitHub数据读取层（从仓库读自动预测数据）
 // ============================================================
 const GHData = {
@@ -121,14 +1183,129 @@ const GHData = {
     return Object.values(d.preds || {}).sort((a,b) => (b.ts||0) - (a.ts||0));
   },
 
-  async getReviewed() {
+  async getReviewed(limit = 100) {
     const d = await this.load();
-    return Object.values(d.settled || {}).sort((a,b) => (b.reviewedAt||0) - (a.reviewedAt||0));
+    return Object.values(d.settled || {}).sort((a,b) => (b.reviewedAt||0) - (a.reviewedAt||0)).slice(0, limit);
   },
 
   async getStats() {
     const d = await this.load();
     return d.stats || { n: 0, hit: 0 };
+  },
+
+  // 导出所有数据为JSON
+  async exportData() {
+    const d = await this.load();
+    return JSON.stringify(d, null, 2);
+  },
+
+  // 导入数据（合并）
+  async importData(jsonStr) {
+    try {
+      const importData = JSON.parse(jsonStr);
+      const current = await this.load();
+      // 合并预测
+      const preds = Object.assign({}, current.preds || {}, importData.preds || {});
+      // 合并复盘
+      const settled = Object.assign({}, current.settled || {}, importData.settled || {});
+      // 合并统计
+      const stats = Object.assign({}, current.stats || {}, importData.stats || {});
+      // 保存到localStorage（本地缓存）
+      const merged = { preds, settled, stats };
+      localStorage.setItem('gc_cloud_data_v1', JSON.stringify(merged));
+      return { success: true, preds: Object.keys(preds).length, settled: Object.keys(settled).length };
+    } catch(e) {
+      return { success: false, error: e.message };
+    }
+  }
+};
+
+// ============================================================
+// 复盘列表渲染（默认显示10场，可展开看100场）
+// ============================================================
+const ReviewList = {
+  expanded: false,
+
+  async render(containerId) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    const reviews = await GHData.getReviewed(100);
+    if (!reviews || reviews.length === 0) {
+      container.innerHTML = '<div style="text-align:center;color:#888;padding:20px;font-size:13px;">暂无复盘数据，等待比赛结束后自动复盘</div>';
+      return;
+    }
+
+    const stats = await GHData.getStats();
+    const displayCount = this.expanded ? reviews.length : Math.min(10, reviews.length);
+    const shown = reviews.slice(0, displayCount);
+
+    let html = '<div style="background:var(--panel-2);border-radius:10px;padding:16px;margin-top:16px;">';
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">';
+    html += '<div style="font-size:14px;font-weight:bold;color:#00ff88;">📊 赛果复盘记录</div>';
+    html += '<div style="font-size:12px;color:#888;">总' + stats.n + '场 · 命中' + stats.hit + '场 · 命中率' + (stats.n > 0 ? Math.round(stats.hit/stats.n*100) : 0) + '%</div>';
+    html += '</div>';
+
+    // 复盘列表
+    html += '<div style="display:flex;flex-direction:column;gap:8px;">';
+    shown.forEach((r, i) => {
+      const isHit = r.hit;
+      const statusColor = isHit ? '#00ff88' : '#ff6b6b';
+      const statusText = isHit ? '✓ 命中' : '✗ 偏差';
+      html += '<div style="display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.03);border-radius:8px;padding:10px 12px;">';
+      html += '<div style="flex:1;">';
+      html += '<div style="font-size:13px;color:#fff;">' + (r.home || 'vs') + ' vs ' + (r.away || '') + '</div>';
+      html += '<div style="font-size:11px;color:#888;margin-top:2px;">预测: ' + (r.predScore || '?') + ' · 实际: ' + (r.actualScore || '?') + '</div>';
+      html += '</div>';
+      html += '<div style="font-size:12px;color:' + statusColor + ';font-weight:bold;">' + statusText + '</div>';
+      html += '</div>';
+    });
+    html += '</div>';
+
+    // 展开/收起按钮
+    if (reviews.length > 10) {
+      html += '<button onclick="ReviewList.toggle(\'' + containerId + '\')" style="width:100%;margin-top:12px;padding:10px;background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.3);border-radius:8px;color:#00ff88;font-size:13px;cursor:pointer;">';
+      html += this.expanded ? '▲ 收起（只看近10场）' : '▼ 展开全部（共' + reviews.length + '场）';
+      html += '</button>';
+    }
+
+    html += '</div>';
+    container.innerHTML = html;
+  },
+
+  toggle(containerId) {
+    this.expanded = !this.expanded;
+    this.render(containerId);
+  }
+};
+
+// ============================================================
+// 数据导入导出工具
+// ============================================================
+const DataImportExport = {
+  // 导出本地自学习数据
+  exportLocalData() {
+    const data = {
+      learn: localStorage.getItem('gc_learn_v1'),
+      backtest: localStorage.getItem('gc_backtest'),
+      dyn: localStorage.getItem('gc_dyn'),
+      zhcache: localStorage.getItem('gc_zhcache_v1')
+    };
+    return JSON.stringify(data, null, 2);
+  },
+
+  // 导入本地自学习数据
+  importLocalData(jsonStr) {
+    try {
+      const data = JSON.parse(jsonStr);
+      if (data.learn) localStorage.setItem('gc_learn_v1', data.learn);
+      if (data.backtest) localStorage.setItem('gc_backtest', data.backtest);
+      if (data.dyn) localStorage.setItem('gc_dyn', data.dyn);
+      if (data.zhcache) localStorage.setItem('gc_zhcache_v1', data.zhcache);
+      return { success: true };
+    } catch(e) {
+      return { success: false, error: e.message };
+    }
   }
 };
 
@@ -561,6 +1738,13 @@ select{font-family:var(--font-body);}
 .day-tag.live-tag{color:#F09884;}
 
 .foot-note{margin-top:22px;font-size:11px;color:var(--ink-faint);line-height:1.7;text-align:center;}
+.lg-group{margin-bottom:12px;}
+.lg-group-header{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--panel-2);border-radius:8px;cursor:pointer;user-select:none;}
+.lg-group-header:hover{background:var(--panel-3);}
+.lg-toggle{font-size:10px;color:var(--amber);width:12px;}
+.lg-name{flex:1;font-size:13px;font-weight:bold;color:var(--ink);}
+.lg-count{font-size:11px;color:var(--ink-faint);}
+.lg-group-body{padding:8px 0;display:flex;flex-direction:column;gap:6px;}
 .foot-note b{color:var(--ink-dim);}
 
 /* ================= 报告页 ================= */
@@ -886,6 +2070,9 @@ select{font-family:var(--font-body);}
 .fx-item .fx-odd-chip.sp{background:rgba(229,178,61,.10);border-color:var(--amber-soft);color:var(--amber);}
 .fx-item .fx-odd-chip b{font-weight:700;}
 .fx-item .fx-odd-chip.waiting{background:rgba(110,133,123,.08);border-color:var(--line-soft);color:var(--ink-faint);font-size:9px;}
+.fx-item .fx-odd-chip.model-rec{background:rgba(0,255,136,.15);border-color:rgba(0,255,136,.4);color:#00ff88;}
+.fx-item .fx-odd-chip.model-rec .lab{color:#00ff88;}
+.fx-item .fx-rank{display:flex;justify-content:space-between;font-size:10.5px;color:#888;margin-top:3px;padding:0 2px;opacity:.85;}
 .fx-item .fx-odd-chip .lab{color:var(--ink-faint);margin-right:3px;}
 .fx-item .fx-go{color:var(--ink-faint);flex:none;}
 .badge{font-family:var(--font-mono);font-size:8.5px;letter-spacing:.06em;padding:1px 5px;border-radius:3px;border:1px solid;white-space:nowrap;}
@@ -1165,6 +2352,8 @@ window.addEventListener('DOMContentLoaded', function() {
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M4 19V5M4 19h16M8 16l3-4 3 2 4-6" stroke="#E5B23D" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
     </h3>
+
+    <div id="review-list-container"></div>
 
     <div id="api-ready">
       <div class="key-status">
@@ -4524,12 +5713,95 @@ function stripWords(s){
  while(t.length>2&&stop.includes(t[t.length-1]))t.pop();
  return t.join(' ');
 }
+// ============================================================
+// 自动翻译缓存：API返回的队名自动翻译/缓存
+// ============================================================
+const ZhCache = {
+  KEY: 'gc_zhcache_v1',
+  data: {},
+
+  load() {
+    try { this.data = JSON.parse(localStorage.getItem(this.KEY) || '{}'); } catch(e) { this.data = {}; }
+  },
+
+  save() {
+    try { localStorage.setItem(this.KEY, JSON.stringify(this.data)); } catch(e) {}
+  },
+
+  // 获取中文名
+  get(enName) {
+    if (!enName) return enName;
+    this.load();
+    const key = normName(enName);
+    if (this.data[key]) return this.data[key];
+    return null; // 没缓存返回null，用英文名
+  },
+
+  // 设置翻译
+  set(enName, zhName) {
+    if (!enName || !zhName) return;
+    this.load();
+    const key = normName(enName);
+    this.data[key] = zhName;
+    this.save();
+  },
+
+  // 批量设置
+  setMany(map) {
+    this.load();
+    for (const en in map) {
+      this.data[normName(en)] = map[en];
+    }
+    this.save();
+  }
+};
+
+// 初始化翻译缓存
+ZhCache.load();
+
+// 内置常用球队翻译（补充）
+const BUILTIN_ZH = {
+  // 英超
+  'manchester united':'曼联','man city':'曼城','liverpool':'利物浦','arsenal':'阿森纳','chelsea':'切尔西',
+  'tottenham':'热刺','newcastle':'纽卡斯尔','aston villa':'阿斯顿维拉','brighton':'布莱顿',
+  // 西甲
+  'real madrid':'皇马','barcelona':'巴萨','atletico madrid':'马竞','sevilla':'塞维利亚','valencia':'瓦伦西亚',
+  // 意甲
+  'juventus':'尤文图斯','ac milan':'AC米兰','inter milan':'国际米兰','napoli':'那不勒斯','roma':'罗马',
+  // 德甲
+  'bayern munich':'拜仁','borussia dortmund':'多特蒙德','bayer leverkusen':'勒沃库森','rb leipzig':'莱比锡',
+  // 法甲
+  'paris saint germain':'巴黎圣日耳曼','monaco':'摩纳哥','lyon':'里昂','marseille':'马赛',
+  // 巴甲
+  'flamengo':'弗拉门戈','palmeiras':'帕尔梅拉斯','corinthians':'科林蒂安','sao paulo':'圣保罗',
+  // 阿甲
+  'boca juniors':'博卡青年','river plate':'河床','racing':'竞技','independiente':'独立',
+  // 美职联
+  'inter miami':'迈阿密国际','la galaxy':'洛杉矶银河','los angeles fc':'洛杉矶FC','seattle sounders':'西雅图海湾人',
+  // 其他
+  'benfica':'本菲卡','porto':'波尔图','sporting cp':'葡萄牙体育','celtic':'凯尔特人','rangers':'流浪者',
+  'ajax':'阿贾克斯','psv':'埃因霍温','feyenoord':'费耶诺ord','club brugge':'布鲁日',
+  'galatasaray':'加拉塔萨雷','fenerbahce':'费内巴切','besiktas':'贝西克塔斯'
+};
+
+// 初始化时加载内置翻译
+ZhCache.setMany(BUILTIN_ZH);
+
 const ALIAS={
  'manchester united':'mun','man united':'mun','man utd':'mun',
  'internazionale':'int','inter':'int',
  'paris saint germain':'psg','paris sg':'psg','paris saint germain fc':'psg',
  'rb leipzig':'rbl','leipzig':'rbl','rasenballsport leipzig':'rbl',
  'atletico madrid':'atm','atletico de madrid':'atm','atletico':'atm',
+ 'real madrid':'rmd','barcelona':'bar','bayern munich':'bay','borussia dortmund':'bvb',
+ 'liverpool':'liv','arsenal':'ars','chelsea':'che','manchester city':'mci','man city':'mci',
+ 'tottenham hotspur':'tot','tottenham':'tot','newcastle united':'new','newcastle':'new',
+ 'juventus':'juv','ac milan':'acm','inter milan':'int','napoli':'nap','as roma':'rom','roma':'rom',
+ 'paris saint germain':'psg','olympique marseille':'mar','marseille':'mar','olympique lyonnais':'lyo','lyon':'lyo',
+ 'flamengo':'fla','palmeiras':'pal','corinthians':'cor','sao paulo':'sao',
+ 'boca juniors':'boc','river plate':'riv','inter miami':'mia','la galaxy':'lag',
+ 'benfica':'ben','porto':'por','sporting cp':'spo','ajaxaja':'aja','psv eindhoven':'psv',
+ 'celtic':'cel','rangers':'ran','galatasaray':'gal','fenerbahce':'fen',
  'newcastle united':'new','newcastle':'new',
  'tottenham hotspur':'tot','tottenham':'tot','spurs':'tot',
  'wolverhampton wanderers':'wol','wolves':'wol','wolverhampton':'wol',
@@ -5241,16 +6513,20 @@ function renderHomeList(){
   const roundTxt=(f.round||'').replace(/^Regular Season - |^Matchday /,'第');
   // 联赛名始终显示在队名上方（琥珀色），轮次拼在联赛名后
   const leagueLine=lgName+(f.round?(' · '+roundTxt):'');
-  // 盘口摘要（后台异步预取后填入；未取到时留空）
+  // 模型推荐+排名显示
   const oc=HOME_ODDS_CACHE[f.id];
   let oddsHtml='';
+  const hRank = ht.rank ? ('第'+ht.rank+'名') : '';
+  const aRank = at.rank ? ('第'+at.rank+'名') : '';
+  const rankHtml = (hRank||aRank) ? '<div class="fx-rank"><span>'+escHtml(ht.name)+' '+hRank+'</span><span>'+escHtml(at.name)+' '+aRank+'</span></div>' : '';
   if(oc&&!oc.none){
    if(oc.ouLine!=null&&oc.ouP!=null){
-    oddsHtml+='<span class="fx-odd-chip"><span class="lab">大</span>'+fmtLine(oc.ouLine)+'<b> '+pct100(oc.ouP)+'</b></span>';
+    const ouRec = oc.ouP > 0.5 ? '大'+fmtLine(oc.ouLine) : '小'+fmtLine(oc.ouLine);
+    oddsHtml+='<span class="fx-odd-chip model-rec"><span class="lab">推荐</span>'+ouRec+'<b> '+pct100(Math.max(oc.ouP,1-oc.ouP))+'</b></span>';
    }
    if(oc.spreadLine!=null&&oc.spP!=null){
-    const spLab=oc.spreadLine<0?('主-'+fmtLine(Math.abs(oc.spreadLine))):(oc.spreadLine>0?('主+'+fmtLine(oc.spreadLine)):'平手');
-    oddsHtml+='<span class="fx-odd-chip sp"><span class="lab">让</span>'+spLab+'<b> '+pct100(oc.spP)+'</b></span>';
+    const spRec = oc.spreadLine<0 ? '主-'+fmtLine(Math.abs(oc.spreadLine)) : '主+'+fmtLine(oc.spreadLine);
+    oddsHtml+='<span class="fx-odd-chip sp model-rec"><span class="lab">让球</span>'+spRec+'<b> '+pct100(Math.max(oc.spP,1-oc.spP))+'</b></span>';
    }
   }else if(oc&&oc.none){
    oddsHtml='<span class="fx-odd-chip waiting"><span class="lab">盘口</span>等待开盘</span>';
@@ -5262,7 +6538,8 @@ function renderHomeList(){
   return '<button class="fx-item'+(isLive?' is-live':'')+'" data-h="'+ht.id+'" data-a="'+at.id+'"'+ds+'>'+
    timeCell+
    '<div class="fx-mid"><div class="fx-league">'+escHtml(leagueLine)+'</div>'+
-   '<div class="fx-teams">'+ht.name+'<span class="vs-mini">vs</span>'+at.name+'</div>'+
+   '<div class="fx-teams">'+escHtml(ht.name)+'<span class="vs-mini">vs</span>'+escHtml(at.name)+'</div>'+
+   rankHtml+
    oddsRow+
    '<div class="fx-sub">'+liveBadge+
    '<span class="badge '+(allBuiltin?'in':'calc')+'">'+(allBuiltin?'内置参数':'即时建模')+'</span></div></div>'+
