@@ -36,23 +36,40 @@ const Cloud = {
   },
 
   async login(username, password) {
-    const r = await this.api('/api/login', {method:'POST', body:{username, password}});
-    if (r.error) throw new Error(r.error);
-    this.token = r.token; this.username = r.username; this.role = r.role;
-    localStorage.setItem('gc_token', r.token);
-    localStorage.setItem('gc_username', r.username);
-    localStorage.setItem('gc_role', r.role);
-    return r;
+    // 管理员硬编码账号
+    if (username === 'hjh' && password === '123456') {
+      this.token = 'admin_token'; this.username = 'hjh'; this.role = 'admin';
+      localStorage.setItem('gc_token', 'admin_token');
+      localStorage.setItem('gc_username', 'hjh');
+      localStorage.setItem('gc_role', 'admin');
+      return {username:'hjh', role:'admin'};
+    }
+    // 从GitHub读取用户列表验证
+    const r = await this.githubReadFile('data/users.json');
+    const users = r ? r.content : {};
+    if (users[username] && users[username].password === password) {
+      this.token = 'user_token_' + username; this.username = username; this.role = users[username].role || 'user';
+      localStorage.setItem('gc_token', this.token);
+      localStorage.setItem('gc_username', username);
+      localStorage.setItem('gc_role', this.role);
+      return {username, role: this.role};
+    }
+    throw new Error('用户名或密码错误');
   },
 
   async register(username, password) {
-    const r = await this.api('/api/register', {method:'POST', body:{username, password}});
-    if (r.error) throw new Error(r.error);
-    this.token = r.token; this.username = r.username; this.role = r.role;
-    localStorage.setItem('gc_token', r.token);
-    localStorage.setItem('gc_username', r.username);
-    localStorage.setItem('gc_role', r.role);
-    return r;
+    if (username === 'hjh') throw new Error('管理员账号不可注册');
+    // 从GitHub读取用户列表
+    const r = await this.githubReadFile('data/users.json');
+    const users = r ? r.content : {};
+    if (users[username]) throw new Error('用户名已存在');
+    users[username] = {password, role: 'user', createdAt: new Date().toISOString()};
+    await this.githubWriteFile('data/users.json', users, 'Register user ' + username);
+    this.token = 'user_token_' + username; this.username = username; this.role = 'user';
+    localStorage.setItem('gc_token', this.token);
+    localStorage.setItem('gc_username', username);
+    localStorage.setItem('gc_role', 'user');
+    return {username, role:'user'};
   },
 
   async logout() {
@@ -63,42 +80,83 @@ const Cloud = {
     localStorage.removeItem('gc_role');
   },
 
-  // 从云端加载所有数据
+  // ===== GitHub API 文件读写 =====
+  async githubReadFile(path) {
+    try {
+      const gh = this.github;
+      const resp = await fetch(`https://api.github.com/repos/${gh.owner}/${gh.repo}/contents/${path}`, {
+        headers: {'Authorization': 'token ' + gh.token}
+      });
+      if (!resp.ok) return null;
+      const data = await resp.json();
+      return { content: JSON.parse(atob(data.content)), sha: data.sha };
+    } catch(e) { console.warn('github read failed', e); return null; }
+  },
+
+  async githubWriteFile(path, content, message) {
+    try {
+      const gh = this.github;
+      // 先获取现有文件的sha
+      let sha = null;
+      const resp = await fetch(`https://api.github.com/repos/${gh.owner}/${gh.repo}/contents/${path}`, {
+        headers: {'Authorization': 'token ' + gh.token}
+      });
+      if (resp.ok) { const data = await resp.json(); sha = data.sha; }
+      // 写入文件
+      await fetch(`https://api.github.com/repos/${gh.owner}/${gh.repo}/contents/${path}`, {
+        method: 'PUT',
+        headers: {'Authorization': 'token ' + gh.token, 'Content-Type': 'application/json'},
+        body: JSON.stringify({ message: message || 'Update data', content: btoa(JSON.stringify(content, null, 2)), sha: sha })
+      });
+      return true;
+    } catch(e) { console.warn('github write failed', e); return false; }
+  },
+
+  // 从云端加载学习数据（GitHub仓库 data/learn_data.json）
   async loadFromCloud() {
     if (!this.token) return null;
     try {
-      const r = await this.api('/api/data');
-      if (r.data && typeof r.data === 'object') {
+      const r = await this.githubReadFile('data/learn_data.json');
+      if (r && r.content && typeof r.content === 'object') {
         // 把云端数据写回 localStorage
-        Object.entries(r.data).forEach(([k, v]) => {
+        Object.entries(r.content).forEach(([k, v]) => {
           localStorage.setItem(k, typeof v === 'string' ? v : JSON.stringify(v));
         });
-        return r.data;
+        console.log('[Cloud] 学习数据已从云端加载', Object.keys(r.content).length, '项');
+        return r.content;
       }
     } catch(e) { console.warn('cloud load failed', e); }
     return null;
   },
 
-  // 把所有localStorage数据保存到云端
+  // 把学习数据保存到云端（GitHub仓库 data/learn_data.json）
   async saveToCloud() {
     if (!this.token || !this.dirty) return;
     try {
       const data = {};
+      // 只同步学习相关的gc_数据，不同步登录状态和临时缓存
+      const syncKeys = ['gc_learn_v1','gc_self_learn','gc_odds_learner','gc_live_snap_v1',
+                        'gc_dyn','gc_zhcache_v1','gc_espn_codes','gc_backtest',
+                        'gc_afb_map','gc_afb_quota','gc_quota_v2','gc_users_v1',
+                        'gc_odds_history_v1','gc_afb_extra'];
       for (let i = 0; i < localStorage.length; i++) {
         const k = localStorage.key(i);
-        if (k && !k.startsWith('gc_token') && !k.startsWith('gc_username') && !k.startsWith('gc_role')) {
+        if (k && (syncKeys.includes(k) || k.startsWith('gc_afb_extra_'))) {
           data[k] = localStorage.getItem(k);
         }
       }
-      await this.api('/api/data', {method:'POST', body:{data, token:this.token}});
-      this.dirty = false;
+      const ok = await this.githubWriteFile('data/learn_data.json', data, 'Auto-sync learn data');
+      if (ok) {
+        this.dirty = false;
+        console.log('[Cloud] 学习数据已同步到云端', Object.keys(data).length, '项');
+      }
     } catch(e) { console.warn('cloud save failed', e); }
   },
 
   markDirty() {
     this.dirty = true;
     if (this.syncTimer) clearTimeout(this.syncTimer);
-    this.syncTimer = setTimeout(() => this.saveToCloud(), 3000);
+    this.syncTimer = setTimeout(() => this.saveToCloud(), 5000);
   }
 };
 
@@ -1508,16 +1566,14 @@ window.loadUserList = async function() {
   } else {
     // 验证token有效性
     try {
-      const r = await Cloud.api('/api/me');
-      if (r.error) {
-        await Cloud.logout();
-        showLogin();
-      } else {
+      // 直接检查localStorage中的token（GitHub静态托管无后端/api）
+      if (Cloud.token) {
         await Cloud.loadFromCloud();
+      } else {
+        showLogin();
       }
     } catch(e) {
-      // 本地开发时（file://）API可能不通，跳过
-      console.warn('cloud check skipped');
+      console.warn('cloud check skipped', e);
     }
   }
 });
@@ -3080,8 +3136,12 @@ function predict(hId,aId,opt){
  for(let i=0;i<N;i++)for(let j=0;j<N;j++)mat[i][j]/=tot;
  raw.w/=tot;raw.d/=tot;raw.l/=tot;
 
+ // —— 自学习Elo：赛后根据实际赛果动态更新的Elo，优先于初始排名Elo ——
+ const _slH=SelfLearner.getElo(h.id),_slA=SelfLearner.getElo(a.id);
+ const _hElo=_slH?Object.assign({},h,{elo:_slH}):h;
+ const _aElo=_slA?Object.assign({},a,{elo:_slA}):a;
  // —— Elo 交叉模型 + 三方融合（55% DC / 25% Elo / 20% 路径模拟）——
- const ep=eloProbs(h,a,opt);
+ const ep=eloProbs(_hElo,_aElo,opt);
  const fuse={w:0.55*raw.w+0.25*ep.w+0.20*path.w,
              d:0.55*raw.d+0.25*ep.d+0.20*path.d,
              l:0.55*raw.l+0.25*ep.l+0.20*path.l};
@@ -3642,6 +3702,143 @@ function asianSettle(mat,line,type){
  return{win,winHalf,push,loseHalf,lose,
   winExp:win+.5*winHalf,loseExp:lose+.5*loseHalf};
 }
+
+// ===== 盘口自学习模型 =====
+// 从有盘口比赛中学习庄家开盘思路，对无盘口比赛模拟开盘
+// 使用SGD在线学习，权重持久化，持续自我优化
+const OddsLearner={
+ weights:{ou:[0.3,0.9],sp:[0.25,-0.7]},
+ lr:0.008,
+ samples:0,
+ _features(r){
+  let xgH=0,xgA=0;const mat=r.mat;
+  if(mat&&mat.length){for(let i=0;i<mat.length;i++)for(let j=0;j<mat[i].length;j++){const p=mat[i][j];if(isFinite(p)){xgH+=i*p;xgA+=j*p;}}}
+  return{xgSum:xgH+xgA,xgDiff:xgH-xgA};
+ },
+ predict(r){
+  const f=this._features(r);
+   const ou=this.weights.ou[0]+this.weights.ou[1]*f.xgSum;
+   const sp=this.weights.sp[0]+this.weights.sp[1]*f.xgDiff;
+  return{ouLine:Math.round(ou*4)/4,spLine:Math.round(sp*4)/4};
+ },
+ learn(r,actualOu,actualSp){
+  if(actualOu==null&&actualSp==null)return;
+  const f=this._features(r);
+  if(actualOu!=null){const pred=this.weights.ou[0]+this.weights.ou[1]*f.xgSum;const err=pred-actualOu;this.weights.ou[0]-=this.lr*err;this.weights.ou[1]-=this.lr*err*f.xgSum;}
+  if(actualSp!=null){const pred=this.weights.sp[0]+this.weights.sp[1]*f.xgDiff;const err=pred-actualSp;this.weights.sp[0]-=this.lr*err;this.weights.sp[1]-=this.lr*err*f.xgDiff;}
+  this.samples++;this._save();
+ },
+ _save(){try{localStorage.setItem('gc_odds_learner',JSON.stringify({w:this.weights,n:this.samples}));}catch(e){}},
+ _load(){try{const s=JSON.parse(localStorage.getItem('gc_odds_learner')||'null');if(s&&s.w){this.weights=s.w;this.samples=s.n||0;}}catch(e){}}
+};
+OddsLearner._load();
+
+// ===== 增强自学习引擎 =====
+// 三大模块：Elo赛后更新、预测因子权重自学习、庄家偏差学习（价值盘识别）
+const SelfLearner={
+ // ---------- 模块1：Elo赛后自学习 ----------
+ // 标准Elo公式，根据实际赛果动态更新球队实力评分
+ eloUpdate(hId,aId,hg,ag,neutral){
+  const ELO=this._load().elo||{};
+  const rh=ELO[hId]||1500, ra=ELO[aId]||1500;
+  const homeAdv=neutral?0:65; // 主场优势65分
+  const eh=1/(1+Math.pow(10,((ra+homeAdv)-rh)/400));
+  const ea=1-eh;
+  const sh=hg>ag?1:(hg===ag?0.5:0);
+  const sa=1-sh;
+  const gd=Math.abs(hg-ag);
+  const K=20*(1+0.1*gd); // 比分差距越大，K值越大（变化越显著）
+  ELO[hId]=Math.round(rh+K*(sh-eh));
+  ELO[aId]=Math.round(ra+K*(sa-ea));
+  const d=this._load();d.elo=ELO;this._save(d);
+  return{hNew:ELO[hId],aNew:ELO[aId],hDelta:ELO[hId]-rh,aDelta:ELO[aId]-ra};
+ },
+ getElo(teamId){const d=this._load();return(d.elo&&d.elo[teamId])||null;},
+
+ // ---------- 模块2：预测因子权重自学习 ----------
+ // 记录每个预测因子的历史命中率，动态调整权重
+ // 因子：home主场, form近期状态, fatigue体能, attitude态度, injury伤病, lineup阵容
+ factorWeights:{home:1.0,form:1.0,fatigue:1.0,attitude:1.0,injury:1.0,lineup:1.0},
+ factorHits:{home:{n:0,h:0},form:{n:0,h:0},fatigue:{n:0,h:0},attitude:{n:0,h:0},injury:{n:0,h:0},lineup:{n:0,h:0}},
+ // 赛后评估各因子方向是否正确，更新命中率
+ learnFactors(factorDirs,actualRes){
+  // factorDirs: {home:'w'|'l'|null, form:'w'|'l'|null, ...} 每个因子指向的胜方
+  // actualRes: 'w'主队胜, 'd'平, 'l'客队胜
+  const d=this._load();
+  const fw=d.factorWeights||this.factorWeights;
+  const fh=d.factorHits||this.factorHits;
+  Object.keys(factorDirs).forEach(f=>{
+   const dir=factorDirs[f];
+   if(!dir||!fh[f])return;
+   fh[f].n++;
+   // 因子指向主队且主队胜，或指向客队且客队胜 → 命中
+   // 平局算半命中
+   if(actualRes==='d'){fh[f].h+=0.5;}
+   else if((dir==='w'&&actualRes==='w')||(dir==='l'&&actualRes==='l')){fh[f].h+=1;}
+  });
+  // 更新权重：命中率越高权重越大，用EMA平滑
+  Object.keys(fh).forEach(f=>{
+   if(fh[f].n>=5){
+    const hitRate=fh[f].h/fh[f].n;
+    // 权重 = 命中率 / 基准0.5，clamp到0.5-2.0
+    const target=Math.max(0.5,Math.min(2.0,hitRate/0.5));
+    fw[f]=fw[f]*0.9+target*0.1; // EMA平滑
+   }
+  });
+  d.factorWeights=fw;d.factorHits=fh;this._save(d);
+ },
+ getFactorWeight(factor){const d=this._load();return(d.factorWeights&&d.factorWeights[factor])||1.0;},
+
+ // ---------- 模块3：庄家偏差学习（价值盘识别） ----------
+ // 学习庄家开盘线和实际赛果的关系，识别庄家开错的"价值盘"
+ // 按盘口线分桶统计实际大球/赢盘概率
+ valueBins:{}, // {ou_2.5: {n, over}, sp_0.5: {n, win}}
+ // 赛后记录庄家开盘和实际赛果
+ learnMarketBias(ouLine,spLine,hg,ag){
+  const d=this._load();
+  const vb=d.valueBins||{};
+  if(ouLine!=null){
+   const key='ou_'+ouLine;
+   if(!vb[key])vb[key]={n:0,over:0};
+   vb[key].n++;
+   if(hg+ag>ouLine)vb[key].over++;
+  }
+  if(spLine!=null){
+   const key='sp_'+spLine;
+   if(!vb[key])vb[key]={n:0,win:0};
+   vb[key].n++;
+   if(hg-ag>spLine)vb[key].win++;
+  }
+  // 只保留最近200个桶的数据
+  const keys=Object.keys(vb);
+  if(keys.length>200){keys.sort((a,b)=>vb[b].n-vb[a].n).slice(200).forEach(k=>delete vb[k]);}
+  d.valueBins=vb;this._save(d);
+ },
+ // 获取某盘口线的历史实际概率（用于发现价值盘）
+ getMarketActual(line,type){
+  const d=this._load();
+  const vb=d.valueBins||{};
+  const key=type+'_'+line;
+  const b=vb[key];
+  if(!b||b.n<10)return null; // 样本不足不参考
+  return type==='ou'?(b.over/b.n):(b.win/b.n);
+ },
+ // 判断是否为价值盘：模型概率与庄家隐含概率/历史实际概率差异大
+ isValueBet(modelProb,line,type){
+  const marketActual=this.getMarketActual(line,type);
+  if(marketActual==null)return false;
+  // 模型概率与历史实际概率差异 > 10%，且方向一致 → 价值盘
+  const diff=modelProb-marketActual;
+  return Math.abs(diff)>0.10;
+ },
+
+ // ---------- 持久化 ----------
+ _load(){try{return Object.assign({elo:{},factorWeights:this.factorWeights,factorHits:this.factorHits,valueBins:{}},JSON.parse(localStorage.getItem('gc_self_learn')||'{}'));}catch(e){return{elo:{},factorWeights:this.factorWeights,factorHits:this.factorHits,valueBins:{}};}},
+ _save(d){try{localStorage.setItem('gc_self_learn',JSON.stringify(d));if(typeof Cloud!=='undefined'&&Cloud.token)Cloud.markDirty();}catch(e){}}
+};
+
+
+
 function pct100(x){if(x==null||!isFinite(x))return '—';return(x*100).toFixed(0)+'%';}
 
 // —— 赛前 vs 临场对比 ——
@@ -3779,7 +3976,7 @@ function detectShift(fid,o,isLive){
   }
   return msgs.length?msgs:null;
 }
-function renderOdds(ed,r,r0,H,A,isEspn){
+function renderOdds(ed,r,r0,H,A,isEspn,fid){
  const card=document.getElementById('r-odds-card'),box=document.getElementById('r-odds');
  if(!isEspn||!ed||!ed.odds||(r.live&&r.live.finished)){card.style.display='none';return;}
  const isLive=!!r.live,o=ed.odds;
@@ -4105,7 +4302,7 @@ function renderReport(){
  renderCompare(ed,r,r0,H,A);
  renderPitch(ed,r,H,A,isEspnMatch);
  renderLineups(ed,r,H,A,fid,isEspnMatch,basis);
- renderOdds(ed,r,r0,H,A,isEspnMatch);
+ renderOdds(ed,r,r0,H,A,isEspnMatch,fid);
  renderIntegrity(ed,r,r0,H,A,opt,isEspnMatch,basis);
  renderScript(r,H,A);
  renderBrief(ed,r,r0,H,A,basis,opt);
@@ -6650,8 +6847,10 @@ async function prefetchHomeOdds(all,standingsCache){
    const ck=f.lg.code+'_'+f.id;
    let ed=ENRICH_CACHE[ck]&&Date.now()-ENRICH_CACHE[ck].t<90000?ENRICH_CACHE[ck].d:null;
    if(!ed){ed=await fetchEspnSummary(f.lg.code,f.id);ENRICH_CACHE[ck]={d:ed,t:Date.now()};}
-   if(!ed||!ed.odds||(ed.odds.ouLine==null&&ed.odds.spreadLine==null)){HOME_ODDS_CACHE[f.id]={none:true,ts:Date.now()};continue;}
-   const o=ed.odds;
+    // 无真实盘口时用模型纯模拟（默认2.5球大小球、0球让球）
+    const hasRealOu=!!(ed&&ed.odds&&ed.odds.ouLine!=null);
+    const hasRealSp=!!(ed&&ed.odds&&ed.odds.spreadLine!=null);
+    const o=(ed&&ed.odds)||{};
    // 建队（复用首页 resolveIds 的逻辑）
    const info=lgForNorm(prov,f.lg);
    const rows=standingsCache[prov+'_'+f.lg.id];
@@ -6673,10 +6872,20 @@ async function prefetchHomeOdds(all,standingsCache){
    const ht=build(f.home,hm),at=build(f.away,am);
    let r;
    try{r=predict(ht.id,at.id,{noLearn:false});}catch(e){HOME_ODDS_CACHE[f.id]={none:true,ts:Date.now()};continue;}
-   const rec={};
-   if(o.ouLine!=null){const ou=asianSettle(r.mat,o.ouLine,'ou');rec.ouLine=o.ouLine;rec.ouP=ou.winExp;}
-   if(o.spreadLine!=null){const sp=asianSettle(r.mat,o.spreadLine,'sp');rec.spreadLine=o.spreadLine;rec.spP=sp.winExp;}
-   HOME_ODDS_CACHE[f.id]=rec;
+    const rec={};
+    // 有真实盘口时，AI自我学习庄家开盘思路（不显示，内部优化）
+    if(hasRealOu||hasRealSp)OddsLearner.learn(r,hasRealOu?o.ouLine:null,hasRealSp?o.spreadLine:null);
+    // 无真实盘口时，用自学习模型模拟开盘线（不是固定值，越学越准）
+    const sim=(!hasRealOu||!hasRealSp)?OddsLearner.predict(r):null;
+    const ouLine=hasRealOu?o.ouLine:(sim?sim.ouLine:2.5);
+    const spLine=hasRealSp?o.spreadLine:(sim?sim.spLine:0);
+    const ou=asianSettle(r.mat,ouLine,'ou');
+    rec.ouLine=ouLine;rec.ouP=ou.winExp;
+    if(!hasRealOu)rec.ouSim=true;
+    const sp=asianSettle(r.mat,spLine,'sp');
+    rec.spreadLine=spLine;rec.spP=sp.winExp;
+    if(!hasRealSp)rec.spSim=true;
+    HOME_ODDS_CACHE[f.id]=rec;
    scheduleRender();
   }catch(e){HOME_ODDS_CACHE[f.id]={none:true,ts:Date.now()};}
  }};
@@ -6774,7 +6983,8 @@ function renderHomeList(){
   if(oc&&!oc.none){
    if(oc.ouLine!=null&&oc.ouP!=null){
     const ouRec = oc.ouP > 0.5 ? '大'+fmtLine(oc.ouLine) : '小'+fmtLine(oc.ouLine);
-    oddsHtml+='<span class="fx-odd-chip model-rec"><span class="lab">推荐</span>'+ouRec+'<b> '+pct100(Math.max(oc.ouP,1-oc.ouP))+'</b></span>';
+     const ouLab = oc.ouSim ? '模拟' : '推荐';
+    oddsHtml+='<span class="fx-odd-chip model-rec"><span class="lab">'+ouLab+'</span>'+ouRec+'<b> '+pct100(Math.max(oc.ouP,1-oc.ouP))+'</b></span>';
    }
    if(oc.spreadLine!=null&&oc.spP!=null){
     let spRec;
@@ -6785,7 +6995,8 @@ function renderHomeList(){
       // 推荐客队赢盘
       spRec = oc.spreadLine < 0 ? '客+' + fmtLine(Math.abs(oc.spreadLine)) : '客-' + fmtLine(oc.spreadLine);
     }
-    oddsHtml+='<span class="fx-odd-chip sp model-rec"><span class="lab">让球</span>'+spRec+'<b> '+pct100(Math.max(oc.spP,1-oc.spP))+'</b></span>';
+     const spLab = oc.spSim ? '模拟' : '让球';
+    oddsHtml+='<span class="fx-odd-chip sp model-rec"><span class="lab">'+spLab+'</span>'+spRec+'<b> '+pct100(Math.max(oc.spP,1-oc.spP))+'</b></span>';
    }
   }else if(oc&&oc.none){
    oddsHtml='<span class="fx-odd-chip waiting"><span class="lab">盘口</span>等待开盘</span>';
@@ -6883,6 +7094,60 @@ function renderHomeList(){
   location.hash='#/report?'+p.toString();
  });
 }
+
+// ===== 自动预测所有比赛（用于无人值守时GitHub Actions机器人调用）=====
+async function autoRecordAllPredictions(){
+  if(!LAST_HOME||!LAST_HOME.all)return;
+  const prov=getProv();
+  const standingsCache=LAST_HOME.standingsCache||{};
+  const matches=LAST_HOME.all.filter(f=>f&&f.st==='NS'&&f.id&&f.lg&&f.lg.code);
+  console.log('[AutoPred] 开始自动预测，共', matches.length, '场未开赛比赛');
+  let recorded=0, skipped=0;
+  for(const f of matches){
+    try{
+      // 检查是否已记录
+      const L=loadLearn();
+      if(L.preds[f.id]||L.settled[f.id]){skipped++;continue;}
+      // 获取ESPN深度数据（含赔率）
+      let ed=null;
+      try{
+        const ck=f.lg.code+'_'+f.id;
+        ed=ENRICH_CACHE[ck]&&Date.now()-ENRICH_CACHE[ck].t<90000?ENRICH_CACHE[ck].d:null;
+        if(!ed){ed=await fetchEspnSummary(f.lg.code,f.id);ENRICH_CACHE[ck]={d:ed,t:Date.now()};}
+      }catch(e){}
+      if(!ed){skipped++;continue;}
+      // 构建球队对象
+      const info=lgForNorm(prov,f.lg);
+      const rows=standingsCache[prov+'_'+f.lg.id];
+      const inRow=t=>{const tn=(normName(t.name||'')||'');return r=>normName(r.name||'')===tn||(tn&&String(r.name||'').toLowerCase().includes(tn))||(tn&&tn.includes(String(r.name||'').toLowerCase()));};
+      const hm=matchTeam(f.home.name),am=matchTeam(f.away.name);
+      const build=(apiT,builtin)=>{
+        const cid=(info.prefix||'x')+apiT.id;
+        const row=rows?rows.find(inRow(apiT)):null;
+        if(row){
+          if(!DYN.teams[cid]||DYN.teams[cid].neutral){
+            if(DYN.teams[cid])delete DYN.teams[cid];
+            return teamFromStanding(info.key,info.obj,apiT,row,rows,info.prefix);
+          }
+          return DYN.teams[cid];
+        }
+        if(builtin)return builtin;
+        return DYN.teams[cid]||neutralTeam(info.key,apiT,info.prefix);
+      };
+      const ht=build(f.home,hm),at=build(f.away,am);
+      // 预测并记录
+      const r=predict(ht.id,at.id,{noLearn:false});
+      recordPred(f.id,f.lg.code,r,r,ht,at,ed,false);
+      recorded++;
+      // 限速，避免请求过快
+      await new Promise(res=>setTimeout(res,300));
+    }catch(e){console.warn('[AutoPred] 比赛预测失败:', f.id, e.message);}
+  }
+  console.log('[AutoPred] 完成：记录', recorded, '场，跳过', skipped, '场');
+  // 触发云端同步
+  if(typeof Cloud!=='undefined'&&Cloud.token)Cloud.markDirty();
+}
+
 
 async function refreshLive(fid,silent){
  const prov=getProv();
@@ -7272,7 +7537,16 @@ async function settleLearned(){
    aH.att=ema(aH.att,hg/Math.max(p.lh,0.25),alpha);
    aH.def=ema(aH.def,ag/Math.max(p.la,0.25),alpha);aH.n++;aH.last=Date.now();L.teamAdj[p.hId]=aH;
    const aA=L.teamAdj[p.aId]||{n:0,att:1,def:1,last:Date.now()};
-   aA.att=ema(aA.att,ag/Math.max(p.la,0.25),0.25);aA.def=ema(aA.def,hg/Math.max(p.lh,0.25),0.25);aA.n++;aA.last=Date.now();L.teamAdj[p.aId]=aA;
+   aA.att=ema(aA.att,ag/Math.max(p.la,0.25),alpha);aA.def=ema(aA.def,hg/Math.max(p.lh,0.25),alpha);aA.n++;aA.last=Date.now();L.teamAdj[p.aId]=aA;
+    // ===== 增强自学习：Elo更新 + 庄家偏差学习 =====
+    try{
+     // Elo赛后自学习（根据实际赛果动态更新球队实力）
+     SelfLearner.eloUpdate(p.hId,p.aId,hg,ag,!!p.neutral);
+     // 庄家偏差学习（记录开盘线与实际赛果，识别价值盘）
+     const _ouL=p.rec?p.rec.ouLine:(p.mkt?p.mkt.ou:null);
+     const _spL=p.rec?p.rec.spLine:(p.mkt?p.mkt.spread:null);
+     SelfLearner.learnMarketBias(_ouL,_spL,hg,ag);
+    }catch(e){}
    let recResult=null;
    if(p.rec){
     recResult={};
@@ -7614,6 +7888,11 @@ function initApi(){
  if(dp)dp.onclick=()=>{HOME_OFFSET=Math.max(0,HOME_OFFSET-1);renderDayLabel();loadFixtures();};
  if(dn)dn.onclick=()=>{HOME_OFFSET=Math.min(6,HOME_OFFSET+1);renderDayLabel();loadFixtures();};
  renderDayLabel();loadFixtures();
+  // 自动预测模式（GitHub Actions机器人使用）：URL带autopred=1时，首页加载后自动预测所有比赛
+  if(location.search.includes('autopred=1')||window.AUTO_PRED){
+   console.log('[AutoPred] 自动预测模式已开启，等待首页加载...');
+   setTimeout(()=>{if(LAST_HOME&&LAST_HOME.all)autoRecordAllPredictions();},8000);
+  }
 }
 
 /* ---------- 路由 ---------- */
