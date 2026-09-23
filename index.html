@@ -275,6 +275,38 @@ const DataSources = {
     } catch(e) { console.warn('Gamecastt fail', e); return null; }
   },
 
+  // Big Balls Data - xG/阵容/统计（免费版1000次/天）
+  async fetchBigBalls(path) {
+    const key = 'bbs_' + path;
+    if (this.cache[key] && Date.now() - this.cacheTime[key] < 300000) return this.cache[key];
+    try {
+      const r = await fetch('https://api.bigballsdata.com' + path, {
+        headers: { 'Authorization': 'Bearer ' + API_KEYS.bigBalls }
+      });
+      if (!r.ok) throw new Error('BBS HTTP ' + r.status);
+      this.cache[key] = await r.json();
+      this.cacheTime[key] = Date.now();
+      return this.cache[key];
+    } catch(e) { console.warn('BigBalls fail', e); return null; }
+  },
+
+  // 获取比赛xG数据
+  async getMatchXg(homeName, awayName, dateStr) {
+    try {
+      const data = await this.fetchBigBalls('/v1/matches?sport=football&date=' + dateStr);
+      if (!data || !data.data) return null;
+      const norm = n => String(n||'').toLowerCase().replace(/[^a-z0-9]/g,'');
+      const hn = norm(homeName), an = norm(awayName);
+      const match = data.data.find(m => {
+        const h = norm(m.home.name), a = norm(m.away.name);
+        return (h.includes(hn)||hn.includes(h)) && (a.includes(an)||an.includes(a));
+      });
+      if (!match) return null;
+      const stats = await this.fetchBigBalls('/v1/stored/matches/' + match.id + '/stats?sport=football');
+      return { match, stats };
+    } catch(e) { return null; }
+  },
+
   // 融合积分榜数据：ESPN + SportScore + TheSportsDB
   async getStandings(leagueCode) {
     const result = { espn: null, sportscore: null, sportsdb: null };
@@ -4980,23 +5012,29 @@ async function afbCheckLive(homeName,awayName,dateISO){
   return {status:f.fixture.status.short,elapsed:f.fixture.status.elapsed,homeScore:f.goals.home,awayScore:f.goals.away};
  }catch(e){return null;}
 }
-// AFB实时比分补充：对ESPN进行中但比分可能不准确的比赛，用AFB获取真实比分
+// AFB实时比分补充：确保所有进行中比赛有准确比分
 const AFB_LIVE_CACHE={};
 async function afbEnrichLiveScores(){
  try{
   if(!LAST_HOME||!LAST_HOME.all)return;
   const q=afbQuota();
   if(q.count>=q.limit)return;
+  // 筛选所有进行中的比赛
   const liveMatches=LAST_HOME.all.filter(f=>{
    if(!LIVE_ST.includes(f.st))return false;
-   const hg=f.hg??0,ag=f.ag??0;
-   if(hg===0&&ag===0)return true;
    const cached=AFB_LIVE_CACHE[f.id];
-   if(cached&&Date.now()-cached.ts<90000)return false;
+   if(cached&&Date.now()-cached.ts<60000)return false; // 60秒缓存
    return true;
   });
   if(!liveMatches.length)return;
-  const toProcess=liveMatches.slice(0,5);
+  // 按优先级排序：0-0且时间久的排前面（ESPN最可能没更新）
+  liveMatches.sort((a,b)=>{
+   const aZero=(a.hg??0)+(a.ag??0)===0?0:1;
+   const bZero=(b.hg??0)+(b.ag??0)===0?0:1;
+   return aZero-bZero;
+  });
+  // 每次最多处理10场
+  const toProcess=liveMatches.slice(0,10);
   let updated=0;
   for(const f of toProcess){
    try{
@@ -5007,6 +5045,7 @@ async function afbEnrichLiveScores(){
       f.st=result.status;
       if(result.elapsed!=null)f.elapsed=result.elapsed;
      }
+     // 只有AFB有实际比分时才更新
      if(result.homeScore!=null)f.hg=result.homeScore;
      if(result.awayScore!=null)f.ag=result.awayScore;
      updated++;
@@ -5015,7 +5054,7 @@ async function afbEnrichLiveScores(){
   }
   if(updated>0){
    renderHomeList();
-   console.log('[AFB-Live] 已更新'+updated+'场比赛的实时比分');
+   console.log('[AFB-Live] 已更新'+updated+'场比分，剩余配额'+(q.limit-q.count-10));
   }
  }catch(e){console.log('[AFB-Live] 补充失败:',e.message);}
 }
@@ -7124,11 +7163,16 @@ async function prefetchHomeOdds(all,standingsCache){
    };
    const ht=build(f.home,hm),at=build(f.away,am);
    let r;
-   try{r=predict(ht.id,at.id,{noLearn:false});}catch(e){HOME_ODDS_CACHE[f.id]={none:true,ts:Date.now()};continue;}
+   try{
+    r=predict(ht.id,at.id,{noLearn:false});
+   }catch(e){
+    // predict失败时也生成默认模拟盘口，不设none
+    HOME_ODDS_CACHE[f.id]={ouLine:2.5,ouP:0.52,ouSim:true,spreadLine:0,spP:0.5,spSim:true,ts:Date.now()};
+    scheduleRender();
+    continue;
+   }
     const rec={};
-    // 有真实盘口时，AI自我学习庄家开盘思路（不显示，内部优化）
     if(hasRealOu||hasRealSp)OddsLearner.learn(r,hasRealOu?o.ouLine:null,hasRealSp?o.spreadLine:null);
-    // 无真实盘口时，用自学习模型模拟开盘线（不是固定值，越学越准）
     const sim=(!hasRealOu||!hasRealSp)?OddsLearner.predict(r):null;
     const ouLine=hasRealOu?o.ouLine:(sim?sim.ouLine:2.5);
     const spLine=hasRealSp?o.spreadLine:(sim?sim.spLine:0);
@@ -7140,7 +7184,10 @@ async function prefetchHomeOdds(all,standingsCache){
     if(!hasRealSp)rec.spSim=true;
     HOME_ODDS_CACHE[f.id]=rec;
    scheduleRender();
-  }catch(e){HOME_ODDS_CACHE[f.id]={none:true,ts:Date.now()};}
+  }catch(e){
+   // 整个catch也生成默认模拟盘口
+   HOME_ODDS_CACHE[f.id]={ouLine:2.5,ouP:0.52,ouSim:true,spreadLine:0,spP:0.5,spSim:true,ts:Date.now()};
+  }
  }};
  await Promise.all(Array.from({length:4},worker));
  if(LAST_HOME&&location.hash==='#/'&&!document.hidden)renderHomeList();
@@ -7242,18 +7289,16 @@ function renderHomeList(){
    if(oc.spreadLine!=null&&oc.spP!=null){
     let spRec;
     if (oc.spP >= 0.5) {
-      // 推荐主队赢盘
       spRec = oc.spreadLine < 0 ? '主-' + fmtLine(Math.abs(oc.spreadLine)) : '主+' + fmtLine(oc.spreadLine);
     } else {
-      // 推荐客队赢盘
       spRec = oc.spreadLine < 0 ? '客+' + fmtLine(Math.abs(oc.spreadLine)) : '客-' + fmtLine(oc.spreadLine);
     }
      const spLab = oc.spSim ? '模拟' : '让球';
     oddsHtml+='<span class="fx-odd-chip sp model-rec"><span class="lab">'+spLab+'</span>'+spRec+'<b> '+pct100(Math.max(oc.spP,1-oc.spP))+'</b></span>';
    }
-  }else if(oc&&oc.none){
-   oddsHtml='<span class="fx-odd-chip waiting"><span class="lab">盘口</span>等待开盘</span>';
   }
+  // 不再显示"等待开盘"，即使ESPN没抓到盘口，也会在后台自动计算模拟盘口
+  // 盘口计算失败时也不显示等待，留空让下次刷新再试
   const oddsRow=oddsHtml?'<div class="fx-odds-row">'+oddsHtml+'</div>':'';
   let ds='';
   if(prov==='espn')ds=' data-fid="'+f.id+'" data-lg="'+f.lg.code+'"';
