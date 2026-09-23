@@ -3703,6 +3703,59 @@ function marketBlend(r,o){
  const s=f.W+f.D+f.L;
  return{W:f.W/s,D:f.D/s,L:f.L/s,w,big};
 }
+// 盘口变化历史记录（持久化保存）
+const OddsHistory = {
+  KEY: 'gc_odds_history_v1',
+  
+  load() {
+    try { return JSON.parse(localStorage.getItem(this.KEY) || '{}'); }
+    catch(e) { return {}; }
+  },
+  
+  save(data) {
+    try { localStorage.setItem(this.KEY, JSON.stringify(data)); }
+    catch(e) {}
+  },
+  
+  // 记录一次变化
+  record(fid, changes, stage, snap) {
+    const all = this.load();
+    if (!all[fid]) all[fid] = [];
+    all[fid].push({
+      ts: Date.now(),
+      stage: stage, // open/prelive/live
+      changes: changes,
+      ou: snap ? snap.ou : null,
+      sp: snap ? snap.sp : null
+    });
+    // 每场最多保留100条变化记录
+    if (all[fid].length > 100) all[fid] = all[fid].slice(-100);
+    this.save(all);
+  },
+  
+  // 获取某场比赛的变化历史
+  get(fid) {
+    const all = this.load();
+    return all[fid] || [];
+  },
+  
+  // 清理730天前的旧记录
+  cleanup() {
+    const all = this.load();
+    const cutoff = Date.now() - 730*24*3600e3;
+    let changed = false;
+    for (const fid in all) {
+      const filtered = all[fid].filter(h => h.ts > cutoff);
+      if (filtered.length !== all[fid].length) {
+        if (filtered.length) all[fid] = filtered;
+        else delete all[fid];
+        changed = true;
+      }
+    }
+    if (changed) this.save(all);
+  }
+};
+
 const PREV_ODDS={};
 function oddsSnapshot(o,isLive){
  if(!o)return null;
@@ -3719,7 +3772,12 @@ function detectShift(fid,o,isLive){
  if(cur.sp!=null&&prev.sp!=null&&Math.abs(cur.sp-prev.sp)>=0.25)msgs.push('让球盘口 '+fmtSpread(prev.sp)+' → '+fmtSpread(cur.sp));
  if(cur.ouP!=null&&prev.ouP!=null&&Math.abs(cur.ouP-prev.ouP)>=0.06)msgs.push('大球隐含概率 '+(prev.ouP*100).toFixed(0)+'% → '+(cur.ouP*100).toFixed(0)+'%');
  if(cur.spP!=null&&prev.spP!=null&&Math.abs(cur.spP-prev.spP)>=0.06)msgs.push('让球隐含概率 '+(prev.spP*100).toFixed(0)+'% → '+(cur.spP*100).toFixed(0)+'%');
- return msgs.length?msgs:null;
+ if(msgs.length){
+   // 自动记录到变化历史
+   const stage = isLive ? 'live' : 'prelive';
+   OddsHistory.record(fid, msgs, stage, cur);
+  }
+  return msgs.length?msgs:null;
 }
 function renderOdds(ed,r,r0,H,A,isEspn){
  const card=document.getElementById('r-odds-card'),box=document.getElementById('r-odds');
@@ -3800,7 +3858,28 @@ function renderOdds(ed,r,r0,H,A,isEspn){
   if(r.live.pitch&&r.live.pitch.attLabel)recHtml+='<br><span style="color:var(--ink-dim);font-size:10px;">态度推断：'+escHtml(r.live.pitch.attLabel)+'</span>';
   recHtml+='</div>';
  }
- if(mv||recHtml)html+='<div class="mk-move"><b>开盘 → '+(isLive?'滚球':'临场')+'变动</b><br>'+mv+recHtml+'</div>';
+ // 判断阶段：滚球 / 临场(开赛前15分钟内) / 当前
+   let stageLabel = '当前';
+   if (isLive) stageLabel = '滚球';
+   else if (ed.date && (new Date(ed.date).getTime() - Date.now()) < 15*60000) stageLabel = '临场';
+   if(mv||recHtml){
+    html+='<div class="mk-move"><b>开盘 → '+stageLabel+'变动</b><br>'+mv;
+    // 显示完整变化历史
+    const history = OddsHistory.get(fid);
+    if(history.length > 1){
+     html+='<div style="margin-top:8px;font-size:12px;color:var(--ink-faint);">变化历史（共'+history.length+'次）：</div>';
+     html+='<div style="max-height:180px;overflow-y:auto;margin-top:4px;">';
+     history.slice().reverse().forEach((h,i)=>{
+      const time = new Date(h.ts);
+      const timeStr = time.getHours().toString().padStart(2,'0')+':'+time.getMinutes().toString().padStart(2,'0');
+      html+='<div style="font-size:11px;color:var(--ink-soft);padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.05);">';
+      html+='<span style="color:var(--ink-faint);">'+timeStr+'</span> '+h.changes.join('；');
+      html+='</div>';
+     });
+     html+='</div>';
+    }
+    html+=recHtml+'</div>';
+   }
  // 模拟结论
  const edges=[['主胜',r.W-(mkt.ml.h||0)],['平局',r.D-(mkt.ml.d||0)],['客胜',r.L-(mkt.ml.a||0)]];
  edges.sort((a,b)=>Math.abs(b[1])-Math.abs(a[1]));
@@ -4359,8 +4438,10 @@ const ESPN_GROUPS=[
  {g:'欧洲U系列&女足',list:[
   ['eng.5','英超U21','L',1.60,1.25,.70,0],['esp.5','西甲U21','L',1.50,1.20,.68,0],
   ['ger.5','德甲U21','L',1.65,1.30,.68,0],['ita.5','意甲U21','L',1.45,1.15,.66,0],
-  ['eng.w1','女足英超','L',1.50,1.15,.65,0],['esp.w1','女足西甲','L',1.45,1.10,.63,0],
-  ['ger.w1','女足德甲','L',1.55,1.20,.62,0],['fra.w1','女法甲','L',1.40,1.05,.60,0]]},
+  ['eng.w.1','女足英超','L',1.50,1.15,.72,1],['esp.w.1','女足西甲','L',1.45,1.10,.70,1],
+  ['fra.w.1','女足法甲','L',1.40,1.05,.68,1],['ned.w.1','女足荷甲','L',1.60,1.20,.66,1],
+  ['usa.nwsl','美国NWSL女足','L',1.45,1.10,.74,1],['mex.w.1','女足墨超','L',1.40,1.05,.66,0],
+  ['aus.w.1','女足澳超','L',1.40,1.05,.64,0]]},
  {g:'南美联赛',list:[
   ['bra.1','巴甲','L',1.32,.98,.88,1],['arg.1','阿甲','L',1.22,.92,.85,1],
   ['bra.2','巴乙','L',1.25,.92,.80,1],['arg.2','阿乙','L',1.20,.88,.76,0],['arg.3','阿丙','L',1.15,.85,.68,0],
@@ -4470,6 +4551,28 @@ async function afbFetch(path){
   if(!res.ok)throw new Error('AFB HTTP '+res.status);
   return await res.json();
  }catch(e){afbConsume(1);throw e;}
+}
+// API-Football 专属补充联赛（ESPN不覆盖）：J2=224 J3=320 天皇杯=99 联赛杯=100
+const AFB_EXTRA_LEAGUES=[224,320,99,100];
+// 拉取补充联赛今明两天赛程（12小时缓存，每天约消耗4次配额，避免超额）
+async function afbFetchExtraFixtures(d0Str,d1Str){
+ const today=new Date().toISOString().slice(0,10);
+ const cacheKey='gc_afb_extra_'+today;
+ let fixtures=[];
+ const cached=JSON.parse(localStorage.getItem(cacheKey)||'null');
+ if(cached&&cached.ts&&Date.now()-cached.ts<12*3600e3){
+  fixtures=cached.data||[];
+ }else{
+  const leagueParam=AFB_EXTRA_LEAGUES.join(',');
+  for(const d of [d0Str,d1Str]){
+   try{
+    const j=await afbFetch('/fixtures?date='+d+'&league='+leagueParam+'&timezone=Asia/Shanghai');
+    (j.response||[]).forEach(f=>{const n=normFixture('apifb',f);if(n)fixtures.push(n);});
+   }catch(e){/*配额不足则跳过，使用缓存*/}
+  }
+  try{localStorage.setItem(cacheKey,JSON.stringify({ts:Date.now(),data:fixtures}));}catch(e){}
+ }
+ return fixtures;
 }
 // 通过队名和日期在API-Football查找fixture ID（带缓存）
 async function afbFindFixture(homeName,awayName,dateISO){
@@ -6412,6 +6515,8 @@ async function fetchHomeFixtures(d0Str,d1Str,onMatch){
  const months=[...new Set([d0Str.slice(0,7),d1Str.slice(0,7)])];
  const hasAny=list=>list.some(keep);
  const first=await pool(10,codes,async c=>{const r=await pull(c,'');merge(r);fire();return r;});
+ // 合并 API-Football 专属补充联赛（J2/J3/天皇杯/联赛杯）
+ try{const extra=await afbFetchExtraFixtures(d0Str,d1Str);merge(extra);fire();}catch(e){}
  let need=codes.filter((c,i)=>!hasAny(first[i]||[]));
  let tasks=need.flatMap(c=>[d0Str,d1Str].map(d=>({c,d})));
  const rDay=await pool(10,tasks,async t=>{const r=await pull(t.c,sufDay(t.d));if(merge(r))fire();return r;});
