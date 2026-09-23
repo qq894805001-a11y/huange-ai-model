@@ -20,7 +20,7 @@ const CONFIG = {
   headless: true,
   // GitHub配置（用于Node.js直接写入，绕过浏览器CORS）
   github: {
-    token: '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',
+    token: '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',
     owner: 'qq894805001-a11y',
     repo: 'huange-ai-model',
   }
@@ -29,6 +29,29 @@ const CONFIG = {
 // Node.js直接写入GitHub（绕过浏览器CORS限制）
 async function syncToGithub(page) {
   console.log('[AI-Bot] 开始用Node.js同步数据到GitHub...');
+  const gh = CONFIG.github;
+
+  // 先测试token是否有效
+  console.log('[AI-Bot] 测试GitHub token...');
+  try {
+    const testResp = await fetch('https://api.github.com/user', {
+      headers: {'Authorization': 'token ' + gh.token, 'User-Agent': 'ai-bot'}
+    });
+    if (testResp.ok) {
+      const userData = await testResp.json();
+      console.log('[AI-Bot] ✅ Token有效，用户:', userData.login);
+    } else {
+      const testErr = await testResp.text();
+      console.error('[AI-Bot] ❌ Token无效，状态:', testResp.status, testErr);
+      console.error('[AI-Bot] Token前10位:', gh.token.substring(0,10) + '...');
+      console.error('[AI-Bot] Token长度:', gh.token.length);
+      return false;
+    }
+  } catch (e) {
+    console.error('[AI-Bot] ❌ Token测试异常:', e.message);
+    return false;
+  }
+
   try {
     // 1. 从浏览器获取所有gc_开头的学习数据
     const learnData = await page.evaluate(() => {
