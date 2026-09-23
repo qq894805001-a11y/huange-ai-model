@@ -4230,19 +4230,29 @@ const ESPN_BASE='https://site.api.espn.com/apis/site/v2/sports/soccer';
 const ESPN_LG={'eng.1':'EPL','esp.1':'LAL','ita.1':'SA','ger.1':'BL','fra.1':'L1','bra.1':'BRA','arg.1':'ARG','usa.1':'MLS','jpn.1':'J1'};
 // ESPN 全赛事表：[code,中文名,类型 L联赛/C杯赛,主场均进球,客场均进球,实力系数,分组,默认勾选]
 const ESPN_GROUPS=[
- {g:'欧洲联赛',list:[
+ {g:'欧洲顶级联赛',list:[
   ['eng.1','英超','L',1.70,1.35,1.00,1],['esp.1','西甲','L',1.62,1.28,.98,1],['ita.1','意甲','L',1.60,1.26,.97,1],
   ['ger.1','德甲','L',1.78,1.42,.96,1],['fra.1','法甲','L',1.66,1.30,.93,1],
-  ['por.1','葡超','L',1.55,1.18,.95,0],['ned.1','荷甲','L',1.80,1.35,.94,0],['tur.1','土超','L',1.55,1.20,.90,0],
-  ['bel.1','比甲','L',1.65,1.25,.89,0],['gre.1','希超','L',1.35,1.00,.86,0],['sco.1','苏超','L',1.50,1.15,.85,0],
+  ['por.1','葡超','L',1.55,1.18,.95,1],['ned.1','荷甲','L',1.80,1.35,.94,1],['tur.1','土超','L',1.55,1.20,.90,1],
+  ['bel.1','比甲','L',1.65,1.25,.89,1],['sco.1','苏超','L',1.50,1.15,.85,1],
+  ['gre.1','希超','L',1.35,1.00,.86,1],['aut.1','奥甲','L',1.60,1.20,.87,1],['sui.1','瑞士超','L',1.55,1.20,.87,1],
+  ['cze.1','捷甲','L',1.50,1.15,.85,1],['rus.1','俄超','L',1.50,1.15,.88,1],
   ['den.1','丹超','L',1.55,1.20,.84,0],['nor.1','挪超','L',1.65,1.30,.83,0],['swe.1','瑞超','L',1.55,1.25,.82,0],
-  ['fin.1','芬超','L',1.50,1.20,.78,0],['aut.1','奥甲','L',1.60,1.20,.87,0],['sui.1','瑞士超','L',1.55,1.20,.87,0],
-  ['cze.1','捷甲','L',1.50,1.15,.85,0],['rou.1','罗甲','L',1.40,1.05,.84,0],['rus.1','俄超','L',1.50,1.15,.88,0],
+  ['fin.1','芬超','L',1.50,1.20,.78,0],['rou.1','罗甲','L',1.40,1.05,.84,0],
   ['irl.1','爱尔兰超','L',1.45,1.10,.74,0],['nir.1','北爱超','L',1.50,1.15,.70,0],['wal.1','威尔士超','L',1.45,1.10,.68,0]]},
  {g:'欧洲次级联赛',list:[
-  ['eng.2','英冠','L',1.55,1.20,.92,1],['eng.3','英甲','L',1.50,1.15,.84,0],['eng.4','英乙','L',1.45,1.10,.76,0],
-  ['esp.2','西乙','L',1.30,1.00,.89,1],['ita.2','意乙','L',1.40,1.05,.89,1],['ger.2','德乙','L',1.65,1.30,.89,1],
-  ['fra.2','法乙','L',1.35,1.05,.87,1],['ned.2','荷乙','L',1.85,1.45,.83,0],['sco.2','苏冠','L',1.45,1.10,.78,0]]},
+  ['eng.2','英冠','L',1.55,1.20,.92,1],['eng.3','英甲','L',1.50,1.15,.84,1],['eng.4','英乙','L',1.45,1.10,.76,1],
+  ['esp.2','西乙','L',1.30,1.00,.89,1],['esp.3','西协甲','L',1.25,.95,.82,0],['ita.2','意乙','L',1.40,1.05,.89,1],
+  ['ger.2','德乙','L',1.65,1.30,.89,1],['ger.3','德丙','L',1.50,1.20,.78,0],
+  ['fra.2','法乙','L',1.35,1.05,.87,1],['fra.3','法丙','L',1.30,1.00,.76,0],
+  ['ned.2','荷乙','L',1.85,1.45,.83,1],['ned.3','荷丙','L',1.70,1.35,.72,0],
+  ['sco.2','苏冠','L',1.45,1.10,.78,1],['sco.3','苏甲','L',1.40,1.05,.70,0],['sco.4','苏乙','L',1.35,1.00,.62,0],
+  ['por.2','葡甲','L',1.45,1.10,.82,1],['tur.2','土甲','L',1.45,1.10,.78,0],['bel.2','比乙','L',1.50,1.15,.76,0]]},
+ {g:'欧洲U系列&女足',list:[
+  ['eng.5','英超U21','L',1.60,1.25,.70,0],['esp.5','西甲U21','L',1.50,1.20,.68,0],
+  ['ger.5','德甲U21','L',1.65,1.30,.68,0],['ita.5','意甲U21','L',1.45,1.15,.66,0],
+  ['eng.w1','女足英超','L',1.50,1.15,.65,0],['esp.w1','女足西甲','L',1.45,1.10,.63,0],
+  ['ger.w1','女足德甲','L',1.55,1.20,.62,0],['fra.w1','女法甲','L',1.40,1.05,.60,0]]},
  {g:'南美联赛',list:[
   ['bra.1','巴甲','L',1.32,.98,.88,1],['arg.1','阿甲','L',1.22,.92,.85,1],
   ['bra.2','巴乙','L',1.25,.92,.80,1],['arg.2','阿乙','L',1.20,.88,.76,0],['arg.3','阿丙','L',1.15,.85,.68,0],
@@ -6552,19 +6562,56 @@ function renderHomeList(){
  const pst=all.filter(f=>f.st==='PST');
  const day0=all.filter(f=>['NS','TBD'].includes(f.st)&&isoBjDay(f.dateISO)===d0Str).sort((a,b)=>a.dateISO.localeCompare(b.dateISO));
  const day1=all.filter(f=>['NS','TBD'].includes(f.st)&&isoBjDay(f.dateISO)===d1Str).sort((a,b)=>a.dateISO.localeCompare(b.dateISO));
+ // 按联赛分组渲染（可折叠）
+ function groupByLeague(matches) {
+   const groups = {};
+   matches.forEach(f => {
+     const { lgName } = resolveIds(f);
+     if (!groups[lgName]) groups[lgName] = [];
+     groups[lgName].push(f);
+   });
+   return groups;
+ }
+
+ function renderGroup(matches, headerText, headerClass) {
+   if (!matches.length) return '';
+   const groups = groupByLeague(matches);
+   let html = '';
+   if (headerText) html += '<div class="day-tag ' + (headerClass||'') + '">' + headerText + '</div>';
+   Object.keys(groups).sort().forEach(lgName => {
+     const group = groups[lgName];
+     const groupId = 'lg_' + lgName.replace(/[^a-zA-Z0-9]/g, '_');
+     html += '<div class="lg-group">';
+     html += '<div class="lg-group-header" onclick="toggleGroup(\'' + groupId + '\')">';
+     html += '<span class="lg-toggle" id="toggle_' + groupId + '">▼</span>';
+     html += '<span class="lg-name">' + escHtml(lgName) + '</span>';
+     html += '<span class="lg-count">' + group.length + '场</span>';
+     html += '</div>';
+     html += '<div class="lg-group-body" id="' + groupId + '">';
+     group.forEach(f => { html += itemHtml(f); });
+     html += '</div>';
+     html += '</div>';
+   });
+   return html;
+ }
+
+ window.toggleGroup = function(groupId) {
+   const body = document.getElementById(groupId);
+   const toggle = document.getElementById('toggle_' + groupId);
+   if (!body || !toggle) return;
+   if (body.style.display === 'none') {
+     body.style.display = 'block';
+     toggle.textContent = '▼';
+   } else {
+     body.style.display = 'none';
+     toggle.textContent = '▶';
+   }
+ };
+
  let html='';
- if(live.length){
-  html+='<div class="day-tag live-tag">进行中 LIVE</div>';
-  live.forEach(f=>html+=itemHtml(f));
- }
- if(day0.length){
-  html+='<div class="day-tag">'+(HOME_OFFSET===0?'今天未开赛':homeDayMd(d0)+' 周'+wk[d0.getDay()])+' · '+homeDayMd(d0)+'</div>';
-  day0.forEach(f=>html+=itemHtml(f));
- }
- if(day1.length){
-  html+='<div class="day-tag">'+(HOME_OFFSET===0?'明天':'次日')+' · '+homeDayMd(d1)+' 周'+wk[d1.getDay()]+'</div>';
-  day1.forEach(f=>html+=itemHtml(f));
- }
+ html += renderGroup(live, '进行中 LIVE', 'live-tag');
+ html += renderGroup(day0, (HOME_OFFSET===0?'今天未开赛':homeDayMd(d0)+' 周'+wk[d0.getDay()]));
+ html += renderGroup(day1, (HOME_OFFSET===0?'明天':'次日')+' · '+homeDayMd(d1)+' 周'+wk[d1.getDay()]);
  if(pst.length){
   html+='<div class="day-tag">已延期</div>';
   pst.forEach(f=>{
