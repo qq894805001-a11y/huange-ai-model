@@ -15,6 +15,13 @@ const Cloud = {
   role: localStorage.getItem('gc_role') || '',
   syncTimer: null,
   dirty: false,
+  // GitHub配置
+  github: {
+    token: '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',
+    owner: 'qq894805001-a11y',
+    repo: 'huange-ai-model',
+    path: 'data/users.json'
+  },
 
   // API 基础地址（同源部署）
   api(path, opts={}) {
@@ -1380,10 +1387,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         var pw = document.getElementById('new-password').value;
         if (!un || !pw) { alert('请输入用户名和密码'); return; }
         try {
-          // 用localStorage存储用户数据
-          var users = JSON.parse(localStorage.getItem('gc_users_v1') || '{}');
+          // 从GitHub读取现有用户
+          const gh = Cloud.github;
+          const resp = await fetch(`https://api.github.com/repos/${gh.owner}/${gh.repo}/contents/${gh.path}`, {
+            headers: {'Authorization': 'token ' + gh.token}
+          });
+          let users = {};
+          if (resp.ok) {
+            const data = await resp.json();
+            users = JSON.parse(atob(data.content));
+          }
+          // 添加新用户
           users[un] = {password: pw, role: 'user', createdAt: Date.now()};
-          localStorage.setItem('gc_users_v1', JSON.stringify(users));
+          // 保存到GitHub
+          await saveUsersToGitHub(users);
           alert('创建成功：' + un);
           document.getElementById('new-username').value = '';
           document.getElementById('new-password').value = '';
@@ -1397,10 +1414,48 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  window.loadUserList = async function() {
+  // 保存用户列表到GitHub云端
+async function saveUsersToGitHub(users) {
+  const gh = Cloud.github;
+  const content = btoa(JSON.stringify(users, null, 2));
+  
+  // 先获取现有文件的sha
+  let sha = null;
+  const resp = await fetch(`https://api.github.com/repos/${gh.owner}/${gh.repo}/contents/${gh.path}`, {
+    headers: {'Authorization': 'token ' + gh.token}
+  });
+  if (resp.ok) {
+    const data = await resp.json();
+    sha = data.sha;
+  }
+  
+  // 写入文件
+  await fetch(`https://api.github.com/repos/${gh.owner}/${gh.repo}/contents/${gh.path}`, {
+    method: 'PUT',
+    headers: {
+      'Authorization': 'token ' + gh.token,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      message: 'Update users.json',
+      content: content,
+      sha: sha
+    })
+  });
+}
+
+window.loadUserList = async function() {
     try {
-      // 从localStorage读取用户列表
-      var users = JSON.parse(localStorage.getItem('gc_users_v1') || '{}');
+      // 从GitHub云端读取用户列表
+      const gh = Cloud.github;
+      const resp = await fetch(`https://api.github.com/repos/${gh.owner}/${gh.repo}/contents/${gh.path}`, {
+        headers: {'Authorization': 'token ' + gh.token}
+      });
+      let users = {};
+      if (resp.ok) {
+        const data = await resp.json();
+        users = JSON.parse(atob(data.content));
+      }
       var userList = Object.entries(users).map(function([username, data]) {
         return {username: username, role: data.role || 'user'};
       });
@@ -1419,9 +1474,20 @@ document.addEventListener('DOMContentLoaded', async () => {
   window.delUser = async function(name) {
     if (!confirm('确定删除用户 ' + name + ' ？')) return;
     try {
-      var users = JSON.parse(localStorage.getItem('gc_users_v1') || '{}');
+      // 从GitHub读取现有用户
+      const gh = Cloud.github;
+      const resp = await fetch(`https://api.github.com/repos/${gh.owner}/${gh.repo}/contents/${gh.path}`, {
+        headers: {'Authorization': 'token ' + gh.token}
+      });
+      let users = {};
+      if (resp.ok) {
+        const data = await resp.json();
+        users = JSON.parse(atob(data.content));
+      }
+      // 删除用户
       delete users[name];
-      localStorage.setItem('gc_users_v1', JSON.stringify(users));
+      // 保存到GitHub
+      await saveUsersToGitHub(users);
       loadUserList();
     } catch(e) { alert('删除失败：' + e.message); }
   };
