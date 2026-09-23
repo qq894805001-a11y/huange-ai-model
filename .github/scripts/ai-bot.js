@@ -56,21 +56,34 @@ async function run() {
     await page.screenshot({ path: 'screenshot-01-login.png', fullPage: false });
     console.log('[AI-Bot] 登录页截图已保存');
 
-    // 步骤2：自动登录
+    // 步骤2：自动登录（用page.evaluate直接设置值，避免type输入失败）
     console.log('[AI-Bot] 步骤2：自动登录...');
     try {
-      // 等待登录表单出现
-      await page.waitForSelector('#cloud-username', { timeout: 10000 });
-      await page.type('#cloud-username', CONFIG.username, { delay: 100 });
-      await page.type('#cloud-password', CONFIG.password, { delay: 100 });
-      await page.click('#cloud-login-btn');
-      console.log('[AI-Bot] 已点击登录按钮');
+      await page.waitForSelector('#cloud-username', { timeout: 15000 });
+      await page.evaluate(() => {
+        document.getElementById('cloud-username').value = 'hjh';
+        document.getElementById('cloud-password').value = '123456';
+        document.getElementById('cloud-login-btn').click();
+      });
+      console.log('[AI-Bot] 已输入账号密码并点击登录');
     } catch (e) {
-      console.log('[AI-Bot] 登录表单未找到，可能已经登录:', e.message);
+      console.log('[AI-Bot] 登录操作失败:', e.message);
     }
 
     // 等待登录完成和页面跳转
-    await sleep(8000);
+    console.log('[AI-Bot] 等待登录完成...');
+    try {
+      // 等待登录框消失（登录成功后页面会reload，登录框隐藏）
+      await page.waitForFunction(() => {
+        const loginBox = document.getElementById('login-box') || document.querySelector('.login-box') || document.querySelector('[id*="login"]');
+        if (!loginBox) return true;
+        return loginBox.style.display === 'none' || loginBox.offsetParent === null;
+      }, { timeout: 15000 });
+      console.log('[AI-Bot] 登录框已消失，登录成功');
+    } catch (e) {
+      console.log('[AI-Bot] 等待登录框消失超时，继续执行...');
+    }
+    await sleep(5000);
 
     // 截图：首页
     await page.screenshot({ path: 'screenshot-02-home.png', fullPage: false });
