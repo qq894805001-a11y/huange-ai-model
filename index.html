@@ -93,6 +93,14 @@ const Cloud = {
     } catch(e) { console.warn('github read failed', e); return null; }
   },
 
+  // 支持中文的base64编码
+  utf8ToBase64(str) {
+    const bytes = new TextEncoder().encode(str);
+    let binary = '';
+    for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+    return btoa(binary);
+  },
+
   async githubWriteFile(path, content, message) {
     try {
       const gh = this.github;
@@ -104,7 +112,7 @@ const Cloud = {
       const writeResp = await fetch(`https://api.github.com/repos/${gh.owner}/${gh.repo}/contents/${path}`, {
         method: 'PUT',
         headers: {'Authorization': 'token ' + gh.token, 'Content-Type': 'application/json'},
-        body: JSON.stringify({ message: message || 'Update data', content: btoa(JSON.stringify(content, null, 2)), sha: sha })
+        body: JSON.stringify({ message: message || 'Update data', content: this.utf8ToBase64(JSON.stringify(content, null, 2)), sha: sha })
       });
       if (!writeResp.ok) {
         const errText = await writeResp.text();
