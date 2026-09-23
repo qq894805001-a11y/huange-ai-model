@@ -6383,12 +6383,12 @@ async function zhWorker(){
    }
   }catch(e){/* 静默，保留原文 */}
   ZH_QUEUED.delete(job.n);
-  await new Promise(r=>setTimeout(r,700));
-  if(changed>=6){break;} // 每批最多 6 个，稍后继续，避免页面长时间等待
+  await new Promise(r=>setTimeout(r,1500)); // 增加延迟到1.5秒，避免429
+  if(changed>=3){break;} // 每批最多3个，减少并发
  }
  ZH_RUNNING=false;
  if(changed){ZH_DONE_CB.forEach(fn=>{try{fn();}catch(e){}});}
- if(ZH_QUEUE.length)setTimeout(zhWorker,1500);
+ if(ZH_QUEUE.length)setTimeout(zhWorker,3000); // 下一批等3秒
 }
 function zhTeam(rawName,code){
  if(!rawName)return rawName||'';
