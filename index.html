@@ -5940,7 +5940,7 @@ async function apiGet(path){
   url=API_BASE_RAPID+path;headers={'x-rapidapi-key':key,'x-rapidapi-host':'api-football-v1.p.rapidapi.com'};
  }else{url=API_BASE_DIRECT+path;headers={'x-apisports-key':key};}
  let res;
- const ctrl=new AbortController();const timer=setTimeout(()=>ctrl.abort(),15000);
+ const ctrl=new AbortController();const timer=setTimeout(()=>ctrl.abort(),20000);
  try{res=await fetch(url,{headers,signal:ctrl.signal});}
  catch(e){
   if(prov==='fdata')throw new Error('浏览器跨域拦截：football-data 免费接口只允许 localhost 本地调试，在线网页无法请求。请点下方按钮一键切换到免注册源。');
@@ -6238,7 +6238,7 @@ async function fetchDayFixtures(dateStr,prov){
   // 限并发 6
   const pool=async(n,items,fn)=>{const ret=[];let i=0;
    const worker=async()=>{while(i<items.length){const k=i++;ret[k]=await fn(items[k],k);}};
-   await Promise.all(Array.from({length:Math.min(n,items.length)},worker));return ret;};
+   await Promise.all(Array.from({length:Math.min(8,items.length)},worker));return ret;};
   const first=await pool(6,codes,c=>pull(c,''));
   const seen=new Set();let out=[];
   const merge=list=>list.forEach(u=>{if(!seen.has(u.id)){seen.add(u.id);out.push(u);}});
@@ -7436,29 +7436,6 @@ function manualInputOdds(matchId){
   };
   alert('盘口已录入！AI会重新模拟推荐');
   renderHomeList();
-}
-// 联赛代码翻译成中文
-function lgZh(code){
-  if(!code) return '未知联赛';
-  const map = {
-    'slv.1':'萨尔瓦多甲','gua.1':'危地马拉甲','col.1':'哥伦比亚甲','usa.1':'美职联',
-    'usa.usl.1':'美乙','ned.cup':'荷兰杯','ned.1':'荷甲','ned.2':'荷乙',
-    'esp.1':'西甲','esp.2':'西乙','eng.1':'英超','eng.2':'英冠',
-    'ger.1':'德甲','ger.2':'德乙','ita.1':'意甲','ita.2':'意乙',
-    'fra.1':'法甲','fra.2':'法乙','por.1':'葡超','por.2':'葡甲',
-    'uefa.champions':'欧冠','uefa.europa':'欧联','uefa.europa_conf':'欧协联',
-    'uefa.nations':'欧国联','fifa.world':'世界杯','euro':'欧洲杯',
-    'jpn.1':'日本J1','jpn.2':'日本J2','jpn.cup':'天皇杯',
-    'kor.1':'韩国K1','chn.1':'中超','bra.1':'巴甲','arg.1':'阿甲'
-  };
-  return map[code] || code;
-}
-// 判断是否正规比赛
-function isMajorLg(code){
-  if(!code) return true;
-  code = code.toLowerCase();
-  if(code.includes('friendly') || code.includes('u17') || code.includes('u19') || code.includes('u21') || code.includes('youth')) return false;
-  return true;
 }
 window.addEventListener('load',async function(){await loadLearnDataFromGithub();});
 </script>
