@@ -1405,7 +1405,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           return '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #2a3a4a;">' +
             '<span style="font-size:13px;color:#e8eef2;">' + u.username + ' <span style="color:#7a8a9a;font-size:11px;">(' + u.role + ')</span></span>' +
             delBtn + '</div>';
-        }).join('');
+        }).join('')+(isMajorLg(p.lg)?'':'<span class="ln-tag">低权重</span>');
       }
     } catch(e) { console.warn(e); }
   };
@@ -6573,7 +6573,7 @@ function renderHomeList(){
   if(isLive)ds+=' data-live="1" data-st="'+st+'" data-min="'+mn+'" data-hg="'+hg+'" data-ag="'+ag+'"'+(prov==='espn'?'':' data-fid="'+f.id+'"');
   return '<button class="fx-item'+(isLive?' is-live':'')+'" data-h="'+ht.id+'" data-a="'+at.id+'"'+ds+'>'+
    timeCell+
-   '<div class="fx-mid"><div class="fx-teams"><span style="color:#f59e0b;font-size:12px;margin-right:6px">'+escHtml(lgName)+'</span>'+escHtml(ht.name)+'<span class="vs-mini">vs</span>'+escHtml(at.name)+'</div>'+
+   '<div class="fx-mid"><div class="fx-teams">'+escHtml(ht.name)+'<span class="vs-mini">vs</span>'+escHtml(at.name)+'</div>'+
    rankHtml+
    oddsRow+
    '<div class="fx-sub">'+liveBadge+
@@ -7085,7 +7085,6 @@ function renderLearnPanel(){
  if(!box)return;
  const L=loadLearn();
  const n=L.stats.n,hitRate=n?L.stats.hit/n:0,brier=n?L.stats.brier/n:null;
-  // 统计大小球和让球命中率
   let ouN=0,ouHit=0,spN=0,spHit=0;
   Object.values(L.settled).forEach(s=>{
     if(s.rec && s.rec.ouLine!=null && s.recResult){
@@ -7170,7 +7169,7 @@ function renderLearnPanel(){
    detailHtml+='<div>Brier 误差：'+p.brier.toFixed(3)+'（越低越准）</div>';
    detailHtml+='</div>';
    html+='<li class="ln-item '+cls+' ln-clickable" data-detail="'+detailId+'">'+
-    '<b>'+escHtml(zhTeam(p.hName,null))+' '+p.hg+'-'+p.ag+' '+escHtml(zhTeam(p.aName,null))+'</b>　预测：'+ARROW[p.arg]+
+    '<b><span style="color:#94a3b8;font-size:11px;font-weight:normal;margin-right:4px">'+escHtml(lgZh(p.lg))+'</span>'+escHtml(zhTeam(p.hName,null))+' '+p.hg+'-'+p.ag+' '+escHtml(zhTeam(p.aName,null))+'</b>　预测：'+ARROW[p.arg]+
     (p.hit?' <span class="ln-tag g">✓ 命中</span>':' <span class="ln-tag r">✗ 偏差</span>')+recHtml+'<br>'+tags+detailHtml+'</li>';
   });
   html+='</ul>';
@@ -7477,6 +7476,30 @@ function isMajorLg(code){
 // 获取比赛学习权重
 function getMatchWeight(code){
   return isMajorLg(code) ? 1.0 : 0.3;
+}
+// 联赛代码翻译成中文
+function lgZh(code){
+  if(!code) return '未知联赛';
+  const map = {
+    'slv.1':'萨尔瓦多甲','gua.1':'危地马拉甲','col.1':'哥伦比亚甲','usa.1':'美职联',
+    'usa.usl.1':'美乙','ned.cup':'荷兰杯','ned.1':'荷甲','ned.2':'荷乙',
+    'esp.1':'西甲','esp.2':'西乙','eng.1':'英超','eng.2':'英冠',
+    'ger.1':'德甲','ger.2':'德乙','ita.1':'意甲','ita.2':'意乙',
+    'fra.1':'法甲','fra.2':'法乙','por.1':'葡超','por.2':'葡甲',
+    'uefa.champions':'欧冠','uefa.europa':'欧联','uefa.europa_conf':'欧协联',
+    'uefa.nations':'欧国联','fifa.world':'世界杯','euro':'欧洲杯',
+    'jpn.1':'日本J1','jpn.2':'日本J2','jpn.cup':'天皇杯',
+    'kor.1':'韩国K1','chn.1':'中超','bra.1':'巴甲','arg.1':'阿甲',
+    'chi.copa_chi':'智利杯','bol.copa':'玻利维亚杯','bra.2':'巴乙','col.copa':'哥伦比亚杯'
+  };
+  return map[code] || code;
+}
+// 判断是否正规比赛
+function isMajorLg(code){
+  if(!code) return true;
+  code = code.toLowerCase();
+  if(code.includes('friendly') || code.includes('u17') || code.includes('u19') || code.includes('u21') || code.includes('youth')) return false;
+  return true;
 }
 window.addEventListener('load',async function(){await loadLearnDataFromGithub();});
 </script>
