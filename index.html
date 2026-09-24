@@ -6574,7 +6574,7 @@ function renderHomeList(){
   return '<button class="fx-item'+(isLive?' is-live':'')+'" data-h="'+ht.id+'" data-a="'+at.id+'"'+ds+'>'+
    timeCell+
    '<div class="fx-mid"><div class="fx-league">'+escHtml(leagueLine)+'</div>'+
-   '<div class="fx-teams">'+escHtml(ht.name)+'<span class="vs-mini">vs</span>'+escHtml(at.name)+'</div>'+
+   '<div class="fx-teams"><span style="color:#f59e0b;font-size:12px;margin-right:6px">'+escHtml(lgName)+'</span>'+escHtml(ht.name)+'<span class="vs-mini">vs</span>'+escHtml(at.name)+'</div>'+
    rankHtml+
    oddsRow+
    '<div class="fx-sub">'+liveBadge+
