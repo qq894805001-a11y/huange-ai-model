@@ -2,7 +2,7 @@ name: 抓取自建API盘口数据
 
 on:
   schedule:
-    - cron: '*/5 * * * *'  # 每5分钟跑一次
+    - cron: '*/10 * * * *'  # 每10分钟跑一次（一天144次，不超200次配额）
   workflow_dispatch:  # 可以手动触发
 
 jobs:
