@@ -18,7 +18,7 @@ jobs:
           node-version: '18'
 
       - name: 运行抓取脚本
-        run: node scripts/fetch-self-api.js
+        run: node .github/scripts/fetch-self-api.js
 
       - name: 提交数据到仓库
         run: |
