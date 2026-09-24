@@ -66,8 +66,8 @@ async function main() {
     });
   }
   
-  // 保存到文件
-  const outputPath = path.join(__dirname, '..', 'data', 'self_api_odds.json');
+  // 保存到文件（相对于仓库根目录）
+  const outputPath = path.join(__dirname, '..', '..', 'data', 'self_api_odds.json');
   fs.mkdirSync(path.dirname(outputPath), { recursive: true });
   fs.writeFileSync(outputPath, JSON.stringify(result, null, 2), 'utf8');
   
