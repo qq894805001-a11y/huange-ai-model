@@ -7239,6 +7239,18 @@ async function prefetchHomeOdds(all,standingsCache){
     if(!hasRealSp)rec.spSim=true;
     HOME_ODDS_CACHE[f.id]=rec;
     saveOddsCache();
+    // 自动记录预测到学习系统（首页就记录，不用点进报告页）
+    try{
+     const L=loadLearn();
+     if(!L.preds[f.id]&&!L.settled[f.id]){
+      L.preds[f.id]={fid:f.id,lg:f.lg.code,hId:ht.id,aId:at.id,hName:f.home.name,aName:f.away.name,
+       date:f.dateISO?f.dateISO.slice(0,10):new Date().toISOString().slice(0,10),
+       ts:Date.now(),W:r.h,D:r.d,L:r.l,lh:r.lh||1.5,la:r.la||1.2,
+       rec:rec,
+       mkt:(ed&&ed.odds)?{h:ed.odds.h,d:ed.odds.d,a:ed.odds.a,ou:ed.odds.ouLine,spread:ed.odds.spreadLine}:null};
+      saveLearn(L);
+     }
+    }catch(e){}
    scheduleRender();
   }catch(e){
    // 整个catch也生成合理模拟盘口
