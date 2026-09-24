@@ -7410,7 +7410,13 @@ function renderHomeList(){
    let html = '';
    if (headerText) html += '<div class="day-tag ' + (headerClass||'') + '">' + headerText + '</div>';
    let groupIdx = 0;
-   Object.keys(groups).sort().forEach(lgName => {
+   // 按联赛组内最早开始时间排序（越早开始的越靠上）
+   const sortedLeagueNames = Object.keys(groups).sort((a,b) => {
+     const aMin = Math.min(...groups[a].map(f => new Date(f.dateISO).getTime()));
+     const bMin = Math.min(...groups[b].map(f => new Date(f.dateISO).getTime()));
+     return aMin - bMin;
+   });
+   sortedLeagueNames.forEach(lgName => {
      const group = groups[lgName];
      const groupId = 'lg_group_' + groupIdx++;  // 用索引做ID，避免中文冲突
      html += '<div class="lg-group">';
