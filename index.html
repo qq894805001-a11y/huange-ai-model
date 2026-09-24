@@ -7604,11 +7604,14 @@ function renderHomeList(){
  // 筛选：默认只显示有盘口数据的比赛（没有数据的不显示）
  const showAll=localStorage.getItem('fx_show_all')==='1';
  const hasOdds=f=>{
-  if(LIVE_ST.includes(f.st))return true; // 进行中的都显示
-  if(HOME_ODDS_CACHE[f.id]&&HOME_ODDS_CACHE[f.id].none===false)return true; // 有盘口
-  return false;
+  // 进行中的：有盘口才显示（没有盘口的友谊赛不显示，没用）
+  if(LIVE_ST.includes(f.st)){
+   return HOME_ODDS_CACHE[f.id]&&HOME_ODDS_CACHE[f.id].none===false;
+  }
+  // 未开赛的：有盘口才显示
+  return HOME_ODDS_CACHE[f.id]&&HOME_ODDS_CACHE[f.id].none===false;
  };
- const live=all.filter(f=>LIVE_ST.includes(f.st)).sort((a,b)=>a.dateISO.localeCompare(b.dateISO));
+ const live=all.filter(f=>LIVE_ST.includes(f.st)).filter(hasOdds).sort((a,b)=>a.dateISO.localeCompare(b.dateISO));
  const pst=all.filter(f=>f.st==='PST');
  let day0=all.filter(f=>['NS','TBD'].includes(f.st)&&isoBjDay(f.dateISO)===d0Str).sort((a,b)=>a.dateISO.localeCompare(b.dateISO));
  let day1=all.filter(f=>['NS','TBD'].includes(f.st)&&isoBjDay(f.dateISO)===d1Str).sort((a,b)=>a.dateISO.localeCompare(b.dateISO));
