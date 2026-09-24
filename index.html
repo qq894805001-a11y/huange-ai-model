@@ -3840,6 +3840,25 @@ function renderBrief(ed,r,r0,H,A,basis,opt){
 function renderReport(){
  const q=new URLSearchParams(location.hash.split('?')[1]||'');
  const hId=q.get('h')||state.h,aId=q.get('a')||state.a;
+ // 云端比赛的队id是self_home_xxx/self_away_xxx，findTeam找不到，临时创建动态球队
+ if(!findTeam(hId)){
+   const hName = q.get('hn') || '主队';
+   if(!DYN.lgs['self']){
+     DYN.lgs['self'] = {key:'self', name:'其他联赛', homeAvg:1.4, awayAvg:1.1, drawRate:0.26, tier:4};
+     saveDyn();
+   }
+   DYN.teams[hId] = {id:hId, name:hName, en:hName, lg:'self', elo:1450, att:1, def:1, form:1.15, squad:66, inj:2, dyn:true, neutral:false};
+   saveDyn();
+ }
+ if(!findTeam(aId)){
+   const aName = q.get('an') || '客队';
+   if(!DYN.lgs['self']){
+     DYN.lgs['self'] = {key:'self', name:'其他联赛', homeAvg:1.4, awayAvg:1.1, drawRate:0.26, tier:4};
+     saveDyn();
+   }
+   DYN.teams[aId] = {id:aId, name:aName, en:aName, lg:'self', elo:1450, att:1, def:1, form:1.15, squad:66, inj:2, dyn:true, neutral:false};
+   saveDyn();
+ }
  if(!findTeam(hId)||!findTeam(aId)){
   toast('该场比赛的临时数据已失效，请重新拉取赛程');
   location.hash='#/';return;
@@ -6318,6 +6337,11 @@ async function fetchHomeFixtures(d0Str,d1Str,onMatch){
 let HOME_OFFSET=0,HOME_TIMER=null,LAST_HOME=null;
 // 首页卡片盘口摘要缓存：{[fid]:{ouLine,ouP,spreadLine,spP}}
 const HOME_ODDS_CACHE={};
+// match_full详细盘口缓存，避免重复调用API
+const MATCH_FULL_CACHE={};
+// match_full请求限流：每秒最多2个请求
+let matchFullLastReqTime=0;
+let matchFullReqCount=0;
 function addDays(d,n){const x=new Date(d);x.setDate(x.getDate()+n);return x;}
 function homeDayMd(d){return(d.getMonth()+1)+'/'+d.getDate();}
 function bjDateStr(d){return d.toLocaleDateString('sv',{timeZone:'Asia/Shanghai'});}
@@ -6347,13 +6371,22 @@ async function loadFixtures(silent){
   setTimeout(()=>{rsPending=false;rsLast=Date.now();if(LAST_HOME)renderHomeList();},wait);};
  LAST_HOME={d0:fmtDate(d0),all:[],standingsCache:{}};
  try{
-  if(prov==='espn'){
-   all=await fetchHomeFixtures(fmtDate(d0),fmtDate(d1),snap=>{LAST_HOME.all=snap;schedRender();});
+  // 优先用云端API拉取比赛列表（队名都是中文），首页加载强制刷新，不使用缓存
+  all = await fetchSelfApiHomeFixtures(true);
+  // 云端拉到比赛了，就只用云端的中文队名比赛，不合并ESPN的，避免英文队名
+  if(all.length > 0){
+    LAST_HOME.all = all;
+    schedRender();
   }else{
-   const[a,b]=await Promise.all([
-    fetchDayFixtures(fmtDate(d0),prov).catch(()=>[]),
-    fetchDayFixtures(fmtDate(d1),prov).catch(()=>[])]);
-   const seen=new Set();a.concat(b).forEach(f=>{if(!seen.has(f.id)){seen.add(f.id);all.push(f);}});
+    // 云端没有比赛，才用ESPN的
+    if(prov==='espn'){
+      all=await fetchHomeFixtures(fmtDate(d0),fmtDate(d1),snap=>{LAST_HOME.all=snap;schedRender();});
+    }else{
+      const[a,b]=await Promise.all([
+       fetchDayFixtures(fmtDate(d0),prov).catch(()=>[]),
+       fetchDayFixtures(fmtDate(d1),prov).catch(()=>[])]);
+      const seen=new Set();a.concat(b).forEach(f=>{if(!seen.has(f.id)){seen.add(f.id);all.push(f);}});
+    }
   }
  }catch(e){
   if(!silent)box.innerHTML='<div class="api-msg err">'+e.message+'<br>可稍后点右上角刷新按钮重试，或扩大赛事勾选范围。</div>';
@@ -6424,6 +6457,8 @@ async function prefetchHomeOdds(all,standingsCache){
   if(LIVE_ST.includes(f.st))return false;
   if(!['NS','TBD'].includes(f.st))return false;
   if(!(f.id&&f.lg&&f.lg.code))return false;
+  // 云端比赛（self_开头）也需要处理，ESPN联赛也处理
+  if(f.id.startsWith('self_'))return true;
   return ESPN_LG[f.lg.code]!==undefined||ESPN_LEAGUES[f.lg.code];
  });
  // 去重（同 fid 只取一次）
@@ -6436,30 +6471,51 @@ async function prefetchHomeOdds(all,standingsCache){
   const f=jobs[ni++];
   const _oc=HOME_ODDS_CACHE[f.id];if(_oc&&!_oc.none)continue;if(_oc&&_oc.none&&Date.now()-_oc.ts<60000)continue;
   try{
-   const ck=f.lg.code+'_'+f.id;
-   let ed=ENRICH_CACHE[ck]&&Date.now()-ENRICH_CACHE[ck].t<90000?ENRICH_CACHE[ck].d:null;
-   if(!ed){ed=await fetchEspnSummary(f.lg.code,f.id);ENRICH_CACHE[ck]={d:ed,t:Date.now()};}
-   if(!ed||!ed.odds||(ed.odds.ouLine==null&&ed.odds.spreadLine==null)){HOME_ODDS_CACHE[f.id]={none:true,ts:Date.now()};continue;}
-   const o=ed.odds;
-   // 建队（复用首页 resolveIds 的逻辑）
-   const info=lgForNorm(prov,f.lg);
-   const rows=standingsCache[prov+'_'+f.lg.id];
-   const inRow=t=>{const tn=(normName(t.name||'')||'');return r=>normName(r.name||'')===tn||(tn&&String(r.name||'').toLowerCase().includes(tn))||(tn&&tn.includes(String(r.name||'').toLowerCase()));};
-   const hm=matchTeam(f.home.name),am=matchTeam(f.away.name);
-   const build=(apiT,builtin)=>{
-    const cid=(info.prefix||'x')+apiT.id;
-    const row=rows?rows.find(inRow(apiT)):null;
-    if(row){
-     if(!DYN.teams[cid]||DYN.teams[cid].neutral){
-      if(DYN.teams[cid])delete DYN.teams[cid];
-      return teamFromStanding(info.key,info.obj,apiT,row,rows,info.prefix);
+   let o = null;
+   let ht = null, at = null;
+   // 云端比赛：直接用云端盘口，用动态球队预测
+   if(f.id.startsWith('self_')){
+     o = await fetchOddsFromAllApis(f, null);
+     // 确保动态球队存在
+     if(!findTeam(f.home.id)){
+       if(!DYN.lgs['self'])DYN.lgs['self'] = {key:'self', name:'其他联赛', homeAvg:1.4, awayAvg:1.1, drawRate:0.26, tier:4};
+       DYN.teams[f.home.id] = {id:f.home.id, name:f.home.name, en:f.home.name, lg:'self', elo:1450, att:1, def:1, form:1.15, squad:66, inj:2, dyn:true, neutral:false};
      }
-     return DYN.teams[cid];
-    }
-    if(builtin)return builtin;
-    return DYN.teams[cid]||neutralTeam(info.key,apiT,info.prefix);
-   };
-   const ht=build(f.home,hm),at=build(f.away,am);
+     if(!findTeam(f.away.id)){
+       if(!DYN.lgs['self'])DYN.lgs['self'] = {key:'self', name:'其他联赛', homeAvg:1.4, awayAvg:1.1, drawRate:0.26, tier:4};
+       DYN.teams[f.away.id] = {id:f.away.id, name:f.away.name, en:f.away.name, lg:'self', elo:1450, att:1, def:1, form:1.15, squad:66, inj:2, dyn:true, neutral:false};
+     }
+     saveDyn();
+     ht = findTeam(f.home.id);
+     at = findTeam(f.away.id);
+   }else{
+     // ESPN比赛：原来的逻辑
+     const ck=f.lg.code+'_'+f.id;
+     let ed=ENRICH_CACHE[ck]&&Date.now()-ENRICH_CACHE[ck].t<90000?ENRICH_CACHE[ck].d:null;
+     if(!ed){ed=await fetchEspnSummary(f.lg.code,f.id);ENRICH_CACHE[ck]={d:ed,t:Date.now()};}
+     o = await fetchOddsFromAllApis(f, ed);
+     // 建队（复用首页 resolveIds 的逻辑）
+     const info=lgForNorm(prov,f.lg);
+     const rows=standingsCache[prov+'_'+f.lg.id];
+     const inRow=t=>{const tn=(normName(t.name||'')||'');return r=>normName(r.name||'')===tn||(tn&&String(r.name||'').toLowerCase().includes(tn))||(tn&&tn.includes(String(r.name||'').toLowerCase()));};
+     const hm=matchTeam(f.home.name),am=matchTeam(f.away.name);
+     const build=(apiT,builtin)=>{
+      const cid=(info.prefix||'x')+apiT.id;
+      const row=rows?rows.find(inRow(apiT)):null;
+      if(row){
+       if(!DYN.teams[cid]||DYN.teams[cid].neutral){
+        if(DYN.teams[cid])delete DYN.teams[cid];
+        return teamFromStanding(info.key,info.obj,apiT,row,rows,info.prefix);
+       }
+       return DYN.teams[cid];
+      }
+      if(builtin)return builtin;
+      return DYN.teams[cid]||neutralTeam(info.key,apiT,info.prefix);
+     };
+     ht=build(f.home,hm);
+     at=build(f.away,am);
+   }
+   if(!o||(o.ouLine==null&&o.spreadLine==null)){HOME_ODDS_CACHE[f.id]={none:true,ts:Date.now()};continue;}
    let r;
    try{r=predict(ht.id,at.id,{noLearn:false});}catch(e){HOME_ODDS_CACHE[f.id]={none:true,ts:Date.now()};continue;}
    const rec={};
@@ -6470,10 +6526,16 @@ async function prefetchHomeOdds(all,standingsCache){
   }catch(e){HOME_ODDS_CACHE[f.id]={none:true,ts:Date.now()};}
  }};
  await Promise.all(Array.from({length:4},worker));
- if(LAST_HOME&&location.hash==='#/'&&!document.hidden)renderHomeList();
+ // 盘口预取完成后，确保重新渲染（延迟一点，避免和其他渲染冲突）
+ setTimeout(()=>{
+   if(LAST_HOME&&location.hash==='#/'){
+     renderHomeList();
+     console.log('[prefetchHomeOdds] 完成，已重新渲染，推荐数量:', document.querySelectorAll('.fx-odd-chip').length);
+   }
+ }, 500);
 }
 
-function renderHomeList(){
+async function renderHomeList(){
  const box=document.getElementById('fx-container');
  if(!box||!LAST_HOME)return;
  const prov=getProv();
@@ -6512,14 +6574,36 @@ function renderHomeList(){
   const ht=build(f.home,hm),at=build(f.away,am);
   return {ht,at,allBuiltin:!!(hm&&am),lgName:info.obj.name};
  }
- function itemHtml(f){
+ async function itemHtml(f){
   const st=f.st,isLive=LIVE_ST.includes(st);
-  const {ht,at,allBuiltin,lgName}=resolveIds(f);
+  // 云端比赛（id以self_开头）直接用云端返回的中文队名，不走ESPN匹配逻辑
+  let ht, at, allBuiltin, lgName;
+  if(f.id && f.id.startsWith('self_')){
+    ht = {id: f.home.id, name: f.home.name, rank: null};
+    at = {id: f.away.id, name: f.away.name, rank: null};
+    allBuiltin = false;
+    lgName = f.lg.name;
+  }else{
+    const resolved = resolveIds(f);
+    ht = resolved.ht; at = resolved.at; allBuiltin = resolved.allBuiltin; lgName = resolved.lgName;
+  }
   const dt=new Date(f.dateISO);
   const hhmm=dt.toLocaleTimeString('zh-CN',{timeZone:'Asia/Shanghai',hour:'2-digit',minute:'2-digit',hour12:false});
-  const hg=f.hg??0,ag=f.ag??0,mn=clamp(f.elapsed||0,0,120);
+  let hg=f.hg??null,ag=f.ag??null,mn=f.elapsed??null;
+  // ESPN没有比分的时候，自动从其他API拉取实时比分和时间
+  if(isLive && (hg==null || mn==null)){
+    const liveData = await fetchLiveScoreFromAllApis(f);
+    if(liveData){
+      if(hg==null && liveData.hg!=null) hg=liveData.hg;
+      if(ag==null && liveData.ag!=null) ag=liveData.ag;
+      if(mn==null && liveData.elapsed!=null) mn=liveData.elapsed;
+    }
+  }
+  hg = hg??0; ag = ag??0; mn = clamp(mn||0,0,120);
+  // 云端比赛进行中但分钟是0，说明没有实时数据
+  const noLiveData = (f.id && f.id.startsWith('self_') && isLive && mn === 0 && st !== 'HT');
   const timeCell=isLive
-   ?'<div class="fx-time live-score">'+hg+' - '+ag+'<small>'+(st==='HT'?'中场休息':st==='SUSP'||st==='INT'?'比赛中断':'约 '+mn+"'")+'</small></div>'
+   ?'<div class="fx-time live-score">'+hg+' - '+ag+'<small>'+(st==='HT'?'中场休息':st==='SUSP'||st==='INT'?'比赛中断':(noLiveData?'暂无数据':'约 '+mn+"'"))+'</small></div>'
    :'<div class="fx-time">'+hhmm+'<small>未开赛</small></div>';
   const liveBadge=isLive?'<span class="badge live-badge">LIVE</span>':'';
   const roundTxt=(f.round||'').replace(/^Regular Season - |^Matchday /,'第');
@@ -6528,8 +6612,8 @@ function renderHomeList(){
   // 模型推荐+排名显示
   const oc=HOME_ODDS_CACHE[f.id];
   let oddsHtml='';
-  const hRank = ht.rank ? ('第'+ht.rank+'名') : '';
-  const aRank = at.rank ? ('第'+at.rank+'名') : '';
+  const hRank = (ht.rank && !f.id.startsWith('self_')) ? ('第'+ht.rank+'名') : '';
+  const aRank = (at.rank && !f.id.startsWith('self_')) ? ('第'+at.rank+'名') : '';
   const rankHtml = (hRank||aRank) ? '<div class="fx-rank"><span>'+escHtml(ht.name)+' '+hRank+'</span><span>'+escHtml(at.name)+' '+aRank+'</span></div>' : '';
   if(oc&&!oc.none){
    if(oc.ouLine!=null&&oc.ouP!=null){
@@ -6543,7 +6627,8 @@ function renderHomeList(){
     oddsHtml+='<span class="'+cls+'"><span class="lab">让球</span>'+spRec+'<b> '+pct100(Math.max(oc.spP,1-oc.spP))+'</b></span>';
    }
   }else{
-   // 没有真实盘口，自动模拟开盘
+   // 没有API开盘信息，不显示推荐也不模拟
+   oddsHtml='';
    const eloDiff = (ht.elo||1500) - (at.elo||1500);
    const expGoals = ((ht.att||1.2) + (at.att||1.2)) / 2;
    let simOuLine = 2.5;
@@ -6560,12 +6645,13 @@ function renderHomeList(){
    let simSpP = 0.5;
    if(eloDiff > 0) simSpP = 0.5 + Math.min(0.2, eloDiff/1000);
    else simSpP = 0.5 - Math.min(0.2, -eloDiff/1000);
-   HOME_ODDS_CACHE[f.id] = {ouLine: simOuLine, ouP: simOuP, ouSim: true, spreadLine: simSpread, spP: simSpP, spSim: true, none: false};
+   HOME_ODDS_CACHE[f.id] = {none: true};
    const ouRec = simOuP > 0.5 ? '大'+fmtLine(simOuLine) : '小'+fmtLine(simOuLine);
-   oddsHtml+='<span class="fx-odd-chip model-rec sim"><span class="lab">模拟</span>'+ouRec+'<b> '+pct100(Math.max(simOuP,1-simOuP))+'</b></span>';
+   // 不显示模拟推荐和输盘口按钮
+   /*oddsHtml+='<span class="fx-odd-chip model-rec sim"><span class="lab">模拟</span>'+ouRec+'<b> '+pct100(Math.max(simOuP,1-simOuP))+'</b></span>';
    const spRec = simSpread<0 ? '主-'+fmtLine(Math.abs(simSpread)) : '主+'+fmtLine(simSpread);
    oddsHtml+='<span class="fx-odd-chip sp model-rec sim"><span class="lab">让球</span>'+spRec+'<b> '+pct100(Math.max(simSpP,1-simSpP))+'</b></span>';
-   oddsHtml+='<button onclick="event.stopPropagation();manualInputOdds(\''+f.id+'\')" style="font-size:10px;padding:2px 6px;margin-left:4px;background:#555;color:#fff;border:none;border-radius:4px;cursor:pointer">输盘口</button>';
+   oddsHtml+='<button onclick="event.stopPropagation();manualInputOdds(\''+f.id+'\')" style="font-size:10px;padding:2px 6px;margin-left:4px;background:#555;color:#fff;border:none;border-radius:4px;cursor:pointer">输盘口</button>';*/
   }
   const oddsRow=oddsHtml?'<div class="fx-odds-row">'+oddsHtml+'</div>':'';
   let ds='';
@@ -6580,13 +6666,14 @@ function renderHomeList(){
    '<span class="badge '+(allBuiltin?'in':'calc')+'">'+(allBuiltin?'内置参数':'即时建模')+'</span></div></div>'+
    '<svg class="fx-go" width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="#6E857B" stroke-width="2" stroke-linecap="round"/></svg></button>';
  }
- const d0=addDays(new Date(),HOME_OFFSET),d1=addDays(d0,1);
- const d0Str=bjDateStr(d0),d1Str=bjDateStr(d1);
+ const d0=addDays(new Date(),HOME_OFFSET),d1=addDays(d0,1),d2=addDays(d1,1);
+ const d0Str=bjDateStr(d0),d1Str=bjDateStr(d1),d2Str=bjDateStr(d2);
  const wk=['日','一','二','三','四','五','六'];
  const live=all.filter(f=>LIVE_ST.includes(f.st)).sort((a,b)=>a.dateISO.localeCompare(b.dateISO));
  const pst=all.filter(f=>f.st==='PST');
  const day0=all.filter(f=>['NS','TBD'].includes(f.st)&&isoBjDay(f.dateISO)===d0Str).sort((a,b)=>a.dateISO.localeCompare(b.dateISO));
  const day1=all.filter(f=>['NS','TBD'].includes(f.st)&&isoBjDay(f.dateISO)===d1Str).sort((a,b)=>a.dateISO.localeCompare(b.dateISO));
+ const day2=all.filter(f=>['NS','TBD'].includes(f.st)&&isoBjDay(f.dateISO)===d2Str).sort((a,b)=>a.dateISO.localeCompare(b.dateISO));
  // 按联赛分组渲染（可折叠）
  function groupByLeague(matches) {
    const groups = {};
@@ -6598,12 +6685,12 @@ function renderHomeList(){
    return groups;
  }
 
- function renderGroup(matches, headerText, headerClass) {
+ async function renderGroup(matches, headerText, headerClass) {
    if (!matches.length) return '';
    const groups = groupByLeague(matches);
    let html = '';
    if (headerText) html += '<div class="day-tag ' + (headerClass||'') + '">' + headerText + '</div>';
-   Object.keys(groups).sort().forEach(lgName => {
+   for(const lgName of Object.keys(groups).sort()){
      const group = groups[lgName];
      const groupId = 'lg_' + lgName.replace(/[^a-zA-Z0-9]/g, '_');
      html += '<div class="lg-group">';
@@ -6613,10 +6700,10 @@ function renderHomeList(){
      html += '<span class="lg-count">' + group.length + '场</span>';
      html += '</div>';
      html += '<div class="lg-group-body" id="' + groupId + '">';
-     group.forEach(f => { html += itemHtml(f); });
+     for(const f of group){ html += await itemHtml(f); }
      html += '</div>';
      html += '</div>';
-   });
+   }
    return html;
  }
 
@@ -6634,9 +6721,10 @@ function renderHomeList(){
  };
 
  let html='';
- html += renderGroup(live, '进行中 LIVE', 'live-tag');
- html += renderGroup(day0, (HOME_OFFSET===0?'今天未开赛':homeDayMd(d0)+' 周'+wk[d0.getDay()]));
- html += renderGroup(day1, (HOME_OFFSET===0?'明天':'次日')+' · '+homeDayMd(d1)+' 周'+wk[d1.getDay()]);
+ html += await renderGroup(live, '进行中 LIVE', 'live-tag');
+ html += await renderGroup(day0, (HOME_OFFSET===0?'今天未开赛':homeDayMd(d0)+' 周'+wk[d0.getDay()]));
+ html += await renderGroup(day1, (HOME_OFFSET===0?'明天':'次日')+' · '+homeDayMd(d1)+' 周'+wk[d1.getDay()]);
+ html += await renderGroup(day2, '后天 · '+homeDayMd(d2)+' 周'+wk[d2.getDay()]);
  if(pst.length){
   html+='<div class="day-tag">已延期</div>';
   pst.forEach(f=>{
@@ -6652,6 +6740,8 @@ function renderHomeList(){
  box.querySelectorAll('.fx-item:not([disabled])').forEach(b=>b.onclick=()=>{
   const n=document.getElementById('api-neutral')&&document.getElementById('api-neutral').checked?1:0;
   const p=new URLSearchParams({h:b.dataset.h,a:b.dataset.a,hi:'none',ai:'none',n:String(n)});
+  if(b.dataset.hn)p.set('hn',b.dataset.hn);
+  if(b.dataset.an)p.set('an',b.dataset.an);
   if(b.dataset.fid)p.set('fid',b.dataset.fid);
   if(b.dataset.lg)p.set('lg',b.dataset.lg);
   if(b.dataset.live){p.set('lv','1');p.set('mn',b.dataset.min);p.set('hg',b.dataset.hg);p.set('ag',b.dataset.ag);p.set('st',b.dataset.st||'');}
@@ -6738,6 +6828,414 @@ function espnTable(body,lgCode){
  rows.forEach((r,i)=>r.rank=i+1);
  return rows;
 }
+// 多API统一获取盘口，优先级：ESPN > 自建API > API-Football > Big Balls Data
+async function fetchOddsFromAllApis(f, ed){
+  // 云端比赛：优先调用match_full获取11家博彩公司原生盘口，得到实际盘口线
+  if(f && f.id && f.id.startsWith('self_')){
+    const selfApiKey = 'fmjwx8H7vbA6j8RiPD6sn9UOsrQSvPJ3d478dn4xwN8';
+    const selfEventId = f.id.replace('self_', '');
+    let selfData = null;
+    
+    // 1. 先看缓存
+    if(MATCH_FULL_CACHE[selfEventId]){
+      selfData = MATCH_FULL_CACHE[selfEventId];
+    }else{
+      // 2. 限流控制：每秒最多2个请求
+      const now = Date.now();
+      if(now - matchFullLastReqTime < 1000){
+        matchFullReqCount++;
+        if(matchFullReqCount >= 2){
+          await new Promise(r => setTimeout(r, 1000 - (now - matchFullLastReqTime)));
+          matchFullReqCount = 0;
+        }
+      }else{
+        matchFullLastReqTime = now;
+        matchFullReqCount = 0;
+      }
+      
+      // 3. 调用match_full
+      try{
+        const selfRes = await fetch('http://47.99.155.27:8321/match_full/'+selfEventId, {
+          headers: {'X-API-Token': selfApiKey}
+        });
+        if(selfRes.ok){
+          selfData = await selfRes.json();
+          // 缓存结果，缓存1小时
+          MATCH_FULL_CACHE[selfEventId] = selfData;
+          setTimeout(() => { delete MATCH_FULL_CACHE[selfEventId]; }, 3600000);
+        }
+      }catch(e){
+        // 请求失败，用列表里的odds兜底
+      }
+    }
+    
+    // 4. 从match_full的odds_by_bookmaker提取实际主流盘口线
+    if(selfData){
+      let ouLine = null, spreadLine = null;
+      const ob = selfData.odds_by_bookmaker || {};
+      const ouLineCount = {};
+      const spreadLineCount = {};
+      for(const bookmaker in ob){
+        const markets = ob[bookmaker] || {};
+        for(const marketName in markets){
+          const outcomes = markets[marketName] || {};
+          // 大小球：匹配"大小球(X)"格式
+          const ouMatch = marketName.match(/大小球\(([\d.]+)\)/);
+          if(ouMatch){
+            const line = parseFloat(ouMatch[1]);
+            ouLineCount[line] = (ouLineCount[line] || 0) + 1;
+          }
+          // 亚盘
+          if(marketName === '亚盘' || marketName.includes('亚盘')){
+            for(const outcomeName in outcomes){
+              const spMatch = outcomeName.match(/主([+-]?[\d./]+)/);
+              if(spMatch){
+                let line = spMatch[1];
+                // 处理分数格式，比如"主-1/1.5"转换成-1.25
+                if(line.includes('/')){
+                  const parts = line.split('/');
+                  const p1 = parseFloat(parts[0]);
+                  const p2 = parseFloat(parts[1]);
+                  line = ((p1 + p2) / 2).toString();
+                }
+                spreadLineCount[line] = (spreadLineCount[line] || 0) + 1;
+                break;
+              }
+            }
+          }
+        }
+      }
+      // 大小球：选出现次数最多的作为主流盘口线
+      const ouLines = Object.keys(ouLineCount).map(k => ({line: parseFloat(k), count: ouLineCount[k]}));
+      if(ouLines.length > 0){
+        ouLines.sort((a,b) => b.count - a.count);
+        ouLine = ouLines[0].line;
+      }
+      // 让球：选出现次数最多的作为主流盘口线
+      const spLines = Object.keys(spreadLineCount).map(k => ({line: parseFloat(k), count: spreadLineCount[k]}));
+      if(spLines.length > 0){
+        spLines.sort((a,b) => b.count - a.count);
+        spreadLine = spLines[0].line;
+      }
+      
+      // 5. 如果odds_by_bookmaker没有数据，用简单odds字段兜底
+      if((ouLine == null || spreadLine == null) && selfData.odds){
+        const odds = selfData.odds;
+        if(ouLine == null){
+          const ouCandidates = [];
+          if(odds.over_15 != null && odds.under_15 != null){
+            ouCandidates.push({line: 1.5, diff: Math.abs(parseFloat(odds.over_15) - parseFloat(odds.under_15))});
+          }
+          if(odds.over_25 != null && odds.under_25 != null){
+            ouCandidates.push({line: 2.5, diff: Math.abs(parseFloat(odds.over_25) - parseFloat(odds.under_25))});
+          }
+          if(odds.over_35 != null && odds.under_35 != null){
+            ouCandidates.push({line: 3.5, diff: Math.abs(parseFloat(odds.over_35) - parseFloat(odds.under_35))});
+          }
+          if(ouCandidates.length > 0){
+            ouCandidates.sort((a,b) => a.diff - b.diff);
+            ouLine = ouCandidates[0].line;
+          }
+        }
+        if(spreadLine == null && odds.asian_handicap != null){
+          spreadLine = parseFloat(odds.asian_handicap);
+        }
+      }
+      
+      if(ouLine!=null || spreadLine!=null){
+        return {ouLine, spreadLine, source: 'self_api'};
+      }
+    }
+    
+    // 6. match_full失败，用比赛列表里的odds兜底
+    if(f.odds){
+      const odds = f.odds;
+      let ouLine = null, spreadLine = null;
+      const ouCandidates = [];
+      if(odds.over_15 != null && odds.under_15 != null){
+        ouCandidates.push({line: 1.5, diff: Math.abs(parseFloat(odds.over_15) - parseFloat(odds.under_15))});
+      }
+      if(odds.over_25 != null && odds.under_25 != null){
+        ouCandidates.push({line: 2.5, diff: Math.abs(parseFloat(odds.over_25) - parseFloat(odds.under_25))});
+      }
+      if(odds.over_35 != null && odds.under_35 != null){
+        ouCandidates.push({line: 3.5, diff: Math.abs(parseFloat(odds.over_35) - parseFloat(odds.under_35))});
+      }
+      if(ouCandidates.length > 0){
+        ouCandidates.sort((a,b) => a.diff - b.diff);
+        ouLine = ouCandidates[0].line;
+      }
+      if(odds.asian_handicap != null){
+        spreadLine = parseFloat(odds.asian_handicap);
+      }
+      if(ouLine!=null || spreadLine!=null){
+        return {ouLine, spreadLine, source: 'self_api_list'};
+      }
+    }
+  }
+  // 2. 云端没有数据，再用ESPN已经拉到的盘口
+  if(ed && ed.odds && (ed.odds.ouLine!=null || ed.odds.spreadLine!=null)){
+    return ed.odds;
+  }
+  // 3. API-Football（95次/天，第三优先）
+  try{
+    const apiFootballKey = 'ce2d77c10f8e8838ea47b98d24ae8ae7';
+    const afRes = await fetch('https://v3.football.api-sports.io/odds?fixture='+f.id, {
+      headers: {'x-apisports-key': apiFootballKey}
+    });
+    if(afRes.ok){
+      const afData = await afRes.json();
+      if(afData.response && afData.response.length){
+        const bookmaker = afData.response[0].bookmakers[0];
+        if(bookmaker && bookmaker.bets){
+          let ouLine = null, spreadLine = null;
+          bookmaker.bets.forEach(bet=>{
+            if(bet.name === 'Goals Over/Under' && bet.values && bet.values.length){
+              ouLine = parseFloat(bet.values[0].value);
+            }
+            if(bet.name === 'Asian Handicap' && bet.values && bet.values.length){
+              spreadLine = parseFloat(bet.values[0].value);
+            }
+          });
+          if(ouLine!=null || spreadLine!=null){
+            return {ouLine, spreadLine, source: 'api_football'};
+          }
+        }
+      }
+    }
+  }catch(e){}
+  // 4. Big Balls Data（免费，最后）
+  try{
+    const bbdKey = 'bbs_live_00000O5LnABdj2TUAxSxRYpwqaLibzQJTBYG9E8wn0i1ZYKB';
+    const bbdRes = await fetch('https://api.bigballsdata.com/v1/odds?match_id='+f.id, {
+      headers: {'Authorization': 'Bearer '+bbdKey}
+    });
+    if(bbdRes.ok){
+      const bbdData = await bbdRes.json();
+      if(bbdData.data){
+        let ouLine = null, spreadLine = null;
+        if(bbdData.data.over_under_line) ouLine = parseFloat(bbdData.data.over_under_line);
+        if(bbdData.data.handicap_line) spreadLine = parseFloat(bbdData.data.handicap_line);
+        if(ouLine!=null || spreadLine!=null){
+          return {ouLine, spreadLine, source: 'big_balls'};
+        }
+      }
+    }
+  }catch(e){}
+  return null;
+}
+// 把云端API的比赛转换成ESPN格式，队名都是中文
+function convertSelfApiMatch(m){
+  // 解析比赛时间：date是24/09/2026格式，time是22:00格式
+  let dateISO = new Date().toISOString();
+  try{
+    if(m.date && m.time){
+      // date格式是日/月/年，比如24/09/2026
+      const parts = m.date.split('/');
+      const dateStr = parts[2] + '-' + parts[1] + '-' + parts[0]; // 2026-09-24
+      dateISO = new Date(dateStr + 'T' + m.time + ':00+08:00').toISOString();
+    }
+  }catch(e){}
+  // 比赛状态
+  let st = 'NS'; // 默认未开赛
+  let hg = null, ag = null, elapsed = null;
+  const status = (m.status || '').toLowerCase();
+  const statusZh = m.status_zh || '';
+  if(status.includes('live') || statusZh.includes('进行') || (m.minute != null && m.minute > 0)){
+    st = 'LIVE';
+    elapsed = m.minute != null ? parseInt(m.minute) : 1;
+  }else if(status.includes('ht') || statusZh.includes('中场')){
+    st = 'HT';
+    elapsed = 45;
+  }else if(status.includes('ft') || statusZh.includes('结束') || status.includes('finished')){
+    st = 'FT';
+    elapsed = 90;
+  }else if(status.includes('post') || statusZh.includes('延期')){
+    st = 'PST';
+  }
+  // 比分
+  if(m.home_score != null) hg = parseInt(m.home_score);
+  if(m.away_score != null) ag = parseInt(m.away_score);
+  // 联赛信息：用league_zh中文字段
+  const lgCode = 'self_' + (m.league_zh || 'unknown');
+  const lgName = m.league_zh || '未知联赛';
+  // 队名：用home_team_zh/away_team_zh中文字段
+  const homeName = m.home_team_zh || m.home_team || '主队';
+  const awayName = m.away_team_zh || m.away_team || '客队';
+  return {
+    id: 'self_' + m.event_id,
+    dateISO: dateISO,
+    st: st,
+    hg: hg,
+    ag: ag,
+    elapsed: elapsed,
+    round: m.round || '',
+    lg: {
+      id: lgCode,
+      code: lgCode,
+      name: lgName,
+      type: 'LEAGUE'
+    },
+    home: {
+      id: 'self_home_' + m.event_id,
+      name: homeName
+    },
+    away: {
+      id: 'self_away_' + m.event_id,
+      name: awayName
+    },
+    // 保存列表里的odds字段，作为兜底
+    odds: m.odds || null
+  };
+}
+// 从云端API拉取今日和明日比赛列表，转换成ESPN格式
+async function fetchSelfApiHomeFixtures(forceRefresh){
+  try{
+    const matches = await getSelfApiMatches(forceRefresh);
+    if(!matches.length) return [];
+    const result = [];
+    const seen = new Set();
+    for(const m of matches){
+      if(!m.event_id || seen.has(m.event_id)) continue;
+      seen.add(m.event_id);
+      result.push(convertSelfApiMatch(m));
+    }
+    return result;
+  }catch(e){
+    return [];
+  }
+}
+
+// 多API实时比分和时间缓存
+const LIVE_SCORE_CACHE = {};
+// 云端API今日比赛列表缓存和ID映射
+let SELF_API_MATCHES_CACHE = null;
+let SELF_API_MATCHES_T = 0;
+// 从云端API拉取今日比赛列表，建立队名到event_id的映射
+async function getSelfApiMatches(forceRefresh){
+  if(!forceRefresh && SELF_API_MATCHES_CACHE && Date.now()-SELF_API_MATCHES_T < 30000){
+    return SELF_API_MATCHES_CACHE;
+  }
+  try{
+    const selfApiKey = 'fmjwx8H7vbA6j8RiPD6sn9UOsrQSvPJ3d478dn4xwN8';
+    const res = await fetch('http://47.99.155.27:8321/api/today', {
+      headers: {'X-API-Token': selfApiKey}
+    });
+    if(res.ok){
+      const data = await res.json();
+      const matches = data.matches || [];
+      SELF_API_MATCHES_CACHE = matches;
+      SELF_API_MATCHES_T = Date.now();
+      return matches;
+    }
+  }catch(e){}
+  return [];
+}
+// 通过队名和时间匹配云端API的比赛
+async function matchSelfApiMatch(f){
+  const matches = await getSelfApiMatches();
+  if(!matches.length) return null;
+  // 规范化队名，去掉空格和特殊字符
+  const norm = name => (name||'').toLowerCase().replace(/[^a-z0-9一-龥]/g,'');
+  const homeNorm = norm(f.home.name);
+  const awayNorm = norm(f.away.name);
+  // 遍历匹配，主队和客队都能匹配上
+  for(const m of matches){
+    const mHome = norm(m.home_team_zh || m.home_team || m.homeTeam || '');
+    const mAway = norm(m.away_team_zh || m.away_team || m.awayTeam || '');
+    if((mHome.includes(homeNorm) || homeNorm.includes(mHome)) && 
+       (mAway.includes(awayNorm) || awayNorm.includes(mAway))){
+      return m;
+    }
+  }
+  return null;
+}
+// 多API获取实时比分和剩余时间，ESPN没有就从其他API拉
+async function fetchLiveScoreFromAllApis(f){
+  const ck = f.id + '_live';
+  if(LIVE_SCORE_CACHE[ck] && Date.now()-LIVE_SCORE_CACHE[ck].t < 30000){
+    return LIVE_SCORE_CACHE[ck].d;
+  }
+  // 1. 优先用你的云端自建API（云端有缓存，不消耗本地配额）
+  try{
+    // 云端比赛直接从f.id提取event_id（去掉self_前缀）
+    let selfEventId = null;
+    if(f.id && f.id.startsWith('self_')){
+      selfEventId = f.id.replace('self_', '');
+    }else{
+      // 非云端比赛，通过队名匹配
+      const selfMatch = await matchSelfApiMatch(f);
+      if(selfMatch && selfMatch.event_id) selfEventId = selfMatch.event_id;
+    }
+    if(selfEventId){
+      const selfApiKey = 'fmjwx8H7vbA6j8RiPD6sn9UOsrQSvPJ3d478dn4xwN8';
+      const selfRes = await fetch('http://47.99.155.27:8321/match_full/'+selfEventId, {
+        headers: {'X-API-Token': selfApiKey}
+      });
+      if(selfRes.ok){
+        const selfData = await selfRes.json();
+        if(selfData){
+          const result = {
+            hg: selfData.home_score != null ? parseInt(selfData.home_score) : (selfMatch.home_score != null ? parseInt(selfMatch.home_score) : null),
+            ag: selfData.away_score != null ? parseInt(selfData.away_score) : (selfMatch.away_score != null ? parseInt(selfMatch.away_score) : null),
+            elapsed: selfData.minute != null ? parseInt(selfData.minute) : (selfMatch.minute != null ? parseInt(selfMatch.minute) : null),
+            status: selfData.status || selfMatch.status || null,
+            source: 'self_api'
+          };
+          if(result.hg != null || result.elapsed != null){
+            LIVE_SCORE_CACHE[ck] = {d: result, t: Date.now()};
+            return result;
+          }
+        }
+      }
+    }
+  }catch(e){}
+  // 2. 云端没有数据，再用API-Football
+  try{
+    const apiFootballKey = 'ce2d77c10f8e8838ea47b98d24ae8ae7';
+    const afRes = await fetch('https://v3.football.api-sports.io/fixtures?id='+f.id, {
+      headers: {'x-apisports-key': apiFootballKey}
+    });
+    if(afRes.ok){
+      const afData = await afRes.json();
+      if(afData.response && afData.response.length){
+        const fix = afData.response[0];
+        const result = {
+          hg: fix.goals.home != null ? fix.goals.home : null,
+          ag: fix.goals.away != null ? fix.goals.away : null,
+          elapsed: fix.fixture.status.elapsed != null ? fix.fixture.status.elapsed : null,
+          status: fix.fixture.status.short || null,
+          source: 'api_football'
+        };
+        LIVE_SCORE_CACHE[ck] = {d: result, t: Date.now()};
+        return result;
+      }
+    }
+  }catch(e){}
+  // 3. 最后用Big Balls Data
+  try{
+    const bbdKey = 'bbs_live_00000O5LnABdj2TUAxSxRYpwqaLibzQJTBYG9E8wn0i1ZYKB';
+    const bbdRes = await fetch('https://api.bigballsdata.com/v1/match/'+f.id, {
+      headers: {'Authorization': 'Bearer '+bbdKey}
+    });
+    if(bbdRes.ok){
+      const bbdData = await bbdRes.json();
+      if(bbdData.data){
+        const result = {
+          hg: bbdData.data.home_score != null ? parseInt(bbdData.data.home_score) : null,
+          ag: bbdData.data.away_score != null ? parseInt(bbdData.data.away_score) : null,
+          elapsed: bbdData.data.minute != null ? parseInt(bbdData.data.minute) : null,
+          status: bbdData.data.status || null,
+          source: 'big_balls'
+        };
+        LIVE_SCORE_CACHE[ck] = {d: result, t: Date.now()};
+        return result;
+      }
+    }
+  }catch(e){}
+  return null;
+}
+
 async function fetchEspnSummary(lg,eventId,force){
  const ck=lg+'_'+eventId;
  if(!force&&ENRICH_CACHE[ck]&&Date.now()-ENRICH_CACHE[ck].t<90000)return ENRICH_CACHE[ck].d;
@@ -7136,10 +7634,8 @@ function renderLearnPanel(){
   html+='</div>';
  }
  if(recent.length){
-  html+='<div class="ln-sep mk-sep">最近复盘（点击展开详情）</div>'+
-  '<label style="display:flex;align-items:center;gap:6px;font-size:12px;margin:6px 0;cursor:pointer"><input type="checkbox" id="only-major-review" style="width:14px;height:14px"> 只看正规比赛</label>'+
-  '<ul class="ln-list">';
-  recent.forEach((p,pi)=>{ const onlyMajor=document.getElementById('only-major-review')?document.getElementById('only-major-review').checked:false; if(onlyMajor && !isMajorLg(p.lg)) return;
+  html+='<div class="ln-sep mk-sep">最近复盘（点击展开详情）</div><ul class="ln-list">';
+  recent.forEach((p,pi)=>{
    const cls=p.hit?'hit':'miss';
    const tags=p.reasons.map(r=>'<span class="ln-tag '+(r.t==='g'?'g':r.t==='r'?'r':'')+'">'+escHtml(r.x)+'</span>').join('')+'<span class="ln-tag" style="background:#333">'+escHtml(lgZh(p.lg))+'</span>'+(isMajorLg(p.lg)?'':'<span class="ln-tag">低权重</span>');
    // 大小球/让球推荐
@@ -7170,14 +7666,11 @@ function renderLearnPanel(){
    if(p.mkt)detailHtml+='<div>市场赔率（去水）：主 '+p1(p.mkt.h)+' / 平 '+p1(p.mkt.d)+' / 客 '+p1(p.mkt.a)+'</div>';
    detailHtml+='<div>Brier 误差：'+p.brier.toFixed(3)+'（越低越准）</div>';
    detailHtml+='</div>';
-   html+='<li class="ln-item '+cls+' ln-clickable" data-detail="'+detailId+'" '+(pi>=15?'style="display:none"':'')+'>'+
+   html+='<li class="ln-item '+cls+' ln-clickable" data-detail="'+detailId+'">'+
     '<b><span style="color:#94a3b8;font-size:11px;font-weight:normal;margin-right:4px">'+escHtml(lgZh(p.lg))+'</span>'+escHtml(zhTeam(p.hName,null))+' '+p.hg+'-'+p.ag+' '+escHtml(zhTeam(p.aName,null))+'</b>　预测：'+ARROW[p.arg]+
     (p.hit?' <span class="ln-tag g">✓ 命中</span>':' <span class="ln-tag r">✗ 偏差</span>')+recHtml+'<br>'+tags+detailHtml+'</li>';
   });
   html+='</ul>';
-  if(recent.length>15){
-    html+='<button id="expand-review" style="width:100%;padding:8px;background:rgba(255,255,255,.05);border:1px solid #333;border-radius:6px;color:#ccc;cursor:pointer;margin-top:8px">展开全部（共'+Math.min(recent.length,30)+'条，其余AI已自动学习）</button>';
-  }
  }
  html+='<button class="ln-btn" id="ln-settle">立即拉取赛果复盘学习</button>';
  html+='<button class="ln-btn" id="ln-token" style="border-color:var(--line);color:var(--ink-faint);margin-top:6px;">设置GitHub Token</button>';
@@ -7471,20 +7964,12 @@ function lgZh(code){
   };
   return map[code] || code;
 }
-// 比赛分级权重
-function getMatchWeight(code){
-  if(!code) return 1.0;
-  code = code.toLowerCase();
-  if(code.includes('u17') || code.includes('u19') || code.includes('u21') || code.includes('youth') || code.includes('u20')) return 0.3;
-  if(code.includes('friendly') || code.includes('women')) return 0.6;
-  if(code.includes('fifa.world') || code.includes('uefa.champions') || code.includes('uefa.europa') || code.includes('euro') || code.includes('copa.america')) return 1.5;
-  if(code.includes('eng.1') || code.includes('esp.1') || code.includes('ger.1') || code.includes('ita.1') || code.includes('fra.1') || code.includes('jpn.1') || code.includes('kor.1') || code.includes('chn.1') || code.includes('bra.1') || code.includes('arg.1') || code.includes('usa.1') || code.includes('ned.1') || code.includes('por.1') || code.includes('uefa.nations')) return 1.2;
-  if(code.includes('eng.2') || code.includes('esp.2') || code.includes('ger.2') || code.includes('ita.2') || code.includes('fra.2') || code.includes('jpn.2') || code.includes('bra.2') || code.includes('ned.2') || code.includes('usa.usl.1')) return 1.0;
-  return 1.0;
-}
 // 判断是否正规比赛
 function isMajorLg(code){
-  return getMatchWeight(code) >= 1.0;
+  if(!code) return true;
+  code = code.toLowerCase();
+  if(code.includes('friendly') || code.includes('u17') || code.includes('u19') || code.includes('u21') || code.includes('youth')) return false;
+  return true;
 }
 // 获取比赛学习权重
 function getMatchWeight(code){
@@ -7514,14 +7999,6 @@ function isMajorLg(code){
   if(code.includes('friendly') || code.includes('u17') || code.includes('u19') || code.includes('u21') || code.includes('youth')) return false;
   return true;
 }
-// 展开复盘按钮
-document.addEventListener('click',function(e){
-  if(e.target && e.target.id==='expand-review'){
-    const lis=document.querySelectorAll('.ln-list li');
-    lis.forEach((li,i)=>{ if(i>=15) li.style.display='block'; }); e.target.textContent='收起'; e.target.onclick=function(){ lis.forEach((li,i)=>{ if(i>=15) li.style.display='none'; }); e.target.style.display='block'; e.target.textContent='展开全部'; }
-    e.target.style.display='none';
-  }
-});
 window.addEventListener('load',async function(){await loadLearnDataFromGithub();});
 </script>
 </body>
