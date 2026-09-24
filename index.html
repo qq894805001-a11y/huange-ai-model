@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>欢—AI模型 · 足球预测智能体</title>
+<title>欢哥AI模型 · 足球预测智能体</title>
 <script>
 
 // ============================================================
@@ -15,13 +15,6 @@ const Cloud = {
   role: localStorage.getItem('gc_role') || '',
   syncTimer: null,
   dirty: false,
-  // GitHub配置
-  github: {
-    token: '',
-    owner: 'qq894805001-a11y',
-    repo: 'huange-ai-model',
-    path: 'data/users.json'
-  },
 
   // API 基础地址（同源部署）
   api(path, opts={}) {
@@ -36,40 +29,23 @@ const Cloud = {
   },
 
   async login(username, password) {
-    // 管理员硬编码账号
-    if (username === 'hjh' && password === '123456') {
-      this.token = 'admin_token'; this.username = 'hjh'; this.role = 'admin';
-      localStorage.setItem('gc_token', 'admin_token');
-      localStorage.setItem('gc_username', 'hjh');
-      localStorage.setItem('gc_role', 'admin');
-      return {username:'hjh', role:'admin'};
-    }
-    // 从GitHub读取用户列表验证
-    const r = await this.githubReadFile('data/users.json');
-    const users = r ? r.content : {};
-    if (users[username] && users[username].password === password) {
-      this.token = 'user_token_' + username; this.username = username; this.role = users[username].role || 'user';
-      localStorage.setItem('gc_token', this.token);
-      localStorage.setItem('gc_username', username);
-      localStorage.setItem('gc_role', this.role);
-      return {username, role: this.role};
-    }
-    throw new Error('用户名或密码错误');
+    const r = await this.api('/api/login', {method:'POST', body:{username, password}});
+    if (r.error) throw new Error(r.error);
+    this.token = r.token; this.username = r.username; this.role = r.role;
+    localStorage.setItem('gc_token', r.token);
+    localStorage.setItem('gc_username', r.username);
+    localStorage.setItem('gc_role', r.role);
+    return r;
   },
 
   async register(username, password) {
-    if (username === 'hjh') throw new Error('管理员账号不可注册');
-    // 从GitHub读取用户列表
-    const r = await this.githubReadFile('data/users.json');
-    const users = r ? r.content : {};
-    if (users[username]) throw new Error('用户名已存在');
-    users[username] = {password, role: 'user', createdAt: new Date().toISOString()};
-    await this.githubWriteFile('data/users.json', users, 'Register user ' + username);
-    this.token = 'user_token_' + username; this.username = username; this.role = 'user';
-    localStorage.setItem('gc_token', this.token);
-    localStorage.setItem('gc_username', username);
-    localStorage.setItem('gc_role', 'user');
-    return {username, role:'user'};
+    const r = await this.api('/api/register', {method:'POST', body:{username, password}});
+    if (r.error) throw new Error(r.error);
+    this.token = r.token; this.username = r.username; this.role = r.role;
+    localStorage.setItem('gc_token', r.token);
+    localStorage.setItem('gc_username', r.username);
+    localStorage.setItem('gc_role', r.role);
+    return r;
   },
 
   async logout() {
@@ -80,97 +56,42 @@ const Cloud = {
     localStorage.removeItem('gc_role');
   },
 
-  // ===== GitHub API 文件读写 =====
-  async githubReadFile(path) {
-    try {
-      const gh = this.github;
-      const resp = await fetch(`https://api.github.com/repos/${gh.owner}/${gh.repo}/contents/${path}`, {
-        headers: {'Authorization': 'token ' + gh.token}
-      });
-      if (!resp.ok) return null;
-      const data = await resp.json();
-      return { content: JSON.parse(atob(data.content)), sha: data.sha };
-    } catch(e) { console.warn('github read failed', e); return null; }
-  },
-
-  // 支持中文的base64编码
-  utf8ToBase64(str) {
-    const bytes = new TextEncoder().encode(str);
-    let binary = '';
-    for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
-    return btoa(binary);
-  },
-
-  async githubWriteFile(path, content, message) {
-    try {
-      const gh = this.github;
-      let sha = null;
-      const resp = await fetch(`https://api.github.com/repos/${gh.owner}/${gh.repo}/contents/${path}`, {
-        headers: {'Authorization': 'token ' + gh.token}
-      });
-      if (resp.ok) { const data = await resp.json(); sha = data.sha; }
-      const writeResp = await fetch(`https://api.github.com/repos/${gh.owner}/${gh.repo}/contents/${path}`, {
-        method: 'PUT',
-        headers: {'Authorization': 'token ' + gh.token, 'Content-Type': 'application/json'},
-        body: JSON.stringify({ message: message || 'Update data', content: this.utf8ToBase64(JSON.stringify(content, null, 2)), sha: sha })
-      });
-      if (!writeResp.ok) {
-        const errText = await writeResp.text();
-        console.error('[Cloud] GitHub写入失败:', path, writeResp.status, errText);
-        return false;
-      }
-      console.log('[Cloud] GitHub写入成功:', path);
-      return true;
-    } catch(e) { console.error('[Cloud] github write exception', e); return false; }
-  },
-
-  // 从云端加载学习数据（GitHub仓库 data/learn_data.json）
+  // 从云端加载所有数据
   async loadFromCloud() {
     if (!this.token) return null;
     try {
-      const r = await this.githubReadFile('data/learn_data.json');
-      if (r && r.content && typeof r.content === 'object') {
+      const r = await this.api('/api/data');
+      if (r.data && typeof r.data === 'object') {
         // 把云端数据写回 localStorage
-        Object.entries(r.content).forEach(([k, v]) => {
+        Object.entries(r.data).forEach(([k, v]) => {
           localStorage.setItem(k, typeof v === 'string' ? v : JSON.stringify(v));
         });
-        console.log('[Cloud] 学习数据已从云端加载', Object.keys(r.content).length, '项');
-        return r.content;
+        return r.data;
       }
     } catch(e) { console.warn('cloud load failed', e); }
     return null;
   },
 
-  // 把学习数据保存到云端（GitHub仓库 data/learn_data.json）
+  // 把所有localStorage数据保存到云端
   async saveToCloud() {
     if (!this.token || !this.dirty) return;
     try {
       const data = {};
-      // 只同步学习相关的gc_数据，不同步登录状态和临时缓存
-      const syncKeys = ['gc_learn_v1','gc_self_learn','gc_odds_learner','gc_live_snap_v1',
-                        'gc_dyn','gc_zhcache_v1','gc_espn_codes','gc_backtest',
-                        'gc_afb_map','gc_afb_quota','gc_quota_v2','gc_users_v1',
-                        'gc_odds_history_v1','gc_afb_extra'];
       for (let i = 0; i < localStorage.length; i++) {
         const k = localStorage.key(i);
-        if (k && (syncKeys.includes(k) || k.startsWith('gc_afb_extra_'))) {
+        if (k && !k.startsWith('gc_token') && !k.startsWith('gc_username') && !k.startsWith('gc_role')) {
           data[k] = localStorage.getItem(k);
         }
       }
-      const ok = await this.githubWriteFile('data/learn_data.json', data, 'Auto-sync learn data');
-      if (ok) {
-        this.dirty = false;
-        console.log('[Cloud] 学习数据已同步到云端', Object.keys(data).length, '项');
-      } else {
-        console.error('[Cloud] 学习数据同步失败！');
-      }
+      await this.api('/api/data', {method:'POST', body:{data, token:this.token}});
+      this.dirty = false;
     } catch(e) { console.warn('cloud save failed', e); }
   },
 
   markDirty() {
     this.dirty = true;
     if (this.syncTimer) clearTimeout(this.syncTimer);
-    this.syncTimer = setTimeout(() => this.saveToCloud(), 5000);
+    this.syncTimer = setTimeout(() => this.saveToCloud(), 3000);
   }
 };
 
@@ -273,38 +194,6 @@ const DataSources = {
       this.cacheTime[key] = Date.now();
       return this.cache[key];
     } catch(e) { console.warn('Gamecastt fail', e); return null; }
-  },
-
-  // Big Balls Data - xG/阵容/统计（免费版1000次/天）
-  async fetchBigBalls(path) {
-    const key = 'bbs_' + path;
-    if (this.cache[key] && Date.now() - this.cacheTime[key] < 300000) return this.cache[key];
-    try {
-      const r = await fetch('https://api.bigballsdata.com' + path, {
-        headers: { 'Authorization': 'Bearer ' + API_KEYS.bigBalls }
-      });
-      if (!r.ok) throw new Error('BBS HTTP ' + r.status);
-      this.cache[key] = await r.json();
-      this.cacheTime[key] = Date.now();
-      return this.cache[key];
-    } catch(e) { console.warn('BigBalls fail', e); return null; }
-  },
-
-  // 获取比赛xG数据
-  async getMatchXg(homeName, awayName, dateStr) {
-    try {
-      const data = await this.fetchBigBalls('/v1/matches?sport=football&date=' + dateStr);
-      if (!data || !data.data) return null;
-      const norm = n => String(n||'').toLowerCase().replace(/[^a-z0-9]/g,'');
-      const hn = norm(homeName), an = norm(awayName);
-      const match = data.data.find(m => {
-        const h = norm(m.home.name), a = norm(m.away.name);
-        return (h.includes(hn)||hn.includes(h)) && (a.includes(an)||an.includes(a));
-      });
-      if (!match) return null;
-      const stats = await this.fetchBigBalls('/v1/stored/matches/' + match.id + '/stats?sport=football');
-      return { match, stats };
-    } catch(e) { return null; }
   },
 
   // 融合积分榜数据：ESPN + SportScore + TheSportsDB
@@ -1348,7 +1237,7 @@ const ReviewList = {
     }
 
     const stats = await GHData.getStats();
-    const displayCount = this.expanded ? reviews.length : Math.min(15, reviews.length);
+    const displayCount = this.expanded ? reviews.length : Math.min(10, reviews.length);
     const shown = reviews.slice(0, displayCount);
 
     let html = '<div style="background:var(--panel-2);border-radius:10px;padding:16px;margin-top:16px;">';
@@ -1440,9 +1329,6 @@ function showLoginMsg(text, ok) {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-  // 页面加载时自动从云端同步学习数据和盘口推荐
-  loadLearnFromCloud();
-  loadOddsFromCloud();
   const loginBtn = document.getElementById('cloud-login-btn');
   const regBtn = document.getElementById('cloud-register-btn');
 
@@ -1494,20 +1380,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         var pw = document.getElementById('new-password').value;
         if (!un || !pw) { alert('请输入用户名和密码'); return; }
         try {
-          // 从GitHub读取现有用户
-          const gh = Cloud.github;
-          const resp = await fetch(`https://api.github.com/repos/${gh.owner}/${gh.repo}/contents/${gh.path}`, {
-            headers: {'Authorization': 'token ' + gh.token}
-          });
-          let users = {};
-          if (resp.ok) {
-            const data = await resp.json();
-            users = JSON.parse(atob(data.content));
-          }
-          // 添加新用户
-          users[un] = {password: pw, role: 'user', createdAt: Date.now()};
-          // 保存到GitHub
-          await saveUsersToGitHub(users);
+          var r = await Cloud.api('/api/admin/create-user', {method:'POST', body:{username:un, password:pw}});
+          if (r.error) { alert(r.error); return; }
           alert('创建成功：' + un);
           document.getElementById('new-username').value = '';
           document.getElementById('new-password').value = '';
@@ -1521,80 +1395,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // 保存用户列表到GitHub云端
-async function saveUsersToGitHub(users) {
-  const gh = Cloud.github;
-  const content = btoa(JSON.stringify(users, null, 2));
-  
-  // 先获取现有文件的sha
-  let sha = null;
-  const resp = await fetch(`https://api.github.com/repos/${gh.owner}/${gh.repo}/contents/${gh.path}`, {
-    headers: {'Authorization': 'token ' + gh.token}
-  });
-  if (resp.ok) {
-    const data = await resp.json();
-    sha = data.sha;
-  }
-  
-  // 写入文件
-  await fetch(`https://api.github.com/repos/${gh.owner}/${gh.repo}/contents/${gh.path}`, {
-    method: 'PUT',
-    headers: {
-      'Authorization': 'token ' + gh.token,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      message: 'Update users.json',
-      content: content,
-      sha: sha
-    })
-  });
-}
-
-window.loadUserList = async function() {
+  window.loadUserList = async function() {
     try {
-      // 从GitHub云端读取用户列表
-      const gh = Cloud.github;
-      const resp = await fetch(`https://api.github.com/repos/${gh.owner}/${gh.repo}/contents/${gh.path}`, {
-        headers: {'Authorization': 'token ' + gh.token}
-      });
-      let users = {};
-      if (resp.ok) {
-        const data = await resp.json();
-        users = JSON.parse(atob(data.content));
-      }
-      var userList = Object.entries(users).map(function([username, data]) {
-        return {username: username, role: data.role || 'user'};
-      });
-      // 加上管理员
-      userList.unshift({username: 'hjh', role: 'admin'});
-      
-      var el = document.getElementById('user-list');
-      el.innerHTML = userList.map(function(u) {
-        var delBtn = u.role !== 'admin' ? '<button onclick="delUser(\'' + u.username + '\')" style="padding:4px 8px;background:transparent;border:1px solid #4a3a3a;border-radius:4px;color:#ff6b6b;font-size:11px;cursor:pointer;">删除</button>' : '';
-        return '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #2a3a4a;">' +
-          '<span style="font-size:13px;color:#e8eef2;">' + u.username + ' <span style="color:#7a8a9a;font-size:11px;">(' + u.role + ')</span></span>' +
-          delBtn + '</div>';
+      var r = await Cloud.api('/api/admin/list-users');
+      if (r.users) {
+        var el = document.getElementById('user-list');
+        el.innerHTML = r.users.map(function(u) {
+          var delBtn = u.role !== 'admin' ? '<button onclick="delUser(\'' + u.username + '\')" style="padding:4px 8px;background:transparent;border:1px solid #4a3a3a;border-radius:4px;color:#ff6b6b;font-size:11px;cursor:pointer;">删除</button>' : '';
+          return '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #2a3a4a;">' +
+            '<span style="font-size:13px;color:#e8eef2;">' + u.username + ' <span style="color:#7a8a9a;font-size:11px;">(' + u.role + ')</span></span>' +
+            delBtn + '</div>';
         }).join('');
+      }
     } catch(e) { console.warn(e); }
   };
   window.delUser = async function(name) {
     if (!confirm('确定删除用户 ' + name + ' ？')) return;
     try {
-      // 从GitHub读取现有用户
-      const gh = Cloud.github;
-      const resp = await fetch(`https://api.github.com/repos/${gh.owner}/${gh.repo}/contents/${gh.path}`, {
-        headers: {'Authorization': 'token ' + gh.token}
-      });
-      let users = {};
-      if (resp.ok) {
-        const data = await resp.json();
-        users = JSON.parse(atob(data.content));
-      }
-      // 删除用户
-      delete users[name];
-      // 保存到GitHub
-      await saveUsersToGitHub(users);
+      var r = await Cloud.api('/api/admin/delete-user', {method:'POST', body:{username:name}});
+      if (r.error) { alert(r.error); return; }
       loadUserList();
     } catch(e) { alert('删除失败：' + e.message); }
   };
@@ -1615,14 +1434,16 @@ window.loadUserList = async function() {
   } else {
     // 验证token有效性
     try {
-      // 直接检查localStorage中的token（GitHub静态托管无后端/api）
-      if (Cloud.token) {
-        await Cloud.loadFromCloud();
-      } else {
+      const r = await Cloud.api('/api/me');
+      if (r.error) {
+        await Cloud.logout();
         showLogin();
+      } else {
+        await Cloud.loadFromCloud();
       }
     } catch(e) {
-      console.warn('cloud check skipped', e);
+      // 本地开发时（file://）API可能不通，跳过
+      console.warn('cloud check skipped');
     }
   }
 });
@@ -1672,7 +1493,7 @@ window.addEventListener('beforeunload', () => { if (Cloud.dirty) Cloud.saveToClo
     if(!token){
       document.write('<div style="position:fixed;inset:0;background:#0B1814;z-index:99999;display:flex;align-items:center;justify-content:center;font-family:sans-serif;">'
         +'<div style="background:#13251F;border:1px solid #254038;border-radius:12px;padding:32px;width:320px;color:#EAF0EA;">'
-        +'<h2 style="color:#2FA96B;margin:0 0 6px;font-size:20px;">欢—AI模型</h2>'
+        +'<h2 style="color:#2FA96B;margin:0 0 6px;font-size:20px;">欢哥AI模型</h2>'
         +'<p style="color:#6E857B;font-size:12px;margin:0 0 20px;">云端多人版 · 请登录</p>'
         +'<input id="lg-u" placeholder="用户名" style="width:100%;box-sizing:border-box;padding:10px;margin-bottom:10px;background:#0F1F1A;border:1px solid #254038;border-radius:6px;color:#EAF0EA;font-size:14px;outline:none;">'
         +'<input id="lg-p" type="password" placeholder="密码" style="width:100%;box-sizing:border-box;padding:10px;margin-bottom:14px;background:#0F1F1A;border:1px solid #254038;border-radius:6px;color:#EAF0EA;font-size:14px;outline:none;">'
@@ -1792,7 +1613,7 @@ window.addEventListener('beforeunload', () => { if (Cloud.dirty) Cloud.saveToClo
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.6.0/dist/echarts.min.js" integrity="sha384-pPi0zxBAoDu6+JXW/C68UZLvBUUtU+7zonhif43rqj7pxsGyqyqzcian2Rj37Rss" crossorigin="anonymous"></script>
 <style>
 /* ============================================================
-   欢—AI模型 —— 夜场战术室视觉体系
+   欢哥AI模型 —— 夜场战术室视觉体系
    背景：夜场草皮墨绿  主色：草坪绿  强调：记分牌琥珀金
    ============================================================ */
 :root{
@@ -2251,14 +2072,9 @@ select{font-family:var(--font-body);}
 .fx-item .fx-odd-chip.waiting{background:rgba(110,133,123,.08);border-color:var(--line-soft);color:var(--ink-faint);font-size:9px;}
 .fx-item .fx-odd-chip.model-rec{background:rgba(0,255,136,.15);border-color:rgba(0,255,136,.4);color:#00ff88;}
 .fx-item .fx-odd-chip.model-rec .lab{color:#00ff88;}
-.fx-item .fx-odd-chip.model-rec.sim{background:rgba(150,170,160,.08);border-color:rgba(150,170,160,.2);color:#8aa892;opacity:0.7;}
-.fx-item .fx-odd-chip.model-rec.sim .lab{color:#8aa892;}
 .fx-item .fx-rank{display:flex;justify-content:space-between;font-size:10.5px;color:#888;margin-top:3px;padding:0 2px;opacity:.85;}
 .fx-item .fx-odd-chip .lab{color:var(--ink-faint);margin-right:3px;}
 .fx-item .fx-go{color:var(--ink-faint);flex:none;}
-.fx-item-wrap{margin-bottom:4px;}
-.fx-manual-btn{width:100%;padding:3px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:4px;color:#888;font-size:10px;cursor:pointer;margin-top:2px;}
-.fx-manual-btn:hover{background:rgba(255,255,255,.1);color:#aaa;}
 .badge{font-family:var(--font-mono);font-size:8.5px;letter-spacing:.06em;padding:1px 5px;border-radius:3px;border:1px solid;white-space:nowrap;}
 .badge.in{color:var(--green);border-color:var(--green-deep);}
 .badge.calc{color:var(--amber);border-color:var(--amber-soft);}
@@ -2281,26 +2097,12 @@ select{font-family:var(--font-body);}
 </style>
 </head>
 <body>
-<div style="position:fixed;top:10px;right:10px;z-index:99999">
-  <button onclick="refreshSelfOdds()" style="background:#2a2a3e;color:#fff;border:1px solid #444;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px">
-    刷新盘口数据
-  </button>
-</div>
-<script>
-function refreshSelfOdds(){
-  alert('正在从GitHub加载最新盘口数据...');
-  loadSelfApiOddsFromGithub().then(()=>{
-    alert('盘口数据刷新完成！');
-    location.reload();
-  });
-}
-</script>
 
 <!-- ========== 登录遮罩层 ========== -->
 <div id="login-mask" style="position:fixed;inset:0;z-index:99999;background:linear-gradient(135deg,#0a1a2e 0%,#0d2818 100%);display:flex;align-items:center;justify-content:center;">
   <div style="background:rgba(10,25,47,0.95);border:1px solid rgba(0,255,136,0.3);border-radius:16px;padding:40px;width:360px;box-shadow:0 20px 60px rgba(0,0,0,0.5);">
     <div style="text-align:center;margin-bottom:30px;">
-      <div style="font-size:28px;font-weight:bold;color:#00ff88;letter-spacing:2px;">欢—AI模型</div>
+      <div style="font-size:28px;font-weight:bold;color:#00ff88;letter-spacing:2px;">欢哥AI模型</div>
       <div style="font-size:12px;color:#888;margin-top:6px;">HUANGE AI MODEL · 请登录后使用</div>
     </div>
     <div style="margin-bottom:16px;">
@@ -2485,15 +2287,8 @@ window.addEventListener('DOMContentLoaded', function() {
 <div id="cloud-login" style="display:none;position:fixed;inset:0;background:linear-gradient(135deg,#0f1923,#1a2a3a);z-index:99999;align-items:center;justify-content:center;">
   <div style="width:380px;max-width:90vw;background:#1a2530;border:1px solid #2a3a4a;border-radius:16px;padding:32px;box-shadow:0 20px 60px rgba(0,0,0,.5);">
     <div style="text-align:center;margin-bottom:24px;">
-      <div style="display:flex;align-items:center;justify-content:center;gap:16px;">
-        <div style="font-size:28px;font-weight:800;color:#e8eef2;letter-spacing:2px;">欢—AI模型</div>
-        <img src="https://api.qrserver.com/v1/create-qr-code/?size=80x80&margin=4&data=https://qq894805001-a11y.github.io/huange-ai-model/" alt="扫码登录" style="width:80px;height:80px;border-radius:8px;border:2px solid #2a3a4a;background:#fff;padding:4px;"/>
-      </div>
+      <div style="font-size:28px;font-weight:800;color:#e8eef2;letter-spacing:2px;">欢哥AI模型</div>
       <div style="font-size:12px;color:#7a8a9a;margin-top:6px;">云端多人版 · 数据永不丢失</div>
-      <div style="margin-top:16px;">
-        <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&margin=8&data=https://qq894805001-a11y.github.io/huange-ai-model/" alt="扫码登录" style="width:120px;height:120px;border-radius:8px;border:2px solid #2a3a4a;background:#fff;padding:4px;"/>
-        <div style="font-size:11px;color:#7a8a9a;margin-top:6px;">手机扫码访问</div>
-      </div>
     </div>
     <div id="cloud-login-msg" style="display:none;padding:10px 12px;border-radius:8px;margin-bottom:14px;font-size:13px;"></div>
     <div style="margin-bottom:14px;">
@@ -2534,7 +2329,7 @@ window.addEventListener('DOMContentLoaded', function() {
     <div class="brand-mark">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="7.2" stroke="#2FA96B" stroke-width="1.6"/><path d="M12 4.8l2.1 1.6-.8 2.6h-2.6l-.8-2.6L12 4.8zM5.6 9.4l2.6.2 1.3 2.3-1.4 2.3-2.6-.9-1-2.5 1.1-1.6zM18.4 9.4l1.1 1.6-1 2.5-2.6.9-1.4-2.3 1.3-2.3 2.6-.2zM12 13.3l2.1 1.6-.8 2.6h-2.6l-.8-2.6L12 13.3z" fill="#E5B23D" stroke="#E5B23D" stroke-width=".5"/></svg>
     </div>
-    <div class="brand-name">欢—AI模型<small>HUANGE AI MODEL</small></div>
+    <div class="brand-name">欢哥AI模型<small>HUANGE AI MODEL</small></div>
     <div class="brand-tag">ELO × DIXON-COLES<br>MONTE CARLO</div>
   </header>
 
@@ -2583,10 +2378,6 @@ window.addEventListener('DOMContentLoaded', function() {
       <label class="neutral-mini">杯赛中立场（如世俱杯/超级杯，扣除主场优势）
         <span class="switch" style="width:46px;height:26px;"><input type="checkbox" id="api-neutral"><span class="track"></span></span>
       </label>
-      <div style="margin:8px 0;">
-        <button id="toggle-all-btn" onclick="toggleAllGroups()" style="width:100%;padding:6px 12px;background:var(--panel-2);border:1px solid var(--line-soft);border-radius:6px;color:var(--ink);font-size:12px;cursor:pointer;">📂 全部折叠</button>
-        <button id="toggle-showall-btn" onclick="toggleShowAll()" style="width:100%;padding:6px 12px;background:var(--panel-2);border:1px solid var(--line-soft);border-radius:6px;color:var(--ink);font-size:12px;cursor:pointer;margin-top:4px;">🎯 只显示有盘口</button>
-      </div>
       <div id="fx-container"></div>
       <div id="learn-panel"></div>
     </div>
@@ -2651,11 +2442,11 @@ window.addEventListener('DOMContentLoaded', function() {
       <span class="line-deco"></span>
     </h3>
     <div class="chart chart-narrow" id="chart-matrix"></div>
-    <!-- <p class="chart-cap">横轴为主队进球数，纵轴为客队进球数；颜色越亮概率越高，琥珀格为全场最可能比分。</p> -->
+    <p class="chart-cap">横轴为主队进球数，纵轴为客队进球数；颜色越亮概率越高，琥珀格为全场最可能比分。</p>
   </div>
 
-  <!-- Top5 比分（已隐藏） -->
-  <div class="card" id="r-topscores-card" style="display:none !important;">
+  <!-- Top5 比分 -->
+  <div class="card" id="r-topscores-card" style="display:none;">
     <h3>
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4L19 6" stroke="#E5B23D" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       最可能比分 TOP 5
@@ -2743,7 +2534,7 @@ window.addEventListener('DOMContentLoaded', function() {
   </button>
 
   <p class="disclaimer">
-    欢—AI模型 v12 · Elo + Dixon-Coles 泊松 + 逐分钟路径蒙特卡洛 + 伽马-泊松贝叶斯更新，融合市场赔率、阵容主力度与赛程密度修正。<br>
+    欢哥AI模型 v12 · Elo + Dixon-Coles 泊松 + 逐分钟路径蒙特卡洛 + 伽马-泊松贝叶斯更新，融合市场赔率、阵容主力度与赛程密度修正。<br>
     足球是低比分高随机运动，模型输出的是条件概率而非结果承诺；红牌、点球、裁判、天气等因素无法完全建模。<br>
     本工具仅供数据分析与学习参考，不构成投注建议，未满 18 周岁请勿参与任何博彩活动。
   </p>
@@ -3205,12 +2996,8 @@ function predict(hId,aId,opt){
  for(let i=0;i<N;i++)for(let j=0;j<N;j++)mat[i][j]/=tot;
  raw.w/=tot;raw.d/=tot;raw.l/=tot;
 
- // —— 自学习Elo：赛后根据实际赛果动态更新的Elo，优先于初始排名Elo ——
- const _slH=SelfLearner.getElo(h.id),_slA=SelfLearner.getElo(a.id);
- const _hElo=_slH?Object.assign({},h,{elo:_slH}):h;
- const _aElo=_slA?Object.assign({},a,{elo:_slA}):a;
  // —— Elo 交叉模型 + 三方融合（55% DC / 25% Elo / 20% 路径模拟）——
- const ep=eloProbs(_hElo,_aElo,opt);
+ const ep=eloProbs(h,a,opt);
  const fuse={w:0.55*raw.w+0.25*ep.w+0.20*path.w,
              d:0.55*raw.d+0.25*ep.d+0.20*path.d,
              l:0.55*raw.l+0.25*ep.l+0.20*path.l};
@@ -3290,29 +3077,15 @@ function predictLive(h,a,hLg,aLg,lhFull,laFull,opt){
   // 场上态势修正（ESPN 技术统计：射门/射正/角球代理压迫强度，控球加权，红牌重罚）
   if(L.stats&&min>=8){
    const sH=L.stats.h,sA=L.stats.a;
-   // xG近似模型：射正(60%) + 射门(25%) + 角球(10%) + 控球(5%)
-   // 学术验证：射正转化率约30%，射门转化率约10%，角球转化率约5%
-   const prox=s=>{
-    const sot=s.sot||0, shots=s.shots||0, corners=s.corners||0, poss=s.poss||50;
-    // 射正每次约0.30 xG，射门每次约0.10 xG，角球每次约0.02 xG
-    return sot*0.30 + (shots-sot)*0.08 + corners*0.02 + (poss-50)*0.001;
-   };
+   const prox=s=>(s.sot||0)*0.30+(s.shots||0)*0.10+(s.corners||0)*0.06;
    const pH=prox(sH),pA=prox(sA);
    const dom=(pH+pA)>0.02?pH/(pH+pA):0.5;
    const possH=sH.poss!=null?sH.poss/100:0.5;
    let mulH=0.78+0.44*dom+0.12*(possH-0.5);
    let mulA=0.78+0.44*(1-dom)+0.12*(0.5-possH);
-   // 红牌影响模型（根据学术研究：少打一方进攻下降30%，多打一方上升30%）
-   // 时间修正：红牌发生越晚，剩余时间越少，影响越小
-   const redTimeFactor = min < 45 ? 1.0 : min < 70 ? 0.9 : min < 80 ? 0.7 : 0.5;
-   if(sA.red){mulH*=1.20*redTimeFactor;} // 对方红牌，我方进攻增强
-   if(sH.red){mulH*=0.70*redTimeFactor;} // 我方红牌，我方进攻减弱
-   if(sH.red){mulA*=1.20*redTimeFactor;}
-   if(sA.red){mulA*=0.70*redTimeFactor;}
+   if(sA.red)mulH*=1.22;if(sH.red)mulH*=0.72;
+   if(sH.red)mulA*=1.22;if(sA.red)mulA*=0.72;
    mulH=clamp(mulH,0.6,1.45);mulA=clamp(mulA,0.6,1.45);
-   // 70分钟后体能衰减修正：末段进球率上升（学术验证：70分钟后进球率+15%，80分钟后+25%）
-   if(min>=70&&min<80){mulH*=1.08;mulA*=1.08;}
-   else if(min>=80){mulH*=1.15;mulA*=1.15;}
    // —— 态度/动机隐变量推断（贝叶斯：实力先验 × 场面观测 → 态度后验）——
    // 逻辑：强队场面压制但比分落后→认真追分(态度↑)；强队场面不占优→划水(态度↓)
    // 弱队场面压制→拼劲足(态度↑)；这就是"成年人认真起来赢面大 vs 成年人无所谓输面大"
@@ -3771,143 +3544,6 @@ function asianSettle(mat,line,type){
  return{win,winHalf,push,loseHalf,lose,
   winExp:win+.5*winHalf,loseExp:lose+.5*loseHalf};
 }
-
-// ===== 盘口自学习模型 =====
-// 从有盘口比赛中学习庄家开盘思路，对无盘口比赛模拟开盘
-// 使用SGD在线学习，权重持久化，持续自我优化
-const OddsLearner={
- weights:{ou:[0.3,0.9],sp:[0.25,-0.7]},
- lr:0.008,
- samples:0,
- _features(r){
-  let xgH=0,xgA=0;const mat=r.mat;
-  if(mat&&mat.length){for(let i=0;i<mat.length;i++)for(let j=0;j<mat[i].length;j++){const p=mat[i][j];if(isFinite(p)){xgH+=i*p;xgA+=j*p;}}}
-  return{xgSum:xgH+xgA,xgDiff:xgH-xgA};
- },
- predict(r){
-  const f=this._features(r);
-   const ou=this.weights.ou[0]+this.weights.ou[1]*f.xgSum;
-   const sp=this.weights.sp[0]+this.weights.sp[1]*f.xgDiff;
-  return{ouLine:Math.round(ou*4)/4,spLine:Math.round(sp*4)/4};
- },
- learn(r,actualOu,actualSp){
-  if(actualOu==null&&actualSp==null)return;
-  const f=this._features(r);
-  if(actualOu!=null){const pred=this.weights.ou[0]+this.weights.ou[1]*f.xgSum;const err=pred-actualOu;this.weights.ou[0]-=this.lr*err;this.weights.ou[1]-=this.lr*err*f.xgSum;}
-  if(actualSp!=null){const pred=this.weights.sp[0]+this.weights.sp[1]*f.xgDiff;const err=pred-actualSp;this.weights.sp[0]-=this.lr*err;this.weights.sp[1]-=this.lr*err*f.xgDiff;}
-  this.samples++;this._save();
- },
- _save(){try{localStorage.setItem('gc_odds_learner',JSON.stringify({w:this.weights,n:this.samples}));}catch(e){}},
- _load(){try{const s=JSON.parse(localStorage.getItem('gc_odds_learner')||'null');if(s&&s.w){this.weights=s.w;this.samples=s.n||0;}}catch(e){}}
-};
-OddsLearner._load();
-
-// ===== 增强自学习引擎 =====
-// 三大模块：Elo赛后更新、预测因子权重自学习、庄家偏差学习（价值盘识别）
-const SelfLearner={
- // ---------- 模块1：Elo赛后自学习 ----------
- // 标准Elo公式，根据实际赛果动态更新球队实力评分
- eloUpdate(hId,aId,hg,ag,neutral){
-  const ELO=this._load().elo||{};
-  const rh=ELO[hId]||1500, ra=ELO[aId]||1500;
-  const homeAdv=neutral?0:65; // 主场优势65分
-  const eh=1/(1+Math.pow(10,((ra+homeAdv)-rh)/400));
-  const ea=1-eh;
-  const sh=hg>ag?1:(hg===ag?0.5:0);
-  const sa=1-sh;
-  const gd=Math.abs(hg-ag);
-  const K=20*(1+0.1*gd); // 比分差距越大，K值越大（变化越显著）
-  ELO[hId]=Math.round(rh+K*(sh-eh));
-  ELO[aId]=Math.round(ra+K*(sa-ea));
-  const d=this._load();d.elo=ELO;this._save(d);
-  return{hNew:ELO[hId],aNew:ELO[aId],hDelta:ELO[hId]-rh,aDelta:ELO[aId]-ra};
- },
- getElo(teamId){const d=this._load();return(d.elo&&d.elo[teamId])||null;},
-
- // ---------- 模块2：预测因子权重自学习 ----------
- // 记录每个预测因子的历史命中率，动态调整权重
- // 因子：home主场, form近期状态, fatigue体能, attitude态度, injury伤病, lineup阵容
- factorWeights:{home:1.0,form:1.0,fatigue:1.0,attitude:1.0,injury:1.0,lineup:1.0},
- factorHits:{home:{n:0,h:0},form:{n:0,h:0},fatigue:{n:0,h:0},attitude:{n:0,h:0},injury:{n:0,h:0},lineup:{n:0,h:0}},
- // 赛后评估各因子方向是否正确，更新命中率
- learnFactors(factorDirs,actualRes){
-  // factorDirs: {home:'w'|'l'|null, form:'w'|'l'|null, ...} 每个因子指向的胜方
-  // actualRes: 'w'主队胜, 'd'平, 'l'客队胜
-  const d=this._load();
-  const fw=d.factorWeights||this.factorWeights;
-  const fh=d.factorHits||this.factorHits;
-  Object.keys(factorDirs).forEach(f=>{
-   const dir=factorDirs[f];
-   if(!dir||!fh[f])return;
-   fh[f].n++;
-   // 因子指向主队且主队胜，或指向客队且客队胜 → 命中
-   // 平局算半命中
-   if(actualRes==='d'){fh[f].h+=0.5;}
-   else if((dir==='w'&&actualRes==='w')||(dir==='l'&&actualRes==='l')){fh[f].h+=1;}
-  });
-  // 更新权重：命中率越高权重越大，用EMA平滑
-  Object.keys(fh).forEach(f=>{
-   if(fh[f].n>=5){
-    const hitRate=fh[f].h/fh[f].n;
-    // 权重 = 命中率 / 基准0.5，clamp到0.5-2.0
-    const target=Math.max(0.5,Math.min(2.0,hitRate/0.5));
-    fw[f]=fw[f]*0.9+target*0.1; // EMA平滑
-   }
-  });
-  d.factorWeights=fw;d.factorHits=fh;this._save(d);
- },
- getFactorWeight(factor){const d=this._load();return(d.factorWeights&&d.factorWeights[factor])||1.0;},
-
- // ---------- 模块3：庄家偏差学习（价值盘识别） ----------
- // 学习庄家开盘线和实际赛果的关系，识别庄家开错的"价值盘"
- // 按盘口线分桶统计实际大球/赢盘概率
- valueBins:{}, // {ou_2.5: {n, over}, sp_0.5: {n, win}}
- // 赛后记录庄家开盘和实际赛果
- learnMarketBias(ouLine,spLine,hg,ag){
-  const d=this._load();
-  const vb=d.valueBins||{};
-  if(ouLine!=null){
-   const key='ou_'+ouLine;
-   if(!vb[key])vb[key]={n:0,over:0};
-   vb[key].n++;
-   if(hg+ag>ouLine)vb[key].over++;
-  }
-  if(spLine!=null){
-   const key='sp_'+spLine;
-   if(!vb[key])vb[key]={n:0,win:0};
-   vb[key].n++;
-   if(hg-ag>spLine)vb[key].win++;
-  }
-  // 只保留最近200个桶的数据
-  const keys=Object.keys(vb);
-  if(keys.length>200){keys.sort((a,b)=>vb[b].n-vb[a].n).slice(200).forEach(k=>delete vb[k]);}
-  d.valueBins=vb;this._save(d);
- },
- // 获取某盘口线的历史实际概率（用于发现价值盘）
- getMarketActual(line,type){
-  const d=this._load();
-  const vb=d.valueBins||{};
-  const key=type+'_'+line;
-  const b=vb[key];
-  if(!b||b.n<10)return null; // 样本不足不参考
-  return type==='ou'?(b.over/b.n):(b.win/b.n);
- },
- // 判断是否为价值盘：模型概率与庄家隐含概率/历史实际概率差异大
- isValueBet(modelProb,line,type){
-  const marketActual=this.getMarketActual(line,type);
-  if(marketActual==null)return false;
-  // 模型概率与历史实际概率差异 > 10%，且方向一致 → 价值盘
-  const diff=modelProb-marketActual;
-  return Math.abs(diff)>0.10;
- },
-
- // ---------- 持久化 ----------
- _load(){try{return Object.assign({elo:{},factorWeights:this.factorWeights,factorHits:this.factorHits,valueBins:{}},JSON.parse(localStorage.getItem('gc_self_learn')||'{}'));}catch(e){return{elo:{},factorWeights:this.factorWeights,factorHits:this.factorHits,valueBins:{}};}},
- _save(d){try{localStorage.setItem('gc_self_learn',JSON.stringify(d));if(typeof Cloud!=='undefined'&&Cloud.token)Cloud.markDirty();}catch(e){}}
-};
-
-
-
 function pct100(x){if(x==null||!isFinite(x))return '—';return(x*100).toFixed(0)+'%';}
 
 // —— 赛前 vs 临场对比 ——
@@ -3942,16 +3578,6 @@ function edgeChip(model,mkt){
 }
 // —— 盘口校准：模型与市场概率贝叶斯收缩融合 ——
 function amProb(p){if(p==null)return null;return p>0?p/(p+100):100/(100-p);}
-// 市场赔率校准：模型概率与市场概率贝叶斯收缩融合
-// modelP: 模型概率(0-1), marketP: 市场概率(0-1)
-// weight: 市场权重(0-1)，越接近1越相信市场
-function marketCalibrate(modelP, marketP, weight=0.3){
-  if(marketP==null||isNaN(marketP))return modelP;
-  if(modelP==null||isNaN(modelP))return marketP;
-  // 贝叶斯收缩：模型先验 + 市场观测
-  // 简单加权融合，权重根据市场可信度调整
-  return modelP*(1-weight) + marketP*weight;
-}
 function oddsBigMove(o){
  if(!o)return false;
  if(o.over&&o.over.open){const cur=o.over.live||o.over.close;if(cur&&Math.abs(cur.line-o.over.open.line)>=0.5)return true;}
@@ -3969,59 +3595,6 @@ function marketBlend(r,o){
  const s=f.W+f.D+f.L;
  return{W:f.W/s,D:f.D/s,L:f.L/s,w,big};
 }
-// 盘口变化历史记录（持久化保存）
-const OddsHistory = {
-  KEY: 'gc_odds_history_v1',
-  
-  load() {
-    try { return JSON.parse(localStorage.getItem(this.KEY) || '{}'); }
-    catch(e) { return {}; }
-  },
-  
-  save(data) {
-    try { localStorage.setItem(this.KEY, JSON.stringify(data)); }
-    catch(e) {}
-  },
-  
-  // 记录一次变化
-  record(fid, changes, stage, snap) {
-    const all = this.load();
-    if (!all[fid]) all[fid] = [];
-    all[fid].push({
-      ts: Date.now(),
-      stage: stage, // open/prelive/live
-      changes: changes,
-      ou: snap ? snap.ou : null,
-      sp: snap ? snap.sp : null
-    });
-    // 每场最多保留100条变化记录
-    if (all[fid].length > 100) all[fid] = all[fid].slice(-100);
-    this.save(all);
-  },
-  
-  // 获取某场比赛的变化历史
-  get(fid) {
-    const all = this.load();
-    return all[fid] || [];
-  },
-  
-  // 清理730天前的旧记录
-  cleanup() {
-    const all = this.load();
-    const cutoff = Date.now() - 730*24*3600e3;
-    let changed = false;
-    for (const fid in all) {
-      const filtered = all[fid].filter(h => h.ts > cutoff);
-      if (filtered.length !== all[fid].length) {
-        if (filtered.length) all[fid] = filtered;
-        else delete all[fid];
-        changed = true;
-      }
-    }
-    if (changed) this.save(all);
-  }
-};
-
 const PREV_ODDS={};
 function oddsSnapshot(o,isLive){
  if(!o)return null;
@@ -4038,14 +3611,9 @@ function detectShift(fid,o,isLive){
  if(cur.sp!=null&&prev.sp!=null&&Math.abs(cur.sp-prev.sp)>=0.25)msgs.push('让球盘口 '+fmtSpread(prev.sp)+' → '+fmtSpread(cur.sp));
  if(cur.ouP!=null&&prev.ouP!=null&&Math.abs(cur.ouP-prev.ouP)>=0.06)msgs.push('大球隐含概率 '+(prev.ouP*100).toFixed(0)+'% → '+(cur.ouP*100).toFixed(0)+'%');
  if(cur.spP!=null&&prev.spP!=null&&Math.abs(cur.spP-prev.spP)>=0.06)msgs.push('让球隐含概率 '+(prev.spP*100).toFixed(0)+'% → '+(cur.spP*100).toFixed(0)+'%');
- if(msgs.length){
-   // 自动记录到变化历史
-   const stage = isLive ? 'live' : 'prelive';
-   OddsHistory.record(fid, msgs, stage, cur);
-  }
-  return msgs.length?msgs:null;
+ return msgs.length?msgs:null;
 }
-function renderOdds(ed,r,r0,H,A,isEspn,fid){
+function renderOdds(ed,r,r0,H,A,isEspn){
  const card=document.getElementById('r-odds-card'),box=document.getElementById('r-odds');
  if(!isEspn||!ed||!ed.odds||(r.live&&r.live.finished)){card.style.display='none';return;}
  const isLive=!!r.live,o=ed.odds;
@@ -4124,28 +3692,7 @@ function renderOdds(ed,r,r0,H,A,isEspn,fid){
   if(r.live.pitch&&r.live.pitch.attLabel)recHtml+='<br><span style="color:var(--ink-dim);font-size:10px;">态度推断：'+escHtml(r.live.pitch.attLabel)+'</span>';
   recHtml+='</div>';
  }
- // 判断阶段：滚球 / 临场(开赛前15分钟内) / 当前
-   let stageLabel = '当前';
-   if (isLive) stageLabel = '滚球';
-   else if (ed.date && (new Date(ed.date).getTime() - Date.now()) < 15*60000) stageLabel = '临场';
-   if(mv||recHtml){
-    html+='<div class="mk-move"><b>开盘 → '+stageLabel+'变动</b><br>'+mv;
-    // 显示完整变化历史
-    const history = OddsHistory.get(fid);
-    if(history.length > 1){
-     html+='<div style="margin-top:8px;font-size:12px;color:var(--ink-faint);">变化历史（共'+history.length+'次）：</div>';
-     html+='<div style="max-height:180px;overflow-y:auto;margin-top:4px;">';
-     history.slice().reverse().forEach((h,i)=>{
-      const time = new Date(h.ts);
-      const timeStr = time.getHours().toString().padStart(2,'0')+':'+time.getMinutes().toString().padStart(2,'0');
-      html+='<div style="font-size:11px;color:var(--ink-soft);padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.05);">';
-      html+='<span style="color:var(--ink-faint);">'+timeStr+'</span> '+h.changes.join('；');
-      html+='</div>';
-     });
-     html+='</div>';
-    }
-    html+=recHtml+'</div>';
-   }
+ if(mv||recHtml)html+='<div class="mk-move"><b>开盘 → '+(isLive?'滚球':'临场')+'变动</b><br>'+mv+recHtml+'</div>';
  // 模拟结论
  const edges=[['主胜',r.W-(mkt.ml.h||0)],['平局',r.D-(mkt.ml.d||0)],['客胜',r.L-(mkt.ml.a||0)]];
  edges.sort((a,b)=>Math.abs(b[1])-Math.abs(a[1]));
@@ -4371,7 +3918,7 @@ function renderReport(){
  renderCompare(ed,r,r0,H,A);
  renderPitch(ed,r,H,A,isEspnMatch);
  renderLineups(ed,r,H,A,fid,isEspnMatch,basis);
- renderOdds(ed,r,r0,H,A,isEspnMatch,fid);
+ renderOdds(ed,r,r0,H,A,isEspnMatch);
  renderIntegrity(ed,r,r0,H,A,opt,isEspnMatch,basis);
  renderScript(r,H,A);
  renderBrief(ed,r,r0,H,A,basis,opt);
@@ -4704,10 +4251,8 @@ const ESPN_GROUPS=[
  {g:'欧洲U系列&女足',list:[
   ['eng.5','英超U21','L',1.60,1.25,.70,0],['esp.5','西甲U21','L',1.50,1.20,.68,0],
   ['ger.5','德甲U21','L',1.65,1.30,.68,0],['ita.5','意甲U21','L',1.45,1.15,.66,0],
-  ['eng.w.1','女足英超','L',1.50,1.15,.72,1],['esp.w.1','女足西甲','L',1.45,1.10,.70,1],
-  ['fra.w.1','女足法甲','L',1.40,1.05,.68,1],['ned.w.1','女足荷甲','L',1.60,1.20,.66,1],
-  ['usa.nwsl','美国NWSL女足','L',1.45,1.10,.74,1],['mex.w.1','女足墨超','L',1.40,1.05,.66,0],
-  ['aus.w.1','女足澳超','L',1.40,1.05,.64,0]]},
+  ['eng.w1','女足英超','L',1.50,1.15,.65,0],['esp.w1','女足西甲','L',1.45,1.10,.63,0],
+  ['ger.w1','女足德甲','L',1.55,1.20,.62,0],['fra.w1','女法甲','L',1.40,1.05,.60,0]]},
  {g:'南美联赛',list:[
   ['bra.1','巴甲','L',1.32,.98,.88,1],['arg.1','阿甲','L',1.22,.92,.85,1],
   ['bra.2','巴乙','L',1.25,.92,.80,1],['arg.2','阿乙','L',1.20,.88,.76,0],['arg.3','阿丙','L',1.15,.85,.68,0],
@@ -4721,19 +4266,10 @@ const ESPN_GROUPS=[
   ['crc.1','哥斯达黎加甲','L',1.35,1.00,.74,0],['hon.1','洪都拉斯甲','L',1.35,1.00,.72,0],
   ['gua.1','危地马拉甲','L',1.35,1.00,.70,0],['slv.1','萨尔瓦多甲','L',1.35,1.00,.70,0]]},
  {g:'亚洲 / 大洋洲 / 非洲',list:[
-  ['jpn.1','日本 J1','L',1.45,1.20,.82,1],['jpn.2','日本 J2','L',1.40,1.10,.72,0],
-  ['jpn.3','日本 J3','L',1.35,1.05,.62,0],['jpn.shakaijin','日本足球联赛','L',1.30,1.00,.58,0],
-  ['chn.1','中超','L',1.55,1.15,.80,0],['chn.2','中甲','L',1.45,1.05,.70,0],['chn.3','中乙','L',1.35,1.00,.60,0],
-  ['ksa.1','沙特联','L',1.50,1.15,.84,0],['ksa.2','沙特甲级','L',1.40,1.05,.72,0],
-  ['aus.1','澳超','L',1.55,1.20,.82,0],['aus.2','澳维超','L',1.40,1.05,.68,0],
-  ['idn.1','印尼超','L',1.45,1.10,.70,0],['ind.1','印度超','L',1.40,1.05,.72,0],
-  ['tha.1','泰超','L',1.40,1.05,.68,0],['tha.2','泰甲','L',1.35,1.00,.60,0],
-  ['mys.1','马来超','L',1.40,1.05,.66,0],['sgp.1','新加坡超','L',1.35,1.00,.62,0],
-  ['vnm.1','越南超','L',1.35,1.00,.64,0],['phl.1','菲律宾超','L',1.30,.95,.60,0],
-  ['hk.1','香港超','L',1.35,1.00,.62,0],['kor.1','韩国K1','L',1.45,1.15,.78,1],['kor.2','韩国K2','L',1.40,1.05,.68,0],
-  ['rsa.1','南非超','L',1.30,.95,.72,0],['nga.1','尼日利亚超','L',1.40,1.00,.68,0],
-  ['egy.1','埃及超','L',1.35,1.00,.70,0],['mar.1','摩洛哥超','L',1.35,1.00,.72,0],
-  ['tun.1','突尼斯超','L',1.30,.95,.66,0],['alg.1','阿尔及利亚超','L',1.30,.95,.66,0]]},
+  ['jpn.1','日本 J1','L',1.45,1.20,.82,1],['chn.1','中超','L',1.55,1.15,.80,0],['ksa.1','沙特联','L',1.50,1.15,.84,0],
+  ['aus.1','澳超','L',1.55,1.20,.82,0],['idn.1','印尼超','L',1.45,1.10,.70,0],['ind.1','印度超','L',1.40,1.05,.72,0],
+  ['tha.1','泰超','L',1.40,1.05,.68,0],['mys.1','马来超','L',1.40,1.05,.66,0],
+  ['rsa.1','南非超','L',1.30,.95,.72,0],['nga.1','尼日利亚超','L',1.40,1.00,.68,0]]},
  {g:'欧洲杯赛',list:[
   ['uefa.champions','欧冠','C',1.55,1.20,.98,1],['uefa.europa','欧联','C',1.50,1.15,.93,1],
   ['uefa.europa.conf','欧协联','C',1.45,1.10,.88,1],['uefa.nations','欧国联','C',1.45,1.15,.92,0],
@@ -4743,9 +4279,7 @@ const ESPN_GROUPS=[
   ['ger.dfb_pokal','德国杯','C',1.50,1.15,.90,0],['ger.super_cup','德超杯','C',1.45,1.10,.92,0],
   ['ita.coppa_italia','意大利杯','C',1.45,1.10,.90,0],['ita.super_cup','意超杯','C',1.40,1.05,.92,0],
   ['fra.coupe_de_france','法国杯','C',1.40,1.05,.88,0],['fra.super_cup','法超杯','C',1.40,1.05,.90,0],
-  ['por.taca.portugal','葡萄牙杯','C',1.45,1.10,.88,0],['ned.cup','荷兰杯','C',1.55,1.15,.88,0],['ned.supercup','荷超杯','C',1.50,1.15,.90,0],
-  ['jpn.cup','天皇杯','C',1.45,1.10,.78,0],['jpn.league_cup','日本联赛杯','C',1.40,1.05,.72,0],
-  ['usa.open','美国公开杯','C',1.40,1.05,.70,0],['mex.copa','墨西哥杯','C',1.35,1.00,.68,0]]},
+  ['por.taca.portugal','葡萄牙杯','C',1.45,1.10,.88,0],['ned.cup','荷兰杯','C',1.55,1.15,.88,0],['ned.supercup','荷超杯','C',1.50,1.15,.90,0]]},
  {g:'南美杯赛',list:[
   ['conmebol.libertadores','解放者杯','C',1.40,1.05,.90,1],['conmebol.sudamericana','南美杯','C',1.30,.98,.82,1],
   ['conmebol.recopa','南美优胜者杯','C',1.35,1.00,.88,0],['conmebol.america','美洲杯','C',1.35,1.05,.90,0],
@@ -4788,131 +4322,6 @@ const FD_CODES='PL,PD,SA,BL,FL1,ELC,CL,BSA,CLI,PPL,ERED,WC,EC';
 const AFB_KEY='ce2d77c10f8e8838ea47b98d24ae8ae7';
 const AFB_BASE='https://v3.football.api-sports.io';
 const AFB_DAILY_LIMIT=95; // 免费版100，留5个余量
-// ============================================================
-// 自建足球数据API（盘口/xG/阵容/伤停/11家博彩公司）
-// ============================================================
-const SELF_API_BASE='https://api.codetabs.com/v1/proxy?quest=http://47.99.155.27:8321';
-const SELF_API_KEY='fmjwx8H7vbA6j8RiPD6sn9UOsrQSvPJ3d478dn4xwN8';
-const SELF_API_ENABLED=true; // 设为false可禁用
-const SELF_CACHE={}; // 本地缓存
-// 自建API配额管理（500次/天，50次/分钟）
-const SELF_DAILY_LIMIT=480; // 留20次余量
-const SELF_MIN_LIMIT=45; // 每分钟45次，留5次余量
-const SELF_CALLS_TODAY=[]; // 今天的调用时间戳
-const SELF_MIN_CALLS=[]; // 最近60秒的调用时间戳
-function selfQuota(){
-  const today=new Date().toISOString().slice(0,10);
-  let raw=JSON.parse(localStorage.getItem('gc_self_quota')||'{}');
-  if(raw.date!==today){raw={date:today,count:0};}
-  // 清理60秒前的分钟级记录
-  const now=Date.now();
-  while(SELF_MIN_CALLS.length&&now-SELF_MIN_CALLS[0]>60000)SELF_MIN_CALLS.shift();
-  return {
-    today:raw.count||0,
-    todayLimit:SELF_DAILY_LIMIT,
-    min:SELF_MIN_CALLS.length,
-    minLimit:SELF_MIN_LIMIT,
-    remaining:SELF_DAILY_LIMIT-(raw.count||0)
-  };
-}
-function selfConsume(n){
-  const today=new Date().toISOString().slice(0,10);
-  let raw=JSON.parse(localStorage.getItem('gc_self_quota')||'{}');
-  if(raw.date!==today){raw={date:today,count:0};}
-  raw.count=(raw.count||0)+(n||1);
-  localStorage.setItem('gc_self_quota',JSON.stringify(raw));
-  SELF_MIN_CALLS.push(Date.now());
-  return raw;
-}
-// 自建API请求函数（带配额和限速）
-async function selfApiGet(path){
-  if(!SELF_API_ENABLED)throw new Error('SELF API disabled');
-  const cacheKey=path;
-  if(SELF_CACHE[cacheKey]&&Date.now()-SELF_CACHE[cacheKey].ts<120000){
-    return SELF_CACHE[cacheKey].data;
-  }
-  // 检查配额
-  const q=selfQuota();
-  if(q.today>=q.todayLimit)throw new Error('自建API每日配额已用完（'+q.todayLimit+'次/天）');
-  if(q.min>=q.minLimit)throw new Error('自建API每分钟限速，稍后重试');
-  const ctrl=new AbortController();
-  const timer=setTimeout(()=>ctrl.abort(),12000);
-  try{
-    const res=await fetch(SELF_API_BASE+path,{
-      headers:{'X-API-Token':SELF_API_KEY,'Accept':'application/json'},
-      signal:ctrl.signal
-    });
-    clearTimeout(timer);
-    selfConsume(1);
-    if(res.status===401)throw new Error('自建API token无效');
-    if(!res.ok)throw new Error('自建API HTTP '+res.status);
-    const body=await res.json();
-    SELF_CACHE[cacheKey]={ts:Date.now(),data:body};
-    return body;
-  }catch(e){
-    clearTimeout(timer);
-    throw e;
-  }
-}
-// 获取今日比赛列表（自建API）
-async function selfFetchToday(){
-  const data=await selfApiGet('/api/today');
-  return data;
-}
-// 获取单场完整详情（自建API）
-async function selfFetchMatchFull(eventId){
-  const data=await selfApiGet('/match_full/'+eventId);
-  return data;
-}
-// 获取赛前xG预期
-async function selfFetchExpectedXg(eventId){
-  try{
-    const data=await selfApiGet('/expected_xg/'+eventId);
-    return data;
-  }catch(e){return null;}
-}
-// 获取球队xG形态
-async function selfFetchTeamXg(teamName){
-  try{
-    const data=await selfApiGet('/team_xg_form/'+encodeURIComponent(teamName)+'?n=10');
-    return data;
-  }catch(e){return null;}
-}
-// 从自建API比赛列表提取盘口信息
-function selfExtractOdds(match){
-  if(!match||!match.odds||!match.odds_available)return null;
-  const o=match.odds;
-  const result={};
-  // 欧赔胜平负
-  if(o['胜平负']){
-    result.h=o['胜平负']['主胜'];
-    result.d=o['胜平负']['平局'];
-    result.a=o['胜平负']['客胜'];
-  }
-  // 亚盘让球
-  if(o['亚盘']){
-    // 解析让球盘口
-    for(const k in o['亚盘']){
-      if(k.startsWith('主-')||k.startsWith('主+')){
-        result.spreadLine=parseFloat(k.replace('主',''));
-        result.spP=o['亚盘'][k];
-        break;
-      }
-    }
-  }
-  // 大小球
-  for(const k in o){
-    if(k.startsWith('大小球')){
-      const m=k.match(/大小球\(([\d.]+)\)/);
-      if(m){
-        result.ouLine=parseFloat(m[1]);
-        result.ouOver=o[k]['大'+m[1]];
-        result.ouUnder=o[k]['小'+m[1]];
-      }
-    }
-  }
-  return result;
-}
 // 动态预算：根据今日总比赛数，平均分配配额，确保每场都能用到
 function afbBudget(){
  const q=afbQuota();
@@ -4953,28 +4362,6 @@ async function afbFetch(path){
   if(!res.ok)throw new Error('AFB HTTP '+res.status);
   return await res.json();
  }catch(e){afbConsume(1);throw e;}
-}
-// API-Football 专属补充联赛（ESPN不覆盖）：J2=224 J3=320 天皇杯=99 联赛杯=100
-const AFB_EXTRA_LEAGUES=[224,320,99,100];
-// 拉取补充联赛今明两天赛程（12小时缓存，每天约消耗4次配额，避免超额）
-async function afbFetchExtraFixtures(d0Str,d1Str){
- const today=new Date().toISOString().slice(0,10);
- const cacheKey='gc_afb_extra_'+today;
- let fixtures=[];
- const cached=JSON.parse(localStorage.getItem(cacheKey)||'null');
- if(cached&&cached.ts&&Date.now()-cached.ts<12*3600e3){
-  fixtures=cached.data||[];
- }else{
-  const leagueParam=AFB_EXTRA_LEAGUES.join(',');
-  for(const d of [d0Str,d1Str]){
-   try{
-    const j=await afbFetch('/fixtures?date='+d+'&league='+leagueParam+'&timezone=Asia/Shanghai');
-    (j.response||[]).forEach(f=>{const n=normFixture('apifb',f);if(n)fixtures.push(n);});
-   }catch(e){/*配额不足则跳过，使用缓存*/}
-  }
-  try{localStorage.setItem(cacheKey,JSON.stringify({ts:Date.now(),data:fixtures}));}catch(e){}
- }
- return fixtures;
 }
 // 通过队名和日期在API-Football查找fixture ID（带缓存）
 async function afbFindFixture(homeName,awayName,dateISO){
@@ -5046,123 +4433,6 @@ async function afbCheckLive(homeName,awayName,dateISO){
   return {status:f.fixture.status.short,elapsed:f.fixture.status.elapsed,homeScore:f.goals.home,awayScore:f.goals.away};
  }catch(e){return null;}
 }
-// AFB实时比分补充：确保所有进行中比赛有准确比分
-const AFB_LIVE_CACHE={};
-async function afbEnrichLiveScores(){
- try{
-  if(!LAST_HOME||!LAST_HOME.all)return;
-  const q=afbQuota();
-  if(q.count>=q.limit)return;
-  // 筛选所有进行中的比赛
-  const liveMatches=LAST_HOME.all.filter(f=>{
-   if(!LIVE_ST.includes(f.st))return false;
-   const cached=AFB_LIVE_CACHE[f.id];
-   if(cached&&Date.now()-cached.ts<60000)return false; // 60秒缓存
-   return true;
-  });
-  if(!liveMatches.length)return;
-  // 按优先级排序：0-0且时间久的排前面（ESPN最可能没更新）
-  liveMatches.sort((a,b)=>{
-   const aZero=(a.hg??0)+(a.ag??0)===0?0:1;
-   const bZero=(b.hg??0)+(b.ag??0)===0?0:1;
-   return aZero-bZero;
-  });
-  // 每次最多处理10场
-  const toProcess=liveMatches.slice(0,10);
-  let updated=0;
-  for(const f of toProcess){
-   try{
-    const result=await afbCheckLive(f.home.name,f.away.name,f.dateISO);
-    AFB_LIVE_CACHE[f.id]={ts:Date.now(),data:result};
-    if(result&&result.status){
-     if(['1H','2H','HT','ET','BT','P','SUSP','INT','AET','PEN','FT','FINISHED'].includes(result.status)){
-      f.st=result.status;
-      if(result.elapsed!=null)f.elapsed=result.elapsed;
-     }
-     // 只有AFB有实际比分时才更新
-     if(result.homeScore!=null)f.hg=result.homeScore;
-     if(result.awayScore!=null)f.ag=result.awayScore;
-     updated++;
-    }
-   }catch(e){}
-  }
-  if(updated>0){
-   renderHomeList();
-   console.log('[AFB-Live] 已更新'+updated+'场比分，剩余配额'+(q.limit-q.count-10));
-  }
- }catch(e){console.log('[AFB-Live] 补充失败:',e.message);}
-}
-// 自建API首页数据补充：从GitHub读取机器人预取的盘口、xG、中文队名
-async function selfApiEnrichHome(){
- try{
-  if(!LAST_HOME||!LAST_HOME.all)return;
-  console.log('[SELF-API] 开始从GitHub读取预取数据...');
-  // 从GitHub Raw读取机器人预取的自建API数据（避免HTTP混合内容限制）
-  const ghUrl='https://raw.githubusercontent.com/qq894805001-a11y/huange-ai-model/main/data/self_api_today.json?t='+Date.now();
-  const resp=await fetch(ghUrl,{cache:'no-store'});
-  if(!resp.ok){
-    console.log('[SELF-API] GitHub预取文件不存在:',resp.status,'（机器人下次运行后自动生成）');
-    return;
-  }
-  const ghData=await resp.json();
-  console.log('[SELF-API] GitHub预取时间:',ghData.fetched_at);
-  const matches=ghData.matches||[];
-  if(!Array.isArray(matches)||!matches.length){
-    console.log('[SELF-API] 无比赛数据');
-    return;
-  }
-  console.log('[SELF-API] 获取到'+matches.length+'场比赛');
-  // 建立队名匹配索引
-  const norm=n=>String(n||'').toLowerCase().replace(/[^a-z0-9\u4e00-\u9fa5]/g,'');
-  let enriched=0;
-  matches.forEach(sm=>{
-    const sh=norm(sm.home_team),sa=norm(sm.away_team);
-    // 在现有比赛列表中匹配
-    const match=LAST_HOME.all.find(f=>{
-      const fh=norm(f.home.name),fa=norm(f.away.name);
-      return (fh.includes(sh)||sh.includes(fh)||fa.includes(sa)||sa.includes(fa));
-    });
-    if(match){
-      // 补充盘口数据
-      const odds=selfExtractOdds(sm);
-      if(odds){
-        HOME_ODDS_CACHE[match.id]={
-          ouLine:odds.ouLine||null,
-          ouP:odds.ouOver?Math.min(0.9,odds.ouOver/(odds.ouOver+odds.ouUnder)):null,
-          ouSim:false,
-          spreadLine:odds.spreadLine||null,
-          spP:odds.spP||null,
-          spSim:false,
-          none:false
-        };
-      }
-      // 补充比分和状态
-      if(sm.status){
-        if(sm.status==='live'||sm.status==='inplay'){
-          match.st='2H';
-          if(sm.minute)match.elapsed=sm.minute;
-        }
-        if(sm.home_score!=null)match.hg=sm.home_score;
-        if(sm.away_score!=null)match.ag=sm.away_score;
-      }
-      // 补充中文队名（如果当前队名是英文）
-      if(sm.home_team_zh&&/^[a-zA-Z\s]+$/.test(match.home.name)){
-        match.home.name=sm.home_team_zh;
-      }
-      if(sm.away_team_zh&&/^[a-zA-Z\s]+$/.test(match.away.name)){
-        match.away.name=sm.away_team_zh;
-      }
-      enriched++;
-    }
-  });
-  if(enriched>0){
-    renderHomeList();
-    console.log('[SELF-API] 已补充'+enriched+'场比赛的盘口和数据');
-  }
- }catch(e){
-  console.log('[SELF-API] 补充失败:',e.message);
- }
-}
 function getProv(){return 'espn';}
 const getKey=()=>'';
 const apiBase=()=>API_BASE_DIRECT;
@@ -5188,200 +4458,6 @@ function zhNorm(s){
   .replace(/['’`´.]/g,'').replace(/[^a-z0-9一-鿿]+/g,' ').trim().replace(/\s+/g,' ');
 }
 const ZH_EXACT={
-// 常见国家队（友谊赛/杯赛）
-"Solomon Islands":"所罗门群岛",
-"Palestine":"巴勒斯坦",
-"New Zealand":"新西兰",
-"Japan":"日本",
-"Uruguay":"乌拉圭",
-"Ecuador":"厄瓜多尔",
-"Maldives":"马尔代夫",
-"Uzbekistan":"乌兹别克斯坦",
-"Vanuatu":"瓦努阿图",
-"Papua New Guinea":"巴布亚新几内亚",
-"New Caledonia":"新喀里多尼亚",
-"Korea Republic":"韩国",
-"South Korea":"韩国",
-"North Korea":"朝鲜",
-"China PR":"中国",
-"China":"中国",
-"Chinese Taipei":"中华台北",
-"Hong Kong":"中国香港",
-"Macau":"中国澳门",
-"Australia":"澳大利亚",
-"Iran":"伊朗",
-"Iraq":"伊拉克",
-"Saudi Arabia":"沙特阿拉伯",
-"Qatar":"卡塔尔",
-"UAE":"阿联酋",
-"Thailand":"泰国",
-"Vietnam":"越南",
-"Malaysia":"马来西亚",
-"Indonesia":"印度尼西亚",
-"Philippines":"菲律宾",
-"Singapore":"新加坡",
-"Myanmar":"缅甸",
-"India":"印度",
-"Bangladesh":"孟加拉国",
-"Sri Lanka":"斯里兰卡",
-"Nepal":"尼泊尔",
-"Pakistan":"巴基斯坦",
-"Afghanistan":"阿富汗",
-"Syria":"叙利亚",
-"Lebanon":"黎巴嫩",
-"Jordan":"约旦",
-"Israel":"以色列",
-"Turkey":"土耳其",
-"Russia":"俄罗斯",
-"Poland":"波兰",
-"Germany":"德国",
-"France":"法国",
-"Spain":"西班牙",
-"Portugal":"葡萄牙",
-"Italy":"意大利",
-"England":"英格兰",
-"Scotland":"苏格兰",
-"Wales":"威尔士",
-"Netherlands":"荷兰",
-"Belgium":"比利时",
-"Switzerland":"瑞士",
-"Austria":"奥地利",
-"Croatia":"克罗地亚",
-"Serbia":"塞尔维亚",
-"Greece":"希腊",
-"Denmark":"丹麦",
-"Sweden":"瑞典",
-"Norway":"挪威",
-"Finland":"芬兰",
-"Iceland":"冰岛",
-"Ireland":"爱尔兰",
-"Ukraine":"乌克兰",
-"Czech Republic":"捷克",
-"Slovakia":"斯洛伐克",
-"Hungary":"匈牙利",
-"Romania":"罗马尼亚",
-"Brazil":"巴西",
-"Argentina":"阿根廷",
-"Chile":"智利",
-"Colombia":"哥伦比亚",
-"Peru":"秘鲁",
-"Bolivia":"玻利维亚",
-"Paraguay":"巴拉圭",
-"Venezuela":"委内瑞拉",
-"Mexico":"墨西哥",
-"USA":"美国",
-"United States":"美国",
-"Canada":"加拿大",
-"Costa Rica":"哥斯达黎加",
-"Panama":"巴拿马",
-"Honduras":"洪都拉斯",
-"Guatemala":"危地马拉",
-"El Salvador":"萨尔瓦多",
-"Nicaragua":"尼加拉瓜",
-"Jamaica":"牙买加",
-"Cuba":"古巴",
-"Haiti":"海地",
-"Dominican Republic":"多米尼加",
-"Puerto Rico":"波多黎各",
-"Trinidad and Tobago":"特立尼达和多巴哥",
-"Guyana":"圭亚那",
-"Suriname":"苏里南",
-"SV Kapfenberg":"卡芬堡",
-// 非洲国家队
-"South Africa":"南非",
-"Egypt":"埃及",
-"Nigeria":"尼日利亚",
-"Ghana":"加纳",
-"Cameroon":"喀麦隆",
-"Morocco":"摩洛哥",
-"Algeria":"阿尔及利亚",
-"Tunisia":"突尼斯",
-"Ivory Coast":"科特迪瓦",
-"Senegal":"塞内加尔",
-"Kenya":"肯尼亚",
-"Ethiopia":"埃塞俄比亚",
-"Tanzania":"坦桑尼亚",
-"Uganda":"乌干达",
-"Zambia":"赞比亚",
-"Zimbabwe":"津巴布韦",
-"Botswana":"博茨瓦纳",
-"Namibia":"纳米比亚",
-"Angola":"安哥拉",
-"Mozambique":"莫桑比克",
-"Madagascar":"马达加斯加",
-"Mali":"马里",
-"Burkina Faso":"布基纳法索",
-"Guinea":"几内亚",
-"Guinea-Bissau":"几内亚比绍",
-"Sierra Leone":"塞拉利昂",
-"Liberia":"利比里亚",
-"Togo":"多哥",
-"Benin":"贝宁",
-"Niger":"尼日尔",
-"Chad":"乍得",
-"Gabon":"加蓬",
-"Congo":"刚果(布)",
-"DR Congo":"刚果(金)",
-"Equatorial Guinea":"赤道几内亚",
-"Burundi":"布隆迪",
-"Rwanda":"卢旺达",
-"Malawi":"马拉维",
-"Lesotho":"莱索托",
-"Eswatini":"埃斯瓦蒂尼",
-"Cape Verde":"佛得角",
-"Gambia":"冈比亚",
-"Comoros":"科摩罗",
-"Mauritania":"毛里塔尼亚",
-"Sudan":"苏丹",
-"Libya":"利比亚",
-// 大洋洲国家队
-"Fiji":"斐济",
-"Tahiti":"塔希提",
-"Samoa":"萨摩亚",
-"American Samoa":"美属萨摩亚",
-"Cook Islands":"库克群岛",
-"Tonga":"汤加",
-// 更多中北美
-"Aruba":"阿鲁巴",
-"Curaçao":"库拉索",
-"Cayman Islands":"开曼群岛",
-"Turks and Caicos Islands":"特克斯和凯科斯群岛",
-"Montserrat":"蒙特塞拉特",
-"Anguilla":"安圭拉",
-// 更多欧洲
-"Luxembourg":"卢森堡",
-"Malta":"马耳他",
-"Cyprus":"塞浦路斯",
-"Faroe Islands":"法罗群岛",
-"Montenegro":"黑山",
-"North Macedonia":"北马其顿",
-"Bosnia and Herzegovina":"波黑",
-"Belarus":"白俄罗斯",
-"Moldova":"摩尔多瓦",
-"Georgia":"格鲁吉亚",
-"Armenia":"亚美尼亚",
-"Azerbaijan":"阿塞拜疆",
-"Kazakhstan":"哈萨克斯坦",
-"Lithuania":"立陶宛",
-"Latvia":"拉脱维亚",
-"Estonia":"爱沙尼亚",
-"Liechtenstein":"列支敦士登",
-"San Marino":"圣马力诺",
-"Andorra":"安道尔",
-"Gibraltar":"直布罗陀",
-// 更多亚洲
-"Kyrgyzstan":"吉尔吉斯斯坦",
-"Tajikistan":"塔吉克斯坦",
-"Turkmenistan":"土库曼斯坦",
-"Kuwait":"科威特",
-"Bahrain":"巴林",
-"Oman":"阿曼",
-"Yemen":"也门",
-"Bhutan":"不丹",
-"Timor-Leste":"东帝汶",
-"Brunei":"文莱",
-"Guam":"关岛",
-"Mongolia":"蒙古",
 
 "Achilles Veen":"芬阿喀琉斯",
 "ADO '20":"海姆斯凯尔克ADO",
@@ -6611,12 +5687,12 @@ async function zhWorker(){
    }
   }catch(e){/* 静默，保留原文 */}
   ZH_QUEUED.delete(job.n);
-  await new Promise(r=>setTimeout(r,1500)); // 增加延迟到1.5秒，避免429
-  if(changed>=3){break;} // 每批最多3个，减少并发
+  await new Promise(r=>setTimeout(r,700));
+  if(changed>=6){break;} // 每批最多 6 个，稍后继续，避免页面长时间等待
  }
  ZH_RUNNING=false;
  if(changed){ZH_DONE_CB.forEach(fn=>{try{fn();}catch(e){}});}
- if(ZH_QUEUE.length)setTimeout(zhWorker,3000); // 下一批等3秒
+ if(ZH_QUEUE.length)setTimeout(zhWorker,1500);
 }
 function zhTeam(rawName,code){
  if(!rawName)return rawName||'';
@@ -7228,8 +6304,6 @@ async function fetchHomeFixtures(d0Str,d1Str,onMatch){
  const months=[...new Set([d0Str.slice(0,7),d1Str.slice(0,7)])];
  const hasAny=list=>list.some(keep);
  const first=await pool(10,codes,async c=>{const r=await pull(c,'');merge(r);fire();return r;});
- // 合并 API-Football 专属补充联赛（J2/J3/天皇杯/联赛杯）
- try{const extra=await afbFetchExtraFixtures(d0Str,d1Str);merge(extra);fire();}catch(e){}
  let need=codes.filter((c,i)=>!hasAny(first[i]||[]));
  let tasks=need.flatMap(c=>[d0Str,d1Str].map(d=>({c,d})));
  const rDay=await pool(10,tasks,async t=>{const r=await pull(t.c,sufDay(t.d));if(merge(r))fire();return r;});
@@ -7240,165 +6314,8 @@ async function fetchHomeFixtures(d0Str,d1Str,onMatch){
 }
 
 let HOME_OFFSET=0,HOME_TIMER=null,LAST_HOME=null;
-// 首页卡片盘口摘要缓存：{[fid]:{ouLine,ouP,spreadLine,spP,ts}}
-// 云端同步：从GitHub读取，AI-Bot自动上传
-const HOME_ODDS_CACHE_KEY='gc_home_odds_v1';
-const HOME_ODDS_CACHE_MAX_AGE=90*24*3600*1000; // 90天
+// 首页卡片盘口摘要缓存：{[fid]:{ouLine,ouP,spreadLine,spP}}
 const HOME_ODDS_CACHE={};
-// 从GitHub仓库加载自建API的盘口数据
-async function loadSelfApiOddsFromGithub(){
-  try{
-    const url='https://raw.githubusercontent.com/qq894805001-a11y/huange-ai-model/main/data/self_api_odds.json?t='+Date.now();
-    const res=await fetch(url);
-    if(!res.ok)return;
-    const data=await res.json();
-    if(!data||!data.matches)return;
-    console.log('从GitHub加载自建API盘口数据:', Object.keys(data.matches).length, '场比赛');
-    window.SELF_API_ODDS=data.matches;
-    // 合并到比赛列表
-    setTimeout(mergeGithubOdds, 500);
-  }catch(e){
-    console.log('加载GitHub盘口数据失败:', e.message);
-  }
-}
-// 上传手动盘口到GitHub云端
-async function uploadManualOddsToGithub(){
-  try{
-    const token = localStorage.getItem('gh_token');
-    if(!token){
-      console.log('没有GitHub token，手动盘口只存在本地');
-      return;
-    }
-    const owner='qq894805001-a11y';
-    const repo='huange-ai-model';
-    const path='data/manual_odds.json';
-    const apiUrl=`https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
-    let sha=null;
-    let cloudData={};
-    const getResp=await fetch(apiUrl,{headers:{'Authorization':'token '+token,'User-Agent':'ai-model'}});
-    if(getResp.ok){
-      const getJson=await getResp.json();
-      sha=getJson.sha;
-      const cloudContent=decodeURIComponent(escape(atob(getJson.content)));
-      cloudData=JSON.parse(cloudContent);
-    }
-    const localOdds=JSON.parse(localStorage.getItem('manual_odds')||'{}');
-    const merged=Object.assign({}, cloudData, localOdds);
-    const content=btoa(unescape(encodeURIComponent(JSON.stringify(merged,null,2))));
-    const putResp=await fetch(apiUrl,{
-      method:'PUT',
-      headers:{'Authorization':'token '+token,'Content-Type':'application/json','User-Agent':'ai-model'},
-      body:JSON.stringify({message:'更新手动盘口',content:content,sha:sha})
-    });
-    if(putResp.ok){
-      console.log('手动盘口已上传到云端');
-    }
-  }catch(e){
-    console.log('上传手动盘口出错:', e.message);
-  }
-}
-// 根据队名从自建API数据里找盘口
-function findSelfApiOdds(homeName, awayName){
-  if(!window.SELF_API_ODDS)return null;
-  const key1=homeName+'_vs_'+awayName;
-  if(window.SELF_API_ODDS[key1])return window.SELF_API_ODDS[key1];
-  for(const key in window.SELF_API_ODDS){
-    const m=window.SELF_API_ODDS[key];
-    if((m.homeTeam&&homeName.includes(m.homeTeam))||(m.awayTeam&&awayName.includes(m.awayTeam))){
-      return m;
-    }
-  }
-  return null;
-}
-// 把GitHub里的盘口数据合并到比赛列表
-function mergeGithubOdds(){
-  if(!window.SELF_API_ODDS||!LAST_HOME)return;
-  const norm=n=>String(n||'').toLowerCase().replace(/[^a-z0-9\u4e00-\u9fa5]/g,'');
-  let merged=0;
-  for(const key in window.SELF_API_ODDS){
-    const sm=window.SELF_API_ODDS[key];
-    if(!sm.odds||!sm.oddsAvailable)continue;
-    const sh=norm(sm.homeTeam),sa=norm(sm.awayTeam);
-    // 在现有比赛列表中匹配（双向模糊匹配）
-    const match=LAST_HOME.all.find(f=>{
-      const fh=norm(f.home.name),fa=norm(f.away.name);
-      return (fh.includes(sh)||sh.includes(fh)||fa.includes(sa)||sa.includes(fa));
-    });
-    if(match){
-      // 正确提取盘口数据
-      const o=sm.odds;
-      // 大小球：优先用2.5
-      let ouLine=2.5;
-      let ouOver=o.over_25;
-      let ouUnder=o.under_25;
-      if(!ouOver||!ouUnder){
-        // 没有2.5就用其他线
-        if(o.over_25){ouLine=2.5;ouOver=o.over_25;ouUnder=o.under_25;}
-        else if(o.over_35){ouLine=3.5;ouOver=o.over_35;ouUnder=o.under_35;}
-        else if(o.over_15){ouLine=1.5;ouOver=o.over_15;ouUnder=o.under_15;}
-        else {ouLine=null;ouOver=null;ouUnder=null;}
-      }
-      // 让球盘：asian_handicap就是让球数（负数是主队让球，正数是主队受让）
-      let spreadLine=o.asian_handicap;
-      let spHome=o.asian_home;
-      let spAway=o.asian_away;
-      
-      HOME_ODDS_CACHE[match.id]={
-        ouLine:ouLine,
-        ouP:ouOver&&ouUnder?ouOver/(ouOver+ouUnder):null,
-        ouSim:false, // 真实盘口，不是模拟
-        spreadLine:spreadLine,
-        spP:spHome&&spAway?spHome/(spHome+spAway):null,
-        spSim:false, // 真实盘口，不是模拟
-        none:false
-      };
-      merged++;
-      console.log('匹配成功:', sm.homeTeam, 'vs', sm.awayTeam, '| 大小球线:', ouLine, '| 让球:', spreadLine);
-    }
-  }
-  console.log('从GitHub合并了'+merged+'场比赛的真实盘口数据');
-  // 重新渲染
-  if(typeof renderHome==='function')renderHome();
-}
-// 页面加载时先从localStorage恢复（快速显示）
-try{
- const saved=JSON.parse(localStorage.getItem(HOME_ODDS_CACHE_KEY)||'{}');
- const now=Date.now();
- let cleaned=0;
- for(const fid in saved){
-  if(now-(saved[fid].ts||0)<HOME_ODDS_CACHE_MAX_AGE){
-   HOME_ODDS_CACHE[fid]=saved[fid];
-  }else{cleaned++;}
- }
- if(cleaned>0)console.log('[OddsCache] 清理过期缓存'+cleaned+'条');
-}catch(e){}
-// 再从GitHub云端加载最新盘口推荐（手机电脑同步）
-async function loadOddsFromCloud(){
- try{
-  const url='https://raw.githubusercontent.com/qq894805001-a11y/huange-ai-model/main/data/home_odds.json?t='+Date.now();
-  const r=await fetch(url,{cache:'no-store'});
-  if(!r.ok)return;
-  const cloud=await r.json();
-  let updated=0;
-  for(const fid in cloud){
-   const c=cloud[fid];
-   const local=HOME_ODDS_CACHE[fid];
-   // 云端数据更新（ts更大）就覆盖
-   if(!local||(c.ts||0)>(local.ts||0)){
-    HOME_ODDS_CACHE[fid]=c;
-    updated++;
-   }
-  }
-  if(updated>0){
-   saveOddsCache();
-   console.log('[OddsCloud] 从云端同步'+updated+'条盘口推荐');
-   if(LAST_HOME&&location.hash==='#/'&&!document.hidden)renderHomeList();
-  }
- }catch(e){console.log('[OddsCloud] 加载失败:',e.message);}
-}
-function saveOddsCache(){
- try{localStorage.setItem(HOME_ODDS_CACHE_KEY,JSON.stringify(HOME_ODDS_CACHE));}catch(e){}
-}
 function addDays(d,n){const x=new Date(d);x.setDate(x.getDate()+n);return x;}
 function homeDayMd(d){return(d.getMonth()+1)+'/'+d.getDate();}
 function bjDateStr(d){return d.toLocaleDateString('sv',{timeZone:'Asia/Shanghai'});}
@@ -7446,10 +6363,6 @@ async function loadFixtures(silent){
  const standingsCache=Object.assign({},(LAST_HOME&&LAST_HOME.standingsCache)||{});
  LAST_HOME={d0:fmtDate(d0),all,standingsCache};
  renderHomeList();
- // AFB实时比分补充（异步，不阻塞）：对ESPN进行中但比分0-0的比赛，用AFB获取真实比分
- if(prov==='espn'&&HOME_OFFSET===0){setTimeout(()=>afbEnrichLiveScores(),2000);}
- // 自建API数据补充（异步，不阻塞）：获取盘口/xG/中文队名
- if(SELF_API_ENABLED&&HOME_OFFSET===0){setTimeout(()=>selfApiEnrichHome(),3000);}
  const hasLive=all.some(f=>LIVE_ST.includes(f.st));
  const tip=document.getElementById('home-refresh-tip');
  if(tip){
@@ -7506,12 +6419,10 @@ async function prefetchHomeOdds(all,standingsCache){
  const prov=getProv();
  if(prov!=='espn')return;
  const targets=all.filter(f=>{
-  // 未开赛的比赛才计算初盘推荐
-  // 进行中的比赛直接用赛前缓存（不重新计算）
   if(LIVE_ST.includes(f.st))return false;
   if(!['NS','TBD'].includes(f.st))return false;
   if(!(f.id&&f.lg&&f.lg.code))return false;
-  return true;
+  return ESPN_LG[f.lg.code]!==undefined||ESPN_LEAGUES[f.lg.code];
  });
  // 去重（同 fid 只取一次）
  const seen=new Set();const jobs=[];
@@ -7526,10 +6437,8 @@ async function prefetchHomeOdds(all,standingsCache){
    const ck=f.lg.code+'_'+f.id;
    let ed=ENRICH_CACHE[ck]&&Date.now()-ENRICH_CACHE[ck].t<90000?ENRICH_CACHE[ck].d:null;
    if(!ed){ed=await fetchEspnSummary(f.lg.code,f.id);ENRICH_CACHE[ck]={d:ed,t:Date.now()};}
-    // 无真实盘口时用模型纯模拟（默认2.5球大小球、0球让球）
-    const hasRealOu=!!(ed&&ed.odds&&ed.odds.ouLine!=null);
-    const hasRealSp=!!(ed&&ed.odds&&ed.odds.spreadLine!=null);
-    const o=(ed&&ed.odds)||{};
+   if(!ed||!ed.odds||(ed.odds.ouLine==null&&ed.odds.spreadLine==null)){HOME_ODDS_CACHE[f.id]={none:true,ts:Date.now()};continue;}
+   const o=ed.odds;
    // 建队（复用首页 resolveIds 的逻辑）
    const info=lgForNorm(prov,f.lg);
    const rows=standingsCache[prov+'_'+f.lg.id];
@@ -7550,95 +6459,16 @@ async function prefetchHomeOdds(all,standingsCache){
    };
    const ht=build(f.home,hm),at=build(f.away,am);
    let r;
-   try{
-    r=predict(ht.id,at.id,{noLearn:false});
-   }catch(e){
-    // predict失败时，根据联赛类型生成合理模拟盘口（不是死板2.5）
-    const lgCode=f.lg.code||'';
-    // 大联赛进球多，小联赛/友谊赛进球少
-    let baseOu=2.5;
-    if(/\.2|\.3|friendly|cup|nations|w\.|u\d/i.test(lgCode))baseOu=2.25;
-    if(/eng\.1|esp\.1|ita\.1|ger\.1|fra\.1|ned\.1/i.test(lgCode))baseOu=2.75;
-    // 主场优势：主队让0.25
-    const baseSp=-0.25;
-    HOME_ODDS_CACHE[f.id]={ouLine:baseOu,ouP:0.5+Math.random()*0.04,ouSim:true,spreadLine:baseSp,spP:0.5+Math.random()*0.04,spSim:true,ts:Date.now()};
-    saveOddsCache();
-    scheduleRender();
-    continue;
-   }
-    const rec={};
-    if(hasRealOu||hasRealSp)OddsLearner.learn(r,hasRealOu?o.ouLine:null,hasRealSp?o.spreadLine:null);
-    const sim=(!hasRealOu||!hasRealSp)?OddsLearner.predict(r):null;
-    const ouLine=hasRealOu?o.ouLine:(sim?sim.ouLine:2.5);
-    const spLine=hasRealSp?o.spreadLine:(sim?sim.spLine:0);
-    const ou=asianSettle(r.mat,ouLine,'ou');
-    rec.ouLine=ouLine;rec.ouP=ou.winExp;
-    if(!hasRealOu)rec.ouSim=true;
-    const sp=asianSettle(r.mat,spLine,'sp');
-    rec.spreadLine=spLine;rec.spP=sp.winExp;
-    if(!hasRealSp)rec.spSim=true;
-    HOME_ODDS_CACHE[f.id]=rec;
-    saveOddsCache();
-    // 自动记录预测到学习系统（首页就记录，不用点进报告页）
-    try{
-     const L=loadLearn();
-     if(!L.preds[f.id]&&!L.settled[f.id]){
-      L.preds[f.id]={fid:f.id,lg:f.lg.code,hId:ht.id,aId:at.id,hName:f.home.name,aName:f.away.name,
-       date:f.dateISO?f.dateISO.slice(0,10):new Date().toISOString().slice(0,10),
-       ts:Date.now(),W:r.h,D:r.d,L:r.l,lh:r.lh||1.5,la:r.la||1.2,
-       rec:rec,
-       mkt:(ed&&ed.odds)?{h:ed.odds.h,d:ed.odds.d,a:ed.odds.a,ou:ed.odds.ouLine,spread:ed.odds.spreadLine}:null};
-      saveLearn(L);
-     }
-    }catch(e){}
+   try{r=predict(ht.id,at.id,{noLearn:false});}catch(e){HOME_ODDS_CACHE[f.id]={none:true,ts:Date.now()};continue;}
+   const rec={};
+   if(o.ouLine!=null){const ou=asianSettle(r.mat,o.ouLine,'ou');rec.ouLine=o.ouLine;rec.ouP=ou.winExp;}
+   if(o.spreadLine!=null){const sp=asianSettle(r.mat,o.spreadLine,'sp');rec.spreadLine=o.spreadLine;rec.spP=sp.winExp;}
+   HOME_ODDS_CACHE[f.id]=rec;
    scheduleRender();
-  }catch(e){
-   // 整个catch也生成合理模拟盘口
-   const lgCode=f.lg.code||'';
-   let baseOu=2.5;
-   if(/\.2|\.3|friendly|cup|nations|w\.|u\d/i.test(lgCode))baseOu=2.25;
-   if(/eng\.1|esp\.1|ita\.1|ger\.1|fra\.1|ned\.1/i.test(lgCode))baseOu=2.75;
-   HOME_ODDS_CACHE[f.id]={ouLine:baseOu,ouP:0.5+Math.random()*0.04,ouSim:true,spreadLine:-0.25,spP:0.5+Math.random()*0.04,spSim:true,ts:Date.now()};
-   saveOddsCache();
-  }
+  }catch(e){HOME_ODDS_CACHE[f.id]={none:true,ts:Date.now()};}
  }};
- await Promise.all(Array.from({length:2},worker));
+ await Promise.all(Array.from({length:4},worker));
  if(LAST_HOME&&location.hash==='#/'&&!document.hidden)renderHomeList();
-}
-
-// 联赛分组折叠/展开
-function toggleGroup(groupId) {
-  const body = document.getElementById(groupId);
-  const toggle = document.getElementById('toggle_' + groupId);
-  if (!body || !toggle) return;
-  if (body.style.display === 'none') {
-    body.style.display = 'block';
-    toggle.textContent = '▼';
-  } else {
-    body.style.display = 'none';
-    toggle.textContent = '▶';
-  }
-}
-
-// 一键全部折叠/展开
-let allExpanded = true;
-function toggleAllGroups() {
-  allExpanded = !allExpanded;
-  const bodies = document.querySelectorAll('.lg-group-body');
-  const toggles = document.querySelectorAll('.lg-toggle');
-  bodies.forEach((body, i) => {
-    body.style.display = allExpanded ? 'block' : 'none';
-    if (toggles[i]) toggles[i].textContent = allExpanded ? '▼' : '▶';
-  });
-  // 更新按钮文字
-  const btn = document.getElementById('toggle-all-btn');
-  if (btn) btn.textContent = allExpanded ? '📂 全部折叠' : '📁 全部展开';
-}
-// 切换显示全部比赛/只显示有盘口的
-function toggleShowAll(){
- const cur=localStorage.getItem('fx_show_all')==='1';
- localStorage.setItem('fx_show_all',cur?'0':'1');
- renderHomeList();
 }
 
 function renderHomeList(){
@@ -7699,36 +6529,23 @@ function renderHomeList(){
   const hRank = ht.rank ? ('第'+ht.rank+'名') : '';
   const aRank = at.rank ? ('第'+at.rank+'名') : '';
   const rankHtml = (hRank||aRank) ? '<div class="fx-rank"><span>'+escHtml(ht.name)+' '+hRank+'</span><span>'+escHtml(at.name)+' '+aRank+'</span></div>' : '';
-  // 如果没有缓存，用默认模拟盘口（进行中比赛也显示）
-  const displayOc = (oc && !oc.none) ? oc : {ouLine:2.5, ouP:0.52, ouSim:true, spreadLine:0, spP:0.5, spSim:true};
-  if(displayOc.ouLine!=null&&displayOc.ouP!=null){
-    const ouRec = displayOc.ouP > 0.5 ? '大'+fmtLine(displayOc.ouLine) : '小'+fmtLine(displayOc.ouLine);
-     const ouLab = displayOc.ouSim ? '模拟' : '推荐';
-    const ouCls = displayOc.ouSim ? 'fx-odd-chip model-rec sim' : 'fx-odd-chip model-rec';
-    oddsHtml+='<span class="'+ouCls+'"><span class="lab">'+ouLab+'</span>'+ouRec+'<b> '+pct100(Math.max(displayOc.ouP,1-displayOc.ouP))+'</b></span>';
+  if(oc&&!oc.none){
+   if(oc.ouLine!=null&&oc.ouP!=null){
+    const ouRec = oc.ouP > 0.5 ? '大'+fmtLine(oc.ouLine) : '小'+fmtLine(oc.ouLine);
+    oddsHtml+='<span class="fx-odd-chip model-rec"><span class="lab">推荐</span>'+ouRec+'<b> '+pct100(Math.max(oc.ouP,1-oc.ouP))+'</b></span>';
+   }
+   if(oc.spreadLine!=null&&oc.spP!=null){
+    const spRec = oc.spreadLine<0 ? '主-'+fmtLine(Math.abs(oc.spreadLine)) : '主+'+fmtLine(oc.spreadLine);
+    oddsHtml+='<span class="fx-odd-chip sp model-rec"><span class="lab">让球</span>'+spRec+'<b> '+pct100(Math.max(oc.spP,1-oc.spP))+'</b></span>';
+   }
+  }else if(oc&&oc.none){
+   oddsHtml='<span class="fx-odd-chip waiting"><span class="lab">盘口</span>等待开盘</span>';
   }
-  if(displayOc.spreadLine!=null&&displayOc.spP!=null){
-    let spRec;
-    if (displayOc.spP >= 0.5) {
-      spRec = displayOc.spreadLine < 0 ? '主-' + fmtLine(Math.abs(displayOc.spreadLine)) : '主+' + fmtLine(displayOc.spreadLine);
-    } else {
-      spRec = displayOc.spreadLine < 0 ? '客+' + fmtLine(Math.abs(displayOc.spreadLine)) : '客-' + fmtLine(displayOc.spreadLine);
-    }
-     const spLab = displayOc.spSim ? '模拟' : '让球';
-    const spCls = displayOc.spSim ? 'fx-odd-chip sp model-rec sim' : 'fx-odd-chip sp model-rec';
-    oddsHtml+='<span class="'+spCls+'"><span class="lab">'+spLab+'</span>'+spRec+'<b> '+pct100(Math.max(displayOc.spP,1-displayOc.spP))+'</b></span>';
-  }
-  // 不再显示"等待开盘"，即使ESPN没抓到盘口，也会在后台自动计算模拟盘口
-  // 盘口计算失败时也不显示等待，留空让下次刷新再试
   const oddsRow=oddsHtml?'<div class="fx-odds-row">'+oddsHtml+'</div>':'';
   let ds='';
   if(prov==='espn')ds=' data-fid="'+f.id+'" data-lg="'+f.lg.code+'"';
   if(isLive)ds+=' data-live="1" data-st="'+st+'" data-min="'+mn+'" data-hg="'+hg+'" data-ag="'+ag+'"'+(prov==='espn'?'':' data-fid="'+f.id+'"');
-  // 只有需要AI模拟的比赛（没有真实盘口）才显示输盘口按钮
-  const needSim = !oc || oc.none || oc.ouSim;
-  const manualBtn = needSim ? '<button class="fx-manual-btn" onclick="event.stopPropagation();manualOdds(\''+f.id+'\',\''+f.lg.code+'\')" title="手动输入盘口">📝 输盘口</button>' : '';
-  return '<div class="fx-item-wrap">'+
-   '<button class="fx-item'+(isLive?' is-live':'')+'" data-h="'+ht.id+'" data-a="'+at.id+'"'+ds+'>'+
+  return '<button class="fx-item'+(isLive?' is-live':'')+'" data-h="'+ht.id+'" data-a="'+at.id+'"'+ds+'>'+
    timeCell+
    '<div class="fx-mid"><div class="fx-league">'+escHtml(leagueLine)+'</div>'+
    '<div class="fx-teams">'+escHtml(ht.name)+'<span class="vs-mini">vs</span>'+escHtml(at.name)+'</div>'+
@@ -7736,32 +6553,15 @@ function renderHomeList(){
    oddsRow+
    '<div class="fx-sub">'+liveBadge+
    '<span class="badge '+(allBuiltin?'in':'calc')+'">'+(allBuiltin?'内置参数':'即时建模')+'</span></div></div>'+
-   '<svg class="fx-go" width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="#6E857B" stroke-width="2" stroke-linecap="round"/></svg></button>'+
-   manualBtn+
-   '</div>';
+   '<svg class="fx-go" width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="#6E857B" stroke-width="2" stroke-linecap="round"/></svg></button>';
  }
  const d0=addDays(new Date(),HOME_OFFSET),d1=addDays(d0,1);
  const d0Str=bjDateStr(d0),d1Str=bjDateStr(d1);
  const wk=['日','一','二','三','四','五','六'];
- // 筛选：默认只显示有盘口数据的比赛（没有数据的不显示）
- const showAll=localStorage.getItem('fx_show_all')==='1';
- const hasOdds=f=>{
-  // 进行中的：有盘口才显示（没有盘口的友谊赛不显示，没用）
-  if(LIVE_ST.includes(f.st)){
-   return HOME_ODDS_CACHE[f.id]&&HOME_ODDS_CACHE[f.id].none===false;
-  }
-  // 未开赛的：有盘口才显示
-  return HOME_ODDS_CACHE[f.id]&&HOME_ODDS_CACHE[f.id].none===false;
- };
- const live=all.filter(f=>LIVE_ST.includes(f.st)).filter(hasOdds).sort((a,b)=>a.dateISO.localeCompare(b.dateISO));
+ const live=all.filter(f=>LIVE_ST.includes(f.st)).sort((a,b)=>a.dateISO.localeCompare(b.dateISO));
  const pst=all.filter(f=>f.st==='PST');
- let day0=all.filter(f=>['NS','TBD'].includes(f.st)&&isoBjDay(f.dateISO)===d0Str).sort((a,b)=>a.dateISO.localeCompare(b.dateISO));
- let day1=all.filter(f=>['NS','TBD'].includes(f.st)&&isoBjDay(f.dateISO)===d1Str).sort((a,b)=>a.dateISO.localeCompare(b.dateISO));
- // 如果不是显示全部，就只保留有盘口的
- if(!showAll){
-  day0=day0.filter(hasOdds);
-  day1=day1.filter(hasOdds);
- }
+ const day0=all.filter(f=>['NS','TBD'].includes(f.st)&&isoBjDay(f.dateISO)===d0Str).sort((a,b)=>a.dateISO.localeCompare(b.dateISO));
+ const day1=all.filter(f=>['NS','TBD'].includes(f.st)&&isoBjDay(f.dateISO)===d1Str).sort((a,b)=>a.dateISO.localeCompare(b.dateISO));
  // 按联赛分组渲染（可折叠）
  function groupByLeague(matches) {
    const groups = {};
@@ -7778,16 +6578,9 @@ function renderHomeList(){
    const groups = groupByLeague(matches);
    let html = '';
    if (headerText) html += '<div class="day-tag ' + (headerClass||'') + '">' + headerText + '</div>';
-   let groupIdx = 0;
-   // 按联赛组内最早开始时间排序（越早开始的越靠上）
-   const sortedLeagueNames = Object.keys(groups).sort((a,b) => {
-     const aMin = Math.min(...groups[a].map(f => new Date(f.dateISO).getTime()));
-     const bMin = Math.min(...groups[b].map(f => new Date(f.dateISO).getTime()));
-     return aMin - bMin;
-   });
-   sortedLeagueNames.forEach(lgName => {
+   Object.keys(groups).sort().forEach(lgName => {
      const group = groups[lgName];
-     const groupId = 'lg_group_' + groupIdx++;  // 用索引做ID，避免中文冲突
+     const groupId = 'lg_' + lgName.replace(/[^a-zA-Z0-9]/g, '_');
      html += '<div class="lg-group">';
      html += '<div class="lg-group-header" onclick="toggleGroup(\'' + groupId + '\')">';
      html += '<span class="lg-toggle" id="toggle_' + groupId + '">▼</span>';
@@ -7831,63 +6624,7 @@ function renderHomeList(){
  }
  if(!html)html='<div class="api-msg">该两天暂无所选赛事的未开赛 / 进行中比赛，可左右切换日期或扩大赛事覆盖范围。<br>免费数据源对低级别赛事覆盖有限。</div>';
  box.innerHTML=html;
- // 手动输入盘口
-window.manualOdds = function(fid, lgCode){
-  const ouLine = prompt('输入大小球盘口（比如2.5）：', '2.5');
-  if(ouLine===null)return;
-  const spLine = prompt('输入让球盘口（比如-0.5，主队让0.5球；0表示平手；+0.5表示主队受让0.5）：', '0');
-  if(spLine===null)return;
-  const ouLineNum = parseFloat(ouLine);
-  const spLineNum = parseFloat(spLine);
-  
-  // 找这场比赛
-  const match = LAST_HOME && LAST_HOME.all.find(f=>f.id===fid);
-  if(!match){
-    alert('找不到这场比赛！');
-    return;
-  }
-  
-  // AI根据两队数据和你输入的盘口线，重新计算概率
-  let ouP = 0.5;
-  let spP = 0.5;
-  // 简单估算：根据两队近期进球数调整
-  try{
-    const homeGoals = (match.home.lastGoals || 2.5);
-    const awayGoals = (match.away.lastGoals || 1.2);
-    const avgGoals = (homeGoals + awayGoals) / 2;
-    // 盘口线低于平均进球，大球概率高
-    if(ouLineNum < avgGoals) ouP = Math.min(0.75, 0.5 + (avgGoals - ouLineNum)*0.15);
-    else ouP = Math.max(0.25, 0.5 - (ouLineNum - avgGoals)*0.15);
-    // 让球概率：根据实力差
-    const strengthDiff = (match.home.strength || 50) - (match.away.strength || 50);
-    spP = 0.5 + strengthDiff/200;
-    spP = Math.max(0.25, Math.min(0.75, spP));
-  }catch(e){}
-  
-  // 保存到缓存（手动输入的，标记为真实盘口，不是模拟）
-  HOME_ODDS_CACHE[fid] = {
-    ouLine: ouLineNum,
-    ouP: ouP,
-    ouSim: false,
-    spreadLine: spLineNum,
-    spP: spP,
-    spSim: false,
-    none: false,
-    manual: true
-  };
-  // 保存到本地
-  const manualOdds = JSON.parse(localStorage.getItem('manual_odds')||'{}');
-  manualOdds[fid] = {lg:lgCode, ouLine:ouLineNum, spLine:spLineNum, ouP:ouP, spP:spP, ts:Date.now()};
-  localStorage.setItem('manual_odds', JSON.stringify(manualOdds));
-  # 同步到GitHub云端
-  if(window.syncLearnToGithubNow){
-    try{ syncLearnToGithubNow(); }catch(e){}
-  }
-  // 重新渲染
-  renderHomeList();
-  alert('盘口已保存到云端！AI已根据新盘口重新模拟分析。\n大小球概率：'+Math.round(ouP*100)+'% | 让球概率：'+Math.round(spP*100)+'%');
-};
-box.querySelectorAll('.fx-item:not([disabled])').forEach(b=>b.onclick=()=>{
+ box.querySelectorAll('.fx-item:not([disabled])').forEach(b=>b.onclick=()=>{
   const n=document.getElementById('api-neutral')&&document.getElementById('api-neutral').checked?1:0;
   const p=new URLSearchParams({h:b.dataset.h,a:b.dataset.a,hi:'none',ai:'none',n:String(n)});
   if(b.dataset.fid)p.set('fid',b.dataset.fid);
@@ -7896,90 +6633,6 @@ box.querySelectorAll('.fx-item:not([disabled])').forEach(b=>b.onclick=()=>{
   location.hash='#/report?'+p.toString();
  });
 }
-
-// ===== 自动预测所有比赛（用于无人值守时GitHub Actions机器人调用）=====
-async function autoRecordAllPredictions(){
-  if(!LAST_HOME||!LAST_HOME.all)return;
-  const prov=getProv();
-  const standingsCache=LAST_HOME.standingsCache||{};
-  // 未开赛的：只预测有盘口数据的（没有盘口的不浪费资源）
-  // 进行中的：都预测复盘，AI自己判断比赛类型给权重
-  const matches=LAST_HOME.all.filter(f=>{
-   if(!f||!f.id||!f.lg||!f.lg.code)return false;
-   if(LIVE_ST.includes(f.st))return true; // 进行中的都预测
-   if(f.st!=='NS')return false;
-   // 未开赛的：有盘口才预测
-   return HOME_ODDS_CACHE[f.id]&&HOME_ODDS_CACHE[f.id].none===false;
-  });
-  // 临场前30分钟重新模拟：对即将开始的比赛，删除旧预测，用最新数据重新预测
-  const now=Date.now();
-  let rePred=0;
-  for(const f of matches){
-    try{
-      const L2=loadLearn();
-      if(!L2.preds[f.id])continue;
-      let matchTime=null;
-      if(f.date){matchTime=new Date(f.date).getTime();}
-      if(!matchTime||isNaN(matchTime))continue;
-      const minsToStart=(matchTime-now)/60000;
-      if(minsToStart>30||minsToStart<-5)continue;
-      delete L2.preds[f.id];
-      saveLearn(L2);
-      rePred++;
-      console.log('[AutoPred] 临场重新模拟:', f.home.name+' vs '+f.away.name, '('+Math.round(minsToStart)+'分钟后开始)');
-    }catch(e){}
-  }
-  if(rePred>0)console.log('[AutoPred] 临场重新模拟', rePred, '场比赛');
-  console.log('[AutoPred] 开始自动预测，共', matches.length, '场未开赛比赛');
-  let recorded=0, skipped=0;
-  for(const f of matches){
-    try{
-      // 检查是否已记录
-      const L=loadLearn();
-      if(L.preds[f.id]||L.settled[f.id]){skipped++;continue;}
-      // 获取ESPN深度数据（含赔率）
-      let ed=null;
-      try{
-        const ck=f.lg.code+'_'+f.id;
-        let isPrematchLive=false;
-        if(f.date){const mt=new Date(f.date).getTime();const mins=(mt-Date.now())/60000;isPrematchLive=mins<=30&&mins>=-5;}
-        ed=(!isPrematchLive&&ENRICH_CACHE[ck]&&Date.now()-ENRICH_CACHE[ck].t<90000)?ENRICH_CACHE[ck].d:null;
-        if(!ed){ed=await fetchEspnSummary(f.lg.code,f.id);ENRICH_CACHE[ck]={d:ed,t:Date.now()};}
-        if(isPrematchLive)console.log('[AutoPred] 临场数据已刷新:', f.home.name+' vs '+f.away.name);
-      }catch(e){}
-      if(!ed){skipped++;continue;}
-      // 构建球队对象
-      const info=lgForNorm(prov,f.lg);
-      const rows=standingsCache[prov+'_'+f.lg.id];
-      const inRow=t=>{const tn=(normName(t.name||'')||'');return r=>normName(r.name||'')===tn||(tn&&String(r.name||'').toLowerCase().includes(tn))||(tn&&tn.includes(String(r.name||'').toLowerCase()));};
-      const hm=matchTeam(f.home.name),am=matchTeam(f.away.name);
-      const build=(apiT,builtin)=>{
-        const cid=(info.prefix||'x')+apiT.id;
-        const row=rows?rows.find(inRow(apiT)):null;
-        if(row){
-          if(!DYN.teams[cid]||DYN.teams[cid].neutral){
-            if(DYN.teams[cid])delete DYN.teams[cid];
-            return teamFromStanding(info.key,info.obj,apiT,row,rows,info.prefix);
-          }
-          return DYN.teams[cid];
-        }
-        if(builtin)return builtin;
-        return DYN.teams[cid]||neutralTeam(info.key,apiT,info.prefix);
-      };
-      const ht=build(f.home,hm),at=build(f.away,am);
-      // 预测并记录
-      const r=predict(ht.id,at.id,{noLearn:false});
-      recordPred(f.id,f.lg.code,r,r,ht,at,ed,false);
-      recorded++;
-      // 限速，避免请求过快
-      await new Promise(res=>setTimeout(res,300));
-    }catch(e){console.warn('[AutoPred] 比赛预测失败:', f.id, e.message);}
-  }
-  console.log('[AutoPred] 完成：记录', recorded, '场，跳过', skipped, '场');
-  // 触发云端同步
-  if(typeof Cloud!=='undefined'&&Cloud.token)Cloud.markDirty();
-}
-
 
 async function refreshLive(fid,silent){
  const prov=getProv();
@@ -8155,11 +6808,11 @@ async function fetchEspnSummary(lg,eventId,force){
 // 估算：每场约2KB，500场=1MB，完全不会爆满
 
 const GC_CONFIG = {
-  MAX_PREDS: 500,      // 最多保留500条未结算预测
-  MAX_SETTLED: 2000,   // 最多保留2000条已结算记录（约2年）
+  MAX_PREDS: 200,      // 最多保留200条未结算预测
+  MAX_SETTLED: 500,   // 最多保留500条已结算记录
   LIVE_SNAP_DAYS: 7,   // 滚球快照保留7天
   TEAM_ADJ_DAYS: 45,   // 球队系数45天衰减
-  CACHE_DAYS: 730,     // 缓存保留2年（730天）
+  CACHE_DAYS: 90,      // 缓存保留90天
   CLEAN_INTERVAL: 86400000  // 每天清理一次
 };
 
@@ -8244,181 +6897,11 @@ setTimeout(() => {
 
 /* ================= 自学习引擎 ================= */
 const LEARN_KEY='gc_learn_v1';
-let cloudLearnLoaded=false;
 function loadLearn(){
- try{return Object.assign({preds:{},settled:{},teamAdj:{},stats:{n:0,brier:0,hit:0,ouN:0,ouHit:0,spN:0,spHit:0}},JSON.parse(localStorage.getItem(LEARN_KEY)||'{}'));}
- catch(e){return {preds:{},settled:{},teamAdj:{},stats:{n:0,brier:0,hit:0,ouN:0,ouHit:0,spN:0,spHit:0}};}
+ try{return Object.assign({preds:{},settled:{},teamAdj:{},stats:{n:0,brier:0,hit:0}},JSON.parse(localStorage.getItem(LEARN_KEY)||'{}'));}
+ catch(e){return {preds:{},settled:{},teamAdj:{},stats:{n:0,brier:0,hit:0}};}
 }
-// 从GitHub云端加载学习数据（电脑和手机同步，每次都加载最新）
-async function loadLearnFromCloud(){
- try{
-  const url='https://raw.githubusercontent.com/qq894805001-a11y/huange-ai-model/main/data/learn_data.json?t='+Date.now();
-  const r=await fetch(url,{cache:'no-store'});
-  if(!r.ok)return;
-  const cloud=await r.json();
-  const local=loadLearn();
-  // 智能合并：云端+本地，最新优先
-  const merged=mergeLearnData(cloud,local);
-  // 保存合并后的数据
-  localStorage.setItem(LEARN_KEY,JSON.stringify(merged));
-  const cloudCount=Object.keys(cloud.settled||{}).length;
-  const localCount=Object.keys(local.settled||{}).length;
-  const mergedCount=Object.keys(merged.settled||{}).length;
-  console.log('[Cloud] 云端'+cloudCount+'场 + 本地'+localCount+'场 = 合并后'+mergedCount+'场');
-  if(typeof renderLearnPanel==='function')renderLearnPanel();
- }catch(e){console.log('[Cloud] 加载学习数据失败:',e.message);}
-}
-function saveLearn(L){
- try{
-  localStorage.setItem(LEARN_KEY,JSON.stringify(L));
-  // 自动同步到GitHub云端（如果用户设置了token）
-  const ghToken=localStorage.getItem('gc_gh_token');
-  if(ghToken){
-   syncLearnToGithub(ghToken,L);
-  }
- }catch(e){}
-}
-// 联赛代码翻译成中文
-const LG_ZH={
- 'slv.1':'萨尔瓦多甲','gua.1':'危地马拉甲','col.1':'哥伦比亚甲','usa.1':'美职联',
- 'usa.usl.1':'美乙','ned.cup':'荷兰杯','ned.1':'荷甲','ned.2':'荷乙',
- 'esp.1':'西甲','esp.2':'西乙','eng.1':'英超','eng.2':'英冠',
- 'ger.1':'德甲','ger.2':'德乙','ita.1':'意甲','ita.2':'意乙',
- 'fra.1':'法甲','fra.2':'法乙','por.1':'葡超','por.2':'葡甲',
- 'uefa.champions':'欧冠','uefa.europa':'欧联','uefa.europa_conf':'欧协联',
- 'uefa.nations':'欧国联','fifa.world':'世界杯','euro':'欧洲杯',
- 'copa.america':'美洲杯','asian.cup':'亚洲杯','afcon':'非洲杯',
- 'concacaf.nations.league':'中北美国联','concacaf.gold.cup':'中北美金杯',
- 'jpn.1':'日本J1','jpn.2':'日本J2','jpn.cup':'天皇杯',
- 'kor.1':'韩国K1','chn.1':'中超','bra.1':'巴甲','arg.1':'阿甲',
- 'ned.cup':'荷兰杯','esp.copa':'国王杯','ita.coppa':'意大利杯','eng.fa':'足总杯'
-};
-function lgZh(code){
- if(!code)return '未知联赛';
- if(LG_ZH[code])return LG_ZH[code];
- // 模糊匹配
- const lower=code.toLowerCase();
- for(const k in LG_ZH){if(lower.startsWith(k)||k.startsWith(lower))return LG_ZH[k];}
- return code;
-}
-// 判断比赛是否正规
-// 正规比赛：所有联赛前三级、所有杯赛、国家队正式比赛
-// 野鸡比赛：友谊赛（驱动力不足）、第四级以下、U系列青年赛
-function isMajorMatch(lgCode){
- if(!lgCode)return true; // 不知道的默认算正规
- lgCode=lgCode.toLowerCase();
- // 友谊赛不算正规（驱动力不足，经常轮换练兵）
- if(lgCode.includes('friendly')||lgCode.includes('int.friendly')||lgCode.includes('club.friendly'))return false;
- // U系列青年赛不算正规
- if(lgCode.includes('u17')||lgCode.includes('u18')||lgCode.includes('u19')||lgCode.includes('u20')||lgCode.includes('u21')||lgCode.includes('u23')||lgCode.includes('youth'))return false;
- // 杯赛都算正规（足总杯、国王杯、欧冠等都是正式比赛）
- if(lgCode.includes('cup')||lgCode.includes('copa')||lgCode.includes('dfb')||lgCode.includes('coppa')||lgCode.includes('supercopa')||lgCode.includes('super.cup'))return true;
- // 国际比赛都算正规
- if(lgCode.includes('uefa.')||lgCode.includes('fifa.')||lgCode.includes('world')||lgCode.includes('euro')||lgCode.includes('copa.america')||lgCode.includes('asian.cup')||lgCode.includes('afcon')||lgCode.includes('nations.league'))return true;
- // 联赛前三级都算正规
- if(lgCode.match(/\.(1|2|3)$/)||lgCode.match(/\.(1|2|3)\./))return true;
- // 第四级及以下算半正规（权重低一点，但还是算）
- // 其他默认算正规
- return true;
-}
-// 从settled重新计算stats
-function recalcStats(settled,onlyMajor){
- let n=0,hit=0,brier=0,ouN=0,ouHit=0,spN=0,spHit=0;
- Object.values(settled||{}).forEach(s=>{
-  // 如果只看正规比赛，跳过野鸡比赛
-  if(onlyMajor&&!isMajorMatch(s.lg))return;
-  n++;
-  // 方向命中
-  if(s.res){
-   if(s.brier!=null)brier+=s.brier;
-   if((s.res==='w'&&s.W>=s.D&&s.W>=s.L)||(s.res==='d'&&s.D>=s.W&&s.D>=s.L)||(s.res==='l'&&s.L>=s.W&&s.L>=s.D))hit++;
-  }
-  // 大小球命中（在recResult里）
-  if(s.recResult&&s.recResult.ouHit!=null){
-   ouN++;
-   if(s.recResult.ouHit)ouHit++;
-  }
-  // 让球命中（在recResult里）
-  if(s.recResult&&s.recResult.spHit!=null){
-   spN++;
-   if(s.recResult.spHit)spHit++;
-  }
- });
- return {n:n,hit:hit,brier:brier,ouN:ouN,ouHit:ouHit,spN:spN,spHit:spHit};
-}
-// 合并学习数据（云端+本地，最新优先）
-function mergeLearnData(cloud,local){
- const merged={preds:{},settled:{},teamAdj:{},stats:{n:0,hit:0,brier:0,ouN:0,ouHit:0,spN:0,spHit:0}};
- // 合并preds（预测记录）
- Object.keys(cloud.preds||{}).forEach(k=>{merged.preds[k]=cloud.preds[k];});
- Object.keys(local.preds||{}).forEach(k=>{
-  if(!merged.preds[k]||(local.preds[k].ts||0)>(merged.preds[k].ts||0)){
-   merged.preds[k]=local.preds[k];
-  }
- });
- // 合并settled（复盘记录）
- Object.keys(cloud.settled||{}).forEach(k=>{merged.settled[k]=cloud.settled[k];});
- Object.keys(local.settled||{}).forEach(k=>{
-  if(!merged.settled[k]||(local.settled[k].setTs||0)>(merged.settled[k].setTs||0)){
-   merged.settled[k]=local.settled[k];
-  }
- });
- // 合并teamAdj（球队调整参数）
- Object.keys(cloud.teamAdj||{}).forEach(k=>{merged.teamAdj[k]=cloud.teamAdj[k];});
- Object.keys(local.teamAdj||{}).forEach(k=>{
-  if(!merged.teamAdj[k]||(local.teamAdj[k].last||0)>(merged.teamAdj[k].last||0)){
-   merged.teamAdj[k]=local.teamAdj[k];
-  }
- });
- // 重新计算stats
- merged.stats=recalcStats(merged.settled);
- return merged;
-}
-// 立即同步学习数据到GitHub（手动点按钮用，智能合并）
-async function syncLearnToGithubNow(token,localL){
- const owner='qq894805001-a11y';
- const repo='huange-ai-model';
- const path='data/learn_data.json';
- const apiUrl=`https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
- // 先获取云端现有数据
- let sha=null;
- let cloudL={preds:{},settled:{},teamAdj:{}};
- const getResp=await fetch(apiUrl,{headers:{'Authorization':'token '+token,'User-Agent':'ai-model'}});
- if(getResp.ok){
-  const getJson=await getResp.json();
-  sha=getJson.sha;
-  // 解码云端内容
-  const cloudContent=decodeURIComponent(escape(atob(getJson.content)));
-  cloudL=JSON.parse(cloudContent);
- }
- // 智能合并：云端+本地，最新优先
- const merged=mergeLearnData(cloudL,localL);
- // 上传合并后的数据
- const content=btoa(unescape(encodeURIComponent(JSON.stringify(merged,null,2))));
- const putResp=await fetch(apiUrl,{
-  method:'PUT',
-  headers:{'Authorization':'token '+token,'Content-Type':'application/json','User-Agent':'ai-model'},
-  body:JSON.stringify({message:'Smart merge learn data',content:content,sha:sha})
- });
- if(!putResp.ok){
-  const errText=await putResp.text();
-  throw new Error('HTTP '+putResp.status+': '+errText);
- }
- // 合并后的数据保存到本地
- localStorage.setItem(LEARN_KEY,JSON.stringify(merged));
- console.log('[Sync] 合并完成：云端'+Object.keys(cloudL.settled||{}).length+'场 + 本地'+Object.keys(localL.settled||{}).length+'场 = 合并后'+Object.keys(merged.settled||{}).length+'场');
-}
-// 自动同步学习数据到GitHub（智能合并，防抖）
-let ghSyncTimer=null;
-function syncLearnToGithub(token,L){
- if(ghSyncTimer)clearTimeout(ghSyncTimer);
- ghSyncTimer=setTimeout(async()=>{
-  try{
-   await syncLearnToGithubNow(token,L);
-   console.log('[AutoSync] 学习数据已自动同步到GitHub');
-  }catch(e){console.log('[AutoSync] 同步错误:',e.message);}
- },3000); // 3秒防抖，避免频繁请求
-}
+function saveLearn(L){try{localStorage.setItem(LEARN_KEY,JSON.stringify(L));}catch(e){}}
 // 学习修正系数（≥3 场样本启用，45 天衰减，clamp 防过拟合）
 function learnAdj(teamId){
  const a=loadLearn().teamAdj[teamId];
@@ -8441,22 +6924,12 @@ function recordPred(fid,lg,r0,r,H,A,ed,isLive){
     const spLine=ed.odds?(ed.odds.spreadLine!=null?ed.odds.spreadLine:(ed.odds.open&&ed.odds.open.spreadLine)):null;
     if(ouLine==null&&spLine==null)return null;
     const rec={ouLine:null,ouPick:null,ouP:null,spLine:null,spPick:null,spP:null};
-    if(ouLine!=null){const ou=asianSettle(base.mat,ouLine,'ou');rec.ouLine=ouLine;rec.ouPick=ou.winExp>=ou.loseExp?'over':'under';rec.ouP=Math.max(ou.winExp,ou.loseExp);rec.ouSim=false;}
-    if(spLine!=null){const sp=asianSettle(base.mat,spLine,'sp');rec.spLine=spLine;rec.spPick=sp.winExp>=sp.loseExp?'win':'lose';rec.spP=Math.max(sp.winExp,sp.loseExp);rec.spSim=false;}
+    if(ouLine!=null){const ou=asianSettle(base.mat,ouLine,'ou');rec.ouLine=ouLine;rec.ouPick=ou.winExp>=ou.loseExp?'over':'under';rec.ouP=Math.max(ou.winExp,ou.loseExp);}
+    if(spLine!=null){const sp=asianSettle(base.mat,spLine,'sp');rec.spLine=spLine;rec.spPick=sp.winExp>=sp.loseExp?'win':'lose';rec.spP=Math.max(sp.winExp,sp.loseExp);}
     return rec;
    }catch(e){return null;}
   })(),
   luStrengthH:null,luStrengthA:null};
- // 如果没有真实盘口，用模拟盘口生成rec（确保所有比赛都有大小球和让球记录）
- if(!L.preds[f.id].rec){
-  try{
-   const simOuLine=2.5; // 默认模拟盘口
-   const simSpLine=0;
-   const rec={ouLine:simOuLine,ouPick:r.W>r.L?'over':'under',ouP:0.5,ouSim:true,
-    spLine:simSpLine,spPick:r.W>r.L?'win':'lose',spP:0.5,spSim:true};
-   L.preds[f.id].rec=rec;
-  }catch(e){}
- }
  saveLearn(L);
 }
 function updatePredLineup(fid,sH,sA){
@@ -8515,7 +6988,7 @@ function settleLiveSnap(fid,lg,hg,ag){
 function ema(oldV,ratio,α){if(!isFinite(oldV))return clamp(ratio,0.7,1.3);return clamp(oldV*(1-α)+clamp(ratio,0.5,1.8)*α,0.7,1.3);}
 async function settleLearned(){
  const L=loadLearn();
- const due=Object.values(L.preds).filter(p=>Date.now()-p.ts>1.5*3600e3).sort((a,b)=>a.ts-b.ts).slice(0,15);
+ const due=Object.values(L.preds).filter(p=>Date.now()-p.ts>2.2*3600e3).sort((a,b)=>a.ts-b.ts).slice(0,3);
  let changed=false;
  for(const p of due){
   try{
@@ -8540,32 +7013,9 @@ async function settleLearned(){
    }
    // EMA 学习：进攻比=实际进/预期；防守比=实际失/预期（同向于模型 def，越大越弱）
    const aH=L.teamAdj[p.hId]||{n:0,att:1,def:1,last:Date.now()};
-   // 时间衰减学习率：越近的比赛影响越大，越久的越小
-   // 半衰期30天：30天前的比赛权重减半
-   const daysAgo = (Date.now() - p.ts) / (24*3600e3);
-   const timeWeight = Math.pow(0.5, daysAgo / 45); // 半衰期45天
-   // 正规比赛权重高，野鸡比赛权重低
-   const isMajor = isMajorMatch(p.lg);
-   let baseAlpha = isMajor ? 0.35 : 0.1; // 正规比赛0.35，野鸡比赛0.1
-   // 如果是AI自己模拟的盘口（没有真实开盘数据），权重再减半，不要影响总体判断
-   if(p.rec && p.rec.ouSim){
-    baseAlpha = baseAlpha * 0.5; // 模拟的权重减半
-   }
-   const alpha = baseAlpha * timeWeight;
-   
-   aH.att=ema(aH.att,hg/Math.max(p.lh,0.25),alpha);
-   aH.def=ema(aH.def,ag/Math.max(p.la,0.25),alpha);aH.n++;aH.last=Date.now();L.teamAdj[p.hId]=aH;
+   aH.att=ema(aH.att,hg/Math.max(p.lh,0.25),0.25);aH.def=ema(aH.def,ag/Math.max(p.la,0.25),0.25);aH.n++;aH.last=Date.now();L.teamAdj[p.hId]=aH;
    const aA=L.teamAdj[p.aId]||{n:0,att:1,def:1,last:Date.now()};
-   aA.att=ema(aA.att,ag/Math.max(p.la,0.25),alpha);aA.def=ema(aA.def,hg/Math.max(p.lh,0.25),alpha);aA.n++;aA.last=Date.now();L.teamAdj[p.aId]=aA;
-    // ===== 增强自学习：Elo更新 + 庄家偏差学习 =====
-    try{
-     // Elo赛后自学习（根据实际赛果动态更新球队实力）
-     SelfLearner.eloUpdate(p.hId,p.aId,hg,ag,!!p.neutral);
-     // 庄家偏差学习（记录开盘线与实际赛果，识别价值盘）
-     const _ouL=p.rec?p.rec.ouLine:(p.mkt?p.mkt.ou:null);
-     const _spL=p.rec?p.rec.spLine:(p.mkt?p.mkt.spread:null);
-     SelfLearner.learnMarketBias(_ouL,_spL,hg,ag);
-    }catch(e){}
+   aA.att=ema(aA.att,ag/Math.max(p.la,0.25),0.25);aA.def=ema(aA.def,hg/Math.max(p.lh,0.25),0.25);aA.n++;aA.last=Date.now();L.teamAdj[p.aId]=aA;
    let recResult=null;
    if(p.rec){
     recResult={};
@@ -8583,16 +7033,6 @@ async function settleLearned(){
    L.settled[p.fid]=Object.assign({},p,{hg,ag,res,brier,hit,goalErr,reasons,recResult,setTs:Date.now()});
    delete L.preds[p.fid];
    L.stats.n++;L.stats.brier+=brier;if(hit)L.stats.hit++;
-   // 更新大小球统计
-   if(recResult&&recResult.ouHit!=null){
-    L.stats.ouN=(L.stats.ouN||0)+1;
-    if(recResult.ouHit)L.stats.ouHit=(L.stats.ouHit||0)+1;
-   }
-   // 更新让球统计
-   if(recResult&&recResult.spHit!=null){
-    L.stats.spN=(L.stats.spN||0)+1;
-    if(recResult.spHit)L.stats.spHit=(L.stats.spHit||0)+1;
-   }
    changed=true;
   }catch(e){}
  }
@@ -8619,23 +7059,15 @@ function renderLearnPanel(){
  const box=document.getElementById('learn-panel');
  if(!box)return;
  const L=loadLearn();
- // 筛选：默认只看正规比赛
- const showAll=localStorage.getItem('ln_show_all')==='1';
- const filteredSettled=showAll?L.settled:Object.fromEntries(Object.entries(L.settled).filter(([k,v])=>isMajorMatch(v.lg)));
- const stats=recalcStats(filteredSettled);
- const n=stats.n,hitRate=n?stats.hit/n:0,brier=n?stats.brier/n:null;
- const recent=Object.values(filteredSettled).sort((a,b)=>b.setTs-a.setTs).slice(0,8);
+ const n=L.stats.n,hitRate=n?L.stats.hit/n:0,brier=n?L.stats.brier/n:null;
+ const recent=Object.values(L.settled).sort((a,b)=>b.setTs-a.setTs).slice(0,8);
  const adjs=Object.entries(L.teamAdj).filter(([id,a])=>a.n>=3&&(Math.abs(a.att-1)>0.04||Math.abs(a.def-1)>0.04))
   .sort((x,y)=>Math.abs(y[1].att-1)+Math.abs(y[1].def-1)-Math.abs(x[1].att-1)-Math.abs(x[1].def-1)).slice(0,6);
  const nm=id=>{const t=findTeam(id);return t?t.name:id;};
  let html='<div class="card learn-card"><h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 3l8 3v6c0 5-3.5 7.5-8 9-4.5-1.5-8-4-8-9V6l8-3z" stroke="#2FA96B" stroke-width="1.7"/></svg> 自学习 · 赛果复盘'+
-  '<span class="line-deco"></span>'+
-  '<button id="ln-filter-btn" style="float:right;font-size:12px;background:var(--line);border:none;color:var(--text);padding:2px 8px;border-radius:4px;cursor:pointer">'+(showAll?'📊 全部比赛':'⭐ 正规比赛')+'</button>'+
-  '</h3>';
+  '<span class="line-deco"></span></h3>';
  html+='<div class="ln-stats"><div class="ln-stat"><b>'+n+'</b><span>已复盘场次</span></div>'+
   '<div class="ln-stat"><b>'+(n?(hitRate*100).toFixed(0)+'%':'—')+'</b><span>方向命中率</span></div>'+
-  '<div class="ln-stat"><b>'+((stats.ouHit||0)/(stats.ouN||1)*100).toFixed(0)+'%</b><span>大小球命中</span><small style="font-size:10px;opacity:.7">'+(stats.ouN||0)+'场</small></div>'+
-  '<div class="ln-stat"><b>'+((stats.spHit||0)/(stats.spN||1)*100).toFixed(0)+'%</b><span>让球命中</span><small style="font-size:10px;opacity:.7">'+(stats.spN||0)+'场</small></div>'+
   '<div class="ln-stat"><b>'+(brier!=null?brier.toFixed(2):'—')+'</b><span>Brier 误差↓</span></div></div>';
  // 概率校准（5 桶，三向概率-结局对）
  if(n>=3){
@@ -8677,15 +7109,13 @@ function renderLearnPanel(){
      const ouPickLab=p.rec.ouPick==='over'?('大'+p.rec.ouLine):('小'+p.rec.ouLine);
      const ouHit=p.recResult&&p.recResult.ouHit;
      const ouActual=p.recResult?('实际'+p.recResult.ouActual+'球'):'';
-     const ouSimTag=p.rec.ouSim?'<small style="opacity:.6">(模拟)</small>':'';
-     recHtml+='<span class="ln-tag '+(ouHit===true?'g':ouHit===false?'r':'')+'">大小球 '+ouPickLab+ouSimTag+' '+(ouHit===true?'✓':ouHit===false?'✗':'—')+(ouActual?' '+ouActual:'')+'</span>';
+     recHtml+='<span class="ln-tag '+(ouHit===true?'g':ouHit===false?'r':'')+'">大小球 '+ouPickLab+' '+(ouHit===true?'✓':ouHit===false?'✗':'—')+(ouActual?' '+ouActual:'')+'</span>';
     }
     if(p.rec.spLine!=null){
      const spPickLab=p.rec.spPick==='win'?('主赢盘'):('主输盘');
      const spHit=p.recResult&&p.recResult.spHit;
      const spActual=p.recResult?('净胜'+p.recResult.spActual):'';
-     const spSimTag=p.rec.spSim?'<small style="opacity:.6">(模拟)</small>':'';
-     recHtml+='<span class="ln-tag '+(spHit===true?'g':spHit===false?'r':'')+'">让球 '+spPickLab+spSimTag+' '+(spHit===true?'✓':spHit===false?'✗':'—')+(spActual?' '+spActual:'')+'</span>';
+     recHtml+='<span class="ln-tag '+(spHit===true?'g':spHit===false?'r':'')+'">让球 '+spPickLab+' '+(spHit===true?'✓':spHit===false?'✗':'—')+(spActual?' '+spActual:'')+'</span>';
     }
    }
    // 详情（默认隐藏，点击展开）
@@ -8701,59 +7131,17 @@ function renderLearnPanel(){
    detailHtml+='<div>Brier 误差：'+p.brier.toFixed(3)+'（越低越准）</div>';
    detailHtml+='</div>';
    html+='<li class="ln-item '+cls+' ln-clickable" data-detail="'+detailId+'">'+
-    '<small style="opacity:.7;font-size:10px">['+escHtml(lgZh(p.lg||''))+']</small> '+
     '<b>'+escHtml(zhTeam(p.hName,null))+' '+p.hg+'-'+p.ag+' '+escHtml(zhTeam(p.aName,null))+'</b>　预测：'+ARROW[p.arg]+
     (p.hit?' <span class="ln-tag g">✓ 命中</span>':' <span class="ln-tag r">✗ 偏差</span>')+recHtml+'<br>'+tags+detailHtml+'</li>';
   });
   html+='</ul>';
  }
  html+='<button class="ln-btn" id="ln-settle">立即拉取赛果复盘学习</button>';
- html+='<button class="ln-btn" id="ln-gh-set" style="margin-top:8px;background:var(--line)">🔗 设置GitHub Token（手机电脑同步）</button>';
- html+='<button class="ln-btn" id="ln-gh-sync" style="margin-top:8px;background:var(--green);color:#000">☁️ 立即同步学习数据到云端</button>';
- html+='<p class="pitch-note">学习数据自动保存，100天后自动清理旧数据；修正系数保守限幅 ±15%，样本不足 3 场不生效，100 天自动清理，避免过拟合。<br>设置GitHub Token后，学习数据自动同步到云端，手机电脑同步看。</p></div>';
+ html+='<button class="ln-btn" id="ln-clear" style="border-color:var(--line);color:var(--ink-faint);margin-top:6px;">清空学习数据</button>';
+ html+='<p class="pitch-note">学习数据仅保存在本机浏览器（localStorage），清除浏览数据会丢失；修正系数保守限幅 ±15%，样本不足 3 场不生效，45 天自动衰减，避免过拟合。</p></div>';
  box.innerHTML=html;
- const b1=document.getElementById('ln-settle');if(b1)b1.onclick=async()=>{
-  b1.textContent='结算中…';b1.disabled=true;
-  try{
-   const before=Object.keys(loadLearn().settled||{}).length;
-   await settleLearned();
-   const after=Object.keys(loadLearn().settled||{}).length;
-   const added=after-before;
-   if(added>0)toast('✅ 新复盘了'+added+'场比赛！');
-   else toast('没有新比赛需要复盘（比赛还没结束）');
-  }catch(e){toast('复盘失败：'+e.message);}
-  renderLearnPanel();
- };
+ const b1=document.getElementById('ln-settle');if(b1)b1.onclick=async()=>{b1.textContent='结算中…';b1.disabled=true;await settleLearned();renderLearnPanel();};
  const b2=document.getElementById('ln-clear');if(b2)b2.onclick=()=>{localStorage.removeItem(LEARN_KEY);renderLearnPanel();toast('学习数据已清空');};
- const b4=document.getElementById('ln-gh-sync');if(b4)b4.onclick=async()=>{
-  const token=localStorage.getItem('gc_gh_token');
-  if(!token){toast('⚠️ 请先点"设置GitHub Token"按钮输入Token！');return;}
-  b4.textContent='同步中…';b4.disabled=true;
-  try{
-   const L=loadLearn();
-   await syncLearnToGithubNow(token,L);
-   toast('✅ 学习数据已同步到云端！手机刷新即可看到');
-  }catch(e){toast('❌ 同步失败：'+e.message);}
-  b4.textContent='☁️ 立即同步学习数据到云端';b4.disabled=false;
- };
- const bFilter=document.getElementById('ln-filter-btn');if(bFilter)bFilter.onclick=()=>{
-  const cur=localStorage.getItem('ln_show_all')==='1';
-  localStorage.setItem('ln_show_all',cur?'0':'1');
-  renderLearnPanel();
- };
- const b3=document.getElementById('ln-gh-set');if(b3)b3.onclick=()=>{
-  const cur=localStorage.getItem('gc_gh_token')||'';
-  const token=prompt('请输入你的GitHub Personal Access Token（需要repo权限）：',cur);
-  if(token!==null){
-   if(token.trim()){
-    localStorage.setItem('gc_gh_token',token.trim());
-    toast('✅ GitHub Token已设置，以后自动同步到云端！');
-   }else{
-    localStorage.removeItem('gc_gh_token');
-    toast('已清除GitHub Token，停止自动同步');
-   }
-  }
- };
  // 复盘条目点击展开详情
  box.querySelectorAll('.ln-clickable').forEach(li=>{
   li.onclick=()=>{const d=document.getElementById(li.dataset.detail);if(d)d.style.display=d.style.display==='none'?'block':'none';};
@@ -8970,11 +7358,6 @@ function initApi(){
  if(dp)dp.onclick=()=>{HOME_OFFSET=Math.max(0,HOME_OFFSET-1);renderDayLabel();loadFixtures();};
  if(dn)dn.onclick=()=>{HOME_OFFSET=Math.min(6,HOME_OFFSET+1);renderDayLabel();loadFixtures();};
  renderDayLabel();loadFixtures();
-  // 自动预测模式（GitHub Actions机器人使用）：URL带autopred=1时，首页加载后自动预测所有比赛
-  if(location.search.includes('autopred=1')||window.AUTO_PRED){
-   console.log('[AutoPred] 自动预测模式已开启，等待首页加载...');
-   setTimeout(()=>{if(LAST_HOME&&LAST_HOME.all)autoRecordAllPredictions();},8000);
-  }
 }
 
 /* ---------- 路由 ---------- */
@@ -8986,48 +7369,7 @@ function route(){
  document.getElementById('view-backtest').classList.toggle('active',isBacktest);
  if(isReport){try{renderReport();}catch(e){console.error(e);toast('报告生成失败：'+(e.message||'数据不完整')+'，请返回重试');setTimeout(()=>{if(location.hash.startsWith('#/report'))location.hash='#/';},1200);}}
  else if(isBacktest){stopLiveTimer();stopPrematchTimer();stopHomeTimer();try{initBacktest();}catch(e){console.error(e);toast('回测页加载失败：'+e.message);}}
- else{stopLiveTimer();stopPrematchTimer();window.scrollTo(0,0);renderDayLabel();if(LAST_HOME){renderHomeList();startHomeTimer((LAST_HOME.all||[]).some(f=>LIVE_ST.includes(f.st))?30000:180000);}renderLearnPanel();settleLearned();loadSelfApiOddsFromGithub();
-// 自动清理过期数据
-function cleanupOldData(){
-  const now = Date.now();
-  // 1. 清理手动盘口：比赛结束24小时后删除
-  try{
-    const manualOdds = JSON.parse(localStorage.getItem('manual_odds')||'{}');
-    let changed = false;
-    for(const fid in manualOdds){
-      const m = manualOdds[fid];
-      if(now - (m.ts||0) > 24*3600*1000){ // 超过24小时
-        delete manualOdds[fid];
-        changed = true;
-      }
-    }
-    if(changed){
-      localStorage.setItem('manual_odds', JSON.stringify(manualOdds));
-      console.log('清理了过期的手动盘口数据');
-    }
-  }catch(e){}
-  // 2. 清理学习数据：只保留最近90天
-  try{
-    const learn = JSON.parse(localStorage.getItem('gc_learn_v1')||'{}');
-    if(learn.settled){
-      let changed = false;
-      for(const fid in learn.settled){
-        const s = learn.settled[fid];
-        if(now - (s.ts||0) > 90*24*3600*1000){ // 超过90天
-          delete learn.settled[fid];
-          changed = true;
-        }
-      }
-      if(changed){
-        localStorage.setItem('gc_learn_v1', JSON.stringify(learn));
-        console.log('清理了超过90天的旧复盘数据');
-      }
-    }
-  }catch(e){}
-}
-cleanupOldData();
-// 每天自动清理一次
-setInterval(cleanupOldData, 24*3600*1000);}
+ else{stopLiveTimer();stopPrematchTimer();window.scrollTo(0,0);renderDayLabel();if(LAST_HOME){renderHomeList();startHomeTimer((LAST_HOME.all||[]).some(f=>LIVE_ST.includes(f.st))?60000:180000);}renderLearnPanel();settleLearned();}
 }
 window.addEventListener('hashchange',route);
 // 定时自动结算赛果（每20分钟）
