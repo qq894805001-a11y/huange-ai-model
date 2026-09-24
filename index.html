@@ -2566,6 +2566,7 @@ window.addEventListener('DOMContentLoaded', function() {
       </label>
       <div style="margin:8px 0;">
         <button id="toggle-all-btn" onclick="toggleAllGroups()" style="width:100%;padding:6px 12px;background:var(--panel-2);border:1px solid var(--line-soft);border-radius:6px;color:var(--ink);font-size:12px;cursor:pointer;">📂 全部折叠</button>
+        <button id="toggle-showall-btn" onclick="toggleShowAll()" style="width:100%;padding:6px 12px;background:var(--panel-2);border:1px solid var(--line-soft);border-radius:6px;color:var(--ink);font-size:12px;cursor:pointer;margin-top:4px;">🎯 只显示有盘口</button>
       </div>
       <div id="fx-container"></div>
       <div id="learn-panel"></div>
@@ -7488,6 +7489,12 @@ function toggleAllGroups() {
   const btn = document.getElementById('toggle-all-btn');
   if (btn) btn.textContent = allExpanded ? '📂 全部折叠' : '📁 全部展开';
 }
+// 切换显示全部比赛/只显示有盘口的
+function toggleShowAll(){
+ const cur=localStorage.getItem('fx_show_all')==='1';
+ localStorage.setItem('fx_show_all',cur?'0':'1');
+ renderHomeList();
+}
 
 function renderHomeList(){
  const box=document.getElementById('fx-container');
@@ -7583,10 +7590,22 @@ function renderHomeList(){
  const d0=addDays(new Date(),HOME_OFFSET),d1=addDays(d0,1);
  const d0Str=bjDateStr(d0),d1Str=bjDateStr(d1);
  const wk=['日','一','二','三','四','五','六'];
+ // 筛选：默认只显示有盘口数据的比赛（没有数据的不显示）
+ const showAll=localStorage.getItem('fx_show_all')==='1';
+ const hasOdds=f=>{
+  if(LIVE_ST.includes(f.st))return true; // 进行中的都显示
+  if(HOME_ODDS_CACHE[f.id]&&HOME_ODDS_CACHE[f.id].none===false)return true; // 有盘口
+  return false;
+ };
  const live=all.filter(f=>LIVE_ST.includes(f.st)).sort((a,b)=>a.dateISO.localeCompare(b.dateISO));
  const pst=all.filter(f=>f.st==='PST');
- const day0=all.filter(f=>['NS','TBD'].includes(f.st)&&isoBjDay(f.dateISO)===d0Str).sort((a,b)=>a.dateISO.localeCompare(b.dateISO));
- const day1=all.filter(f=>['NS','TBD'].includes(f.st)&&isoBjDay(f.dateISO)===d1Str).sort((a,b)=>a.dateISO.localeCompare(b.dateISO));
+ let day0=all.filter(f=>['NS','TBD'].includes(f.st)&&isoBjDay(f.dateISO)===d0Str).sort((a,b)=>a.dateISO.localeCompare(b.dateISO));
+ let day1=all.filter(f=>['NS','TBD'].includes(f.st)&&isoBjDay(f.dateISO)===d1Str).sort((a,b)=>a.dateISO.localeCompare(b.dateISO));
+ // 如果不是显示全部，就只保留有盘口的
+ if(!showAll){
+  day0=day0.filter(hasOdds);
+  day1=day1.filter(hasOdds);
+ }
  // 按联赛分组渲染（可折叠）
  function groupByLeague(matches) {
    const groups = {};
@@ -7671,7 +7690,15 @@ async function autoRecordAllPredictions(){
   if(!LAST_HOME||!LAST_HOME.all)return;
   const prov=getProv();
   const standingsCache=LAST_HOME.standingsCache||{};
-  const matches=LAST_HOME.all.filter(f=>f&&f.st==='NS'&&f.id&&f.lg&&f.lg.code);
+  // 未开赛的：只预测有盘口数据的（没有盘口的不浪费资源）
+  // 进行中的：都预测复盘，AI自己判断比赛类型给权重
+  const matches=LAST_HOME.all.filter(f=>{
+   if(!f||!f.id||!f.lg||!f.lg.code)return false;
+   if(LIVE_ST.includes(f.st))return true; // 进行中的都预测
+   if(f.st!=='NS')return false;
+   // 未开赛的：有盘口才预测
+   return HOME_ODDS_CACHE[f.id]&&HOME_ODDS_CACHE[f.id].none===false;
+  });
   // 临场前30分钟重新模拟：对即将开始的比赛，删除旧预测，用最新数据重新预测
   const now=Date.now();
   let rePred=0;
@@ -8718,7 +8745,7 @@ function route(){
  document.getElementById('view-backtest').classList.toggle('active',isBacktest);
  if(isReport){try{renderReport();}catch(e){console.error(e);toast('报告生成失败：'+(e.message||'数据不完整')+'，请返回重试');setTimeout(()=>{if(location.hash.startsWith('#/report'))location.hash='#/';},1200);}}
  else if(isBacktest){stopLiveTimer();stopPrematchTimer();stopHomeTimer();try{initBacktest();}catch(e){console.error(e);toast('回测页加载失败：'+e.message);}}
- else{stopLiveTimer();stopPrematchTimer();window.scrollTo(0,0);renderDayLabel();if(LAST_HOME){renderHomeList();startHomeTimer((LAST_HOME.all||[]).some(f=>LIVE_ST.includes(f.st))?60000:180000);}renderLearnPanel();settleLearned();}
+ else{stopLiveTimer();stopPrematchTimer();window.scrollTo(0,0);renderDayLabel();if(LAST_HOME){renderHomeList();startHomeTimer((LAST_HOME.all||[]).some(f=>LIVE_ST.includes(f.st))?30000:180000);}renderLearnPanel();settleLearned();}
 }
 window.addEventListener('hashchange',route);
 // 定时自动结算赛果（每20分钟）
