@@ -7283,35 +7283,44 @@ function mergeGithubOdds(){
     const sm=window.SELF_API_ODDS[key];
     if(!sm.odds||!sm.oddsAvailable)continue;
     const sh=norm(sm.homeTeam),sa=norm(sm.awayTeam);
-    // 在现有比赛列表中匹配
+    // 在现有比赛列表中匹配（双向模糊匹配）
     const match=LAST_HOME.all.find(f=>{
       const fh=norm(f.home.name),fa=norm(f.away.name);
       return (fh.includes(sh)||sh.includes(fh)||fa.includes(sa)||sa.includes(fa));
     });
     if(match){
-      // 提取盘口
+      // 正确提取盘口数据
       const o=sm.odds;
-      if(o){
-        HOME_ODDS_CACHE[match.id]={
-          ouLine:o['大小球(2.5)']?2.5:null,
-          ouP:null,
-          ouSim:false,
-          spreadLine:o['亚盘']?null:null,
-          spP:null,
-          spSim:false,
-          none:false
-        };
-        merged++;
+      // 大小球：优先用2.5
+      let ouLine=2.5;
+      let ouOver=o.over_25;
+      let ouUnder=o.under_25;
+      if(!ouOver||!ouUnder){
+        // 没有2.5就用其他线
+        if(o.over_25){ouLine=2.5;ouOver=o.over_25;ouUnder=o.under_25;}
+        else if(o.over_35){ouLine=3.5;ouOver=o.over_35;ouUnder=o.under_35;}
+        else if(o.over_15){ouLine=1.5;ouOver=o.over_15;ouUnder=o.under_15;}
+        else {ouLine=null;ouOver=null;ouUnder=null;}
       }
-      // 补充比分和状态
-      if(sm.status==='live'||sm.status==='inplay'){
-        match.st='2H';
-      }
-      if(sm.homeScore!=null)match.hg=sm.homeScore;
-      if(sm.awayScore!=null)match.ag=sm.awayScore;
+      // 让球盘：asian_handicap就是让球数（负数是主队让球，正数是主队受让）
+      let spreadLine=o.asian_handicap;
+      let spHome=o.asian_home;
+      let spAway=o.asian_away;
+      
+      HOME_ODDS_CACHE[match.id]={
+        ouLine:ouLine,
+        ouP:ouOver&&ouUnder?ouOver/(ouOver+ouUnder):null,
+        ouSim:false, // 真实盘口，不是模拟
+        spreadLine:spreadLine,
+        spP:spHome&&spAway?spHome/(spHome+spAway):null,
+        spSim:false, // 真实盘口，不是模拟
+        none:false
+      };
+      merged++;
+      console.log('匹配成功:', sm.homeTeam, 'vs', sm.awayTeam, '| 大小球线:', ouLine, '| 让球:', spreadLine);
     }
   }
-  console.log('从GitHub合并了'+merged+'场比赛的盘口数据');
+  console.log('从GitHub合并了'+merged+'场比赛的真实盘口数据');
   // 重新渲染
   if(typeof renderHome==='function')renderHome();
 }
