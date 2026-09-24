@@ -4305,7 +4305,7 @@ const ESPN_GROUPS=[
 const ESPN_LEAGUES={};
 ESPN_GROUPS.forEach(grp=>grp.list.forEach(x=>{ESPN_LEAGUES[x[0]]={name:x[1],type:x[2],h:x[3],a:x[4],s:x[5],hot:!!x[6],group:grp.g};}));
 function defaultEspnCodes(){const c=[];ESPN_GROUPS.forEach(g=>g.list.forEach(x=>c.push(x[0])));return c;}
-function getEspnCodes(){try{const v=JSON.parse(localStorage.getItem('gc_espn_codes')||'null');if(Array.isArray(v)&&v.length)return v.filter(c=>ESPN_LEAGUES[c]);}catch(e){}return defaultEspnCodes();}
+function getEspnCodes(){return defaultEspnCodes();}
 function setEspnCodes(arr){try{localStorage.setItem('gc_espn_codes',JSON.stringify(arr));}catch(e){}}
 const PROVIDER_META={
  espn:{name:'ESPN 免注册源',limit:'无明确限制 · 秒级 · 含统计阵容'},
