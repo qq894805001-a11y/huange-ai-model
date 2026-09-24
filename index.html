@@ -7846,19 +7846,18 @@ function recalcStats(settled){
   n++;
   // 方向命中
   if(s.res){
-   const p=s.res==='w'?s.W:s.res==='d'?s.D:s.L;
-   brier+=[s.W-s.resW,s.D-s.resD,s.L-s.resL].reduce((a,b)=>a+b*b,0);
+   if(s.brier!=null)brier+=s.brier;
    if((s.res==='w'&&s.W>=s.D&&s.W>=s.L)||(s.res==='d'&&s.D>=s.W&&s.D>=s.L)||(s.res==='l'&&s.L>=s.W&&s.L>=s.D))hit++;
   }
-  // 大小球命中
-  if(s.ouLine&&s.ouRes){
+  // 大小球命中（在recResult里）
+  if(s.recResult&&s.recResult.ouHit!=null){
    ouN++;
-   if((s.ouRes==='over'&&s.ouPred==='over')||(s.ouRes==='under'&&s.ouPred==='under'))ouHit++;
+   if(s.recResult.ouHit)ouHit++;
   }
-  // 让球命中
-  if(s.spLine&&s.spRes){
+  // 让球命中（在recResult里）
+  if(s.recResult&&s.recResult.spHit!=null){
    spN++;
-   if(s.spRes===s.spPred)spHit++;
+   if(s.recResult.spHit)spHit++;
   }
  });
  return {n:n,hit:hit,brier:brier,ouN:ouN,ouHit:ouHit,spN:spN,spHit:spHit};
