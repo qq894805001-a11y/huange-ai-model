@@ -1174,6 +1174,41 @@
       "luStrengthH": null,
       "luStrengthA": null
     },
+    "401879564": {
+      "fid": "401879564",
+      "lg": "gua.1",
+      "hId": "e7258",
+      "aId": "e7251",
+      "hName": "Municipal",
+      "aName": "Suchitepequez",
+      "date": "2026-09-25",
+      "ts": 1790222835311,
+      "W": {
+        "id": "e7258",
+        "name": "市政",
+        "en": "Municipal",
+        "lg": "Egua.1",
+        "elo": 1647,
+        "att": 1,
+        "def": 1,
+        "form": 1.2,
+        "squad": 70,
+        "inj": 2,
+        "dyn": true,
+        "neutral": false
+      },
+      "lh": 1.335825,
+      "la": 0.9894999999999999,
+      "rec": {
+        "ouLine": 2.5,
+        "ouP": 0.42662224125795817,
+        "ouSim": true,
+        "spreadLine": -0.5,
+        "spP": 0.5217836808246021,
+        "spSim": true
+      },
+      "mkt": null
+    },
     "401880827": {
       "fid": "401880827",
       "lg": "eng.3",
