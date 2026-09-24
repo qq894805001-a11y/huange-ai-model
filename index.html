@@ -2101,12 +2101,7 @@ select{font-family:var(--font-body);}
   <button onclick="loadSelfApiOddsFromGithub();location.reload();" style="background:#2a2a3e;color:#fff;border:1px solid #444;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px">
     刷新盘口数据
   </button>
-  <button onclick="pullCloudLearnData();" style="background:#2a2a3e;color:#fff;border:1px solid #444;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px;margin-left:4px">
-    拉取云端学习数据
-  </button>
-  <button onclick="uploadLearnDataToGithub();" style="background:#2a2a3e;color:#fff;border:1px solid #444;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px;margin-left:4px">
-    上传本地学习数据
-  </button>
+
 </div>
 
 <!-- ========== 登录遮罩层 ========== -->
@@ -7817,5 +7812,18 @@ onZhDone(()=>{
  else if(h==='#/'||h===''){if(LAST_HOME)renderHomeList();renderLearnPanel();}
 });
 </script>
+
+<!-- 固定悬浮同步按钮 -->
+<div style="position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px">
+  <button onclick="setGithubToken();" style="background:#1a73e8;color:#fff;border:none;padding:10px 16px;border-radius:8px;cursor:pointer;font-size:13px;box-shadow:0 4px 12px rgba(0,0,0,0.3)">
+    设置GitHub Token
+  </button>
+  <button onclick="uploadLearnDataToGithub();" style="background:#00c853;color:#fff;border:none;padding:10px 16px;border-radius:8px;cursor:pointer;font-size:13px;box-shadow:0 4px 12px rgba(0,0,0,0.3)">
+    同步学习数据到云端
+  </button>
+  <button onclick="pullCloudLearnData();" style="background:#ff9800;color:#fff;border:none;padding:10px 16px;border-radius:8px;cursor:pointer;font-size:13px;box-shadow:0 4px 12px rgba(0,0,0,0.3)">
+    拉取云端学习数据
+  </button>
+</div>
 </body>
 </html>
