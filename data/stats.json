@@ -1,12 +1,14 @@
 {
   "total_runs": 1,
-  "last_update": "2026-09-24T18:45:48.009Z",
+  "last_update": "2026-09-24T18:25:41.449Z",
   "db1_status": {},
   "db2_status": {
     "today_matches": 0,
     "today_with_odds": 0,
     "detail_count": 0,
-    "sources": []
+    "sources": [
+      "db1_cloud_api"
+    ]
   },
   "api_usage": {}
 }
