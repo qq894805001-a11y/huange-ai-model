@@ -7830,7 +7830,45 @@ async function loadLearnFromCloud(){
   }
  }catch(e){console.log('[Cloud] 加载学习数据失败:',e.message);}
 }
-function saveLearn(L){try{localStorage.setItem(LEARN_KEY,JSON.stringify(L));if(typeof Cloud!=='undefined'&&Cloud.token)Cloud.markDirty();}catch(e){}}
+function saveLearn(L){
+ try{
+  localStorage.setItem(LEARN_KEY,JSON.stringify(L));
+  // 自动同步到GitHub云端（如果用户设置了token）
+  const ghToken=localStorage.getItem('gc_gh_token');
+  if(ghToken){
+   syncLearnToGithub(ghToken,L);
+  }
+ }catch(e){}
+}
+// 自动同步学习数据到GitHub
+let ghSyncTimer=null;
+function syncLearnToGithub(token,L){
+ if(ghSyncTimer)clearTimeout(ghSyncTimer);
+ ghSyncTimer=setTimeout(async()=>{
+  try{
+   const owner='qq894805001-a11y';
+   const repo='huange-ai-model';
+   const path='data/learn_data.json';
+   const apiUrl=`https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
+   // 先获取现有文件的sha
+   let sha=null;
+   const getResp=await fetch(apiUrl,{headers:{'Authorization':'token '+token,'User-Agent':'ai-model'}});
+   if(getResp.ok){
+    const getJson=await getResp.json();
+    sha=getJson.sha;
+   }
+   // 上传新内容
+   const content=Buffer.from(JSON.stringify(L,null,2),'utf-8').toString('base64');
+   const putResp=await fetch(apiUrl,{
+    method:'PUT',
+    headers:{'Authorization':'token '+token,'Content-Type':'application/json','User-Agent':'ai-model'},
+    body:JSON.stringify({message:'Auto-sync learn data',content:content,sha:sha})
+   });
+   if(putResp.ok)console.log('[AutoSync] 学习数据已自动同步到GitHub');
+   else console.log('[AutoSync] 同步失败:',putResp.status);
+  }catch(e){console.log('[AutoSync] 同步错误:',e.message);}
+ },3000); // 3秒防抖，避免频繁请求
+}
 // 学习修正系数（≥3 场样本启用，45 天衰减，clamp 防过拟合）
 function learnAdj(teamId){
  const a=loadLearn().teamAdj[teamId];
@@ -8094,10 +8132,35 @@ function renderLearnPanel(){
   html+='</ul>';
  }
  html+='<button class="ln-btn" id="ln-settle">立即拉取赛果复盘学习</button>';
- html+='<p class="pitch-note">学习数据自动保存，100天后自动清理旧数据；修正系数保守限幅 ±15%，样本不足 3 场不生效，100 天自动清理，避免过拟合。</p></div>';
+ html+='<button class="ln-btn" id="ln-gh-set" style="margin-top:8px;background:var(--line)">🔗 设置GitHub Token（手机电脑同步）</button>';
+ html+='<p class="pitch-note">学习数据自动保存，100天后自动清理旧数据；修正系数保守限幅 ±15%，样本不足 3 场不生效，100 天自动清理，避免过拟合。<br>设置GitHub Token后，学习数据自动同步到云端，手机电脑同步看。</p></div>';
  box.innerHTML=html;
- const b1=document.getElementById('ln-settle');if(b1)b1.onclick=async()=>{b1.textContent='结算中…';b1.disabled=true;await settleLearned();renderLearnPanel();};
+ const b1=document.getElementById('ln-settle');if(b1)b1.onclick=async()=>{
+  b1.textContent='结算中…';b1.disabled=true;
+  try{
+   const before=Object.keys(loadLearn().settled||{}).length;
+   await settleLearned();
+   const after=Object.keys(loadLearn().settled||{}).length;
+   const added=after-before;
+   if(added>0)toast('✅ 新复盘了'+added+'场比赛！');
+   else toast('没有新比赛需要复盘（比赛还没结束）');
+  }catch(e){toast('复盘失败：'+e.message);}
+  renderLearnPanel();
+ };
  const b2=document.getElementById('ln-clear');if(b2)b2.onclick=()=>{localStorage.removeItem(LEARN_KEY);renderLearnPanel();toast('学习数据已清空');};
+ const b3=document.getElementById('ln-gh-set');if(b3)b3.onclick=()=>{
+  const cur=localStorage.getItem('gc_gh_token')||'';
+  const token=prompt('请输入你的GitHub Personal Access Token（需要repo权限）：',cur);
+  if(token!==null){
+   if(token.trim()){
+    localStorage.setItem('gc_gh_token',token.trim());
+    toast('✅ GitHub Token已设置，以后自动同步到云端！');
+   }else{
+    localStorage.removeItem('gc_gh_token');
+    toast('已清除GitHub Token，停止自动同步');
+   }
+  }
+ };
  // 复盘条目点击展开详情
  box.querySelectorAll('.ln-clickable').forEach(li=>{
   li.onclick=()=>{const d=document.getElementById(li.dataset.detail);if(d)d.style.display=d.style.display==='none'?'block':'none';};
