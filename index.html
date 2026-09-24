@@ -8039,10 +8039,33 @@ function saveLearn(L){
   }
  }catch(e){}
 }
+// 判断比赛是否正规（乙级以上）
+// 正规比赛：五大联赛、二级联赛、重要杯赛、国家队大赛
+// 野鸡比赛：低级别联赛、小国家联赛、友谊赛
+function isMajorMatch(lgCode){
+ if(!lgCode)return false;
+ lgCode=lgCode.toLowerCase();
+ // 友谊赛不算正规
+ if(lgCode.includes('friendly')||lgCode.includes('int.friendly'))return false;
+ // 五大联赛
+ const majorLeagues=['eng.1','spa.1','ger.1','ita.1','fra.1','eng.2','spa.2','ger.2','ita.2','fra.2',
+  'uefa.champions','uefa.europa','uefa.europa_conf','uefa.nations',
+  'world','euro','copa.america','asian.cup','afcon'];
+ for(const lg of majorLeagues){
+  if(lgCode===lg||lgCode.startsWith(lg+'.')||lgCode.startsWith(lg+'_'))return true;
+ }
+ // 二级联赛（各国第二级）
+ if(lgCode.match(/\.(2|ii)$/)||lgCode.includes('.2.'))return true;
+ // 杯赛（各国杯赛）
+ if(lgCode.includes('cup')||lgCode.includes('copa')||lgCode.includes('dfb')||lgCode.includes('serie.a.coppa'))return true;
+ return false;
+}
 // 从settled重新计算stats
-function recalcStats(settled){
+function recalcStats(settled,onlyMajor){
  let n=0,hit=0,brier=0,ouN=0,ouHit=0,spN=0,spHit=0;
  Object.values(settled||{}).forEach(s=>{
+  // 如果只看正规比赛，跳过野鸡比赛
+  if(onlyMajor&&!isMajorMatch(s.lg))return;
   n++;
   // 方向命中
   if(s.res){
@@ -8163,6 +8186,16 @@ function recordPred(fid,lg,r0,r,H,A,ed,isLive){
    }catch(e){return null;}
   })(),
   luStrengthH:null,luStrengthA:null};
+ // 如果没有真实盘口，用模拟盘口生成rec（确保所有比赛都有大小球和让球记录）
+ if(!L.preds[f.id].rec){
+  try{
+   const simOuLine=2.5; // 默认模拟盘口
+   const simSpLine=0;
+   const rec={ouLine:simOuLine,ouPick:r.W>r.L?'over':'under',ouP:0.5,
+    spLine:simSpLine,spPick:r.W>r.L?'win':'lose',spP:0.5};
+   L.preds[f.id].rec=rec;
+  }catch(e){}
+ }
  saveLearn(L);
 }
 function updatePredLineup(fid,sH,sA){
@@ -8221,7 +8254,7 @@ function settleLiveSnap(fid,lg,hg,ag){
 function ema(oldV,ratio,α){if(!isFinite(oldV))return clamp(ratio,0.7,1.3);return clamp(oldV*(1-α)+clamp(ratio,0.5,1.8)*α,0.7,1.3);}
 async function settleLearned(){
  const L=loadLearn();
- const due=Object.values(L.preds).filter(p=>Date.now()-p.ts>2.2*3600e3).sort((a,b)=>a.ts-b.ts).slice(0,3);
+ const due=Object.values(L.preds).filter(p=>Date.now()-p.ts>1.5*3600e3).sort((a,b)=>a.ts-b.ts).slice(0,15);
  let changed=false;
  for(const p of due){
   try{
@@ -8250,7 +8283,10 @@ async function settleLearned(){
    // 半衰期30天：30天前的比赛权重减半
    const daysAgo = (Date.now() - p.ts) / (24*3600e3);
    const timeWeight = Math.pow(0.5, daysAgo / 45); // 半衰期45天
-   const alpha = 0.25 * timeWeight; // 基础学习率0.25，乘以时间权重
+   // 正规比赛权重高，野鸡比赛权重低
+   const isMajor = isMajorMatch(p.lg);
+   const baseAlpha = isMajor ? 0.35 : 0.1; // 正规比赛0.35，野鸡比赛0.1
+   const alpha = baseAlpha * timeWeight;
    
    aH.att=ema(aH.att,hg/Math.max(p.lh,0.25),alpha);
    aH.def=ema(aH.def,ag/Math.max(p.la,0.25),alpha);aH.n++;aH.last=Date.now();L.teamAdj[p.hId]=aH;
@@ -8318,17 +8354,23 @@ function renderLearnPanel(){
  const box=document.getElementById('learn-panel');
  if(!box)return;
  const L=loadLearn();
- const n=L.stats.n,hitRate=n?L.stats.hit/n:0,brier=n?L.stats.brier/n:null;
- const recent=Object.values(L.settled).sort((a,b)=>b.setTs-a.setTs).slice(0,8);
+ // 筛选：默认只看正规比赛
+ const showAll=localStorage.getItem('ln_show_all')==='1';
+ const filteredSettled=showAll?L.settled:Object.fromEntries(Object.entries(L.settled).filter(([k,v])=>isMajorMatch(v.lg)));
+ const stats=recalcStats(filteredSettled);
+ const n=stats.n,hitRate=n?stats.hit/n:0,brier=n?stats.brier/n:null;
+ const recent=Object.values(filteredSettled).sort((a,b)=>b.setTs-a.setTs).slice(0,8);
  const adjs=Object.entries(L.teamAdj).filter(([id,a])=>a.n>=3&&(Math.abs(a.att-1)>0.04||Math.abs(a.def-1)>0.04))
   .sort((x,y)=>Math.abs(y[1].att-1)+Math.abs(y[1].def-1)-Math.abs(x[1].att-1)-Math.abs(x[1].def-1)).slice(0,6);
  const nm=id=>{const t=findTeam(id);return t?t.name:id;};
  let html='<div class="card learn-card"><h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 3l8 3v6c0 5-3.5 7.5-8 9-4.5-1.5-8-4-8-9V6l8-3z" stroke="#2FA96B" stroke-width="1.7"/></svg> 自学习 · 赛果复盘'+
-  '<span class="line-deco"></span></h3>';
+  '<span class="line-deco"></span>'+
+  '<button id="ln-filter-btn" style="float:right;font-size:12px;background:var(--line);border:none;color:var(--text);padding:2px 8px;border-radius:4px;cursor:pointer">'+(showAll?'📊 全部比赛':'⭐ 正规比赛')+'</button>'+
+  '</h3>';
  html+='<div class="ln-stats"><div class="ln-stat"><b>'+n+'</b><span>已复盘场次</span></div>'+
   '<div class="ln-stat"><b>'+(n?(hitRate*100).toFixed(0)+'%':'—')+'</b><span>方向命中率</span></div>'+
-  '<div class="ln-stat"><b>'+((L.stats.ouHit||0)/(L.stats.ouN||1)*100).toFixed(0)+'%</b><span>大小球命中</span><small style="font-size:10px;opacity:.7">'+(L.stats.ouN||0)+'场</small></div>'+
-  '<div class="ln-stat"><b>'+((L.stats.spHit||0)/(L.stats.spN||1)*100).toFixed(0)+'%</b><span>让球命中</span><small style="font-size:10px;opacity:.7">'+(L.stats.spN||0)+'场</small></div>'+
+  '<div class="ln-stat"><b>'+((stats.ouHit||0)/(stats.ouN||1)*100).toFixed(0)+'%</b><span>大小球命中</span><small style="font-size:10px;opacity:.7">'+(stats.ouN||0)+'场</small></div>'+
+  '<div class="ln-stat"><b>'+((stats.spHit||0)/(stats.spN||1)*100).toFixed(0)+'%</b><span>让球命中</span><small style="font-size:10px;opacity:.7">'+(stats.spN||0)+'场</small></div>'+
   '<div class="ln-stat"><b>'+(brier!=null?brier.toFixed(2):'—')+'</b><span>Brier 误差↓</span></div></div>';
  // 概率校准（5 桶，三向概率-结局对）
  if(n>=3){
@@ -8425,6 +8467,11 @@ function renderLearnPanel(){
    toast('✅ 学习数据已同步到云端！手机刷新即可看到');
   }catch(e){toast('❌ 同步失败：'+e.message);}
   b4.textContent='☁️ 立即同步学习数据到云端';b4.disabled=false;
+ };
+ const bFilter=document.getElementById('ln-filter-btn');if(bFilter)bFilter.onclick=()=>{
+  const cur=localStorage.getItem('ln_show_all')==='1';
+  localStorage.setItem('ln_show_all',cur?'0':'1');
+  renderLearnPanel();
  };
  const b3=document.getElementById('ln-gh-set');if(b3)b3.onclick=()=>{
   const cur=localStorage.getItem('gc_gh_token')||'';
