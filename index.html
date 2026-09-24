@@ -9443,8 +9443,9 @@ function renderLearnPanel(){
   });
   html+='</div>';
  }
+ html+='<div class="ln-sep mk-sep">最近复盘（点击展开详情）</div>';
  if(recent.length){
-  html+='<div class="ln-sep mk-sep">最近复盘（点击展开详情）</div><ul class="ln-list">';
+  html+='<ul class="ln-list">';
   recent.forEach((p,pi)=>{
    const cls=p.hit?'hit':'miss';
    const tags=p.reasons.map(r=>'<span class="ln-tag '+(r.t==='g'?'g':r.t==='r'?'r':'')+'">'+escHtml(r.x)+'</span>').join('')+'<span class="ln-tag" style="background:#333">'+escHtml(lgZh(p.lg))+'</span>'+(isMajorLg(p.lg)?'':'<span class="ln-tag">低权重</span>');
@@ -9481,6 +9482,8 @@ function renderLearnPanel(){
     (p.hit?' <span class="ln-tag g">✓ 命中</span>':' <span class="ln-tag r">✗ 偏差</span>')+recHtml+'<br>'+tags+detailHtml+'</li>';
   });
   html+='</ul>';
+ } else {
+  html+='<div style="text-align:center;color:#888;padding:16px;font-size:12px;">暂无复盘数据，等待比赛结束后自动复盘<br><span style="font-size:11px;color:#666;">（每30分钟自动检查已结束比赛并复盘）</span></div>';
  }
  html+='<button class="ln-btn" id="ln-settle">立即拉取赛果复盘学习</button>';
  html+='<button class="ln-btn" id="ln-token" style="border-color:var(--line);color:var(--ink-faint);margin-top:6px;">设置GitHub Token</button>';
