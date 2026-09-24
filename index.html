@@ -2281,6 +2281,20 @@ select{font-family:var(--font-body);}
 </style>
 </head>
 <body>
+<div style="position:fixed;top:10px;right:10px;z-index:99999">
+  <button onclick="refreshSelfOdds()" style="background:#2a2a3e;color:#fff;border:1px solid #444;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px">
+    刷新盘口数据
+  </button>
+</div>
+<script>
+function refreshSelfOdds(){
+  alert('正在从GitHub加载最新盘口数据...');
+  loadSelfApiOddsFromGithub().then(()=>{
+    alert('盘口数据刷新完成！');
+    location.reload();
+  });
+}
+</script>
 
 <!-- ========== 登录遮罩层 ========== -->
 <div id="login-mask" style="position:fixed;inset:0;z-index:99999;background:linear-gradient(135deg,#0a1a2e 0%,#0d2818 100%);display:flex;align-items:center;justify-content:center;">
