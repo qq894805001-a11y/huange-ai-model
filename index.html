@@ -7255,6 +7255,8 @@ async function loadSelfApiOddsFromGithub(){
     if(!data||!data.matches)return;
     console.log('从GitHub加载自建API盘口数据:', Object.keys(data.matches).length, '场比赛');
     window.SELF_API_ODDS=data.matches;
+    // 合并到比赛列表
+    setTimeout(mergeGithubOdds, 500);
   }catch(e){
     console.log('加载GitHub盘口数据失败:', e.message);
   }
@@ -7271,6 +7273,47 @@ function findSelfApiOdds(homeName, awayName){
     }
   }
   return null;
+}
+// 把GitHub里的盘口数据合并到比赛列表
+function mergeGithubOdds(){
+  if(!window.SELF_API_ODDS||!LAST_HOME)return;
+  const norm=n=>String(n||'').toLowerCase().replace(/[^a-z0-9\u4e00-\u9fa5]/g,'');
+  let merged=0;
+  for(const key in window.SELF_API_ODDS){
+    const sm=window.SELF_API_ODDS[key];
+    if(!sm.odds||!sm.oddsAvailable)continue;
+    const sh=norm(sm.homeTeam),sa=norm(sm.awayTeam);
+    // 在现有比赛列表中匹配
+    const match=LAST_HOME.all.find(f=>{
+      const fh=norm(f.home.name),fa=norm(f.away.name);
+      return (fh.includes(sh)||sh.includes(fh)||fa.includes(sa)||sa.includes(fa));
+    });
+    if(match){
+      // 提取盘口
+      const o=sm.odds;
+      if(o){
+        HOME_ODDS_CACHE[match.id]={
+          ouLine:o['大小球(2.5)']?2.5:null,
+          ouP:null,
+          ouSim:false,
+          spreadLine:o['亚盘']?null:null,
+          spP:null,
+          spSim:false,
+          none:false
+        };
+        merged++;
+      }
+      // 补充比分和状态
+      if(sm.status==='live'||sm.status==='inplay'){
+        match.st='2H';
+      }
+      if(sm.homeScore!=null)match.hg=sm.homeScore;
+      if(sm.awayScore!=null)match.ag=sm.awayScore;
+    }
+  }
+  console.log('从GitHub合并了'+merged+'场比赛的盘口数据');
+  // 重新渲染
+  if(typeof renderHome==='function')renderHome();
 }
 // 页面加载时先从localStorage恢复（快速显示）
 try{
