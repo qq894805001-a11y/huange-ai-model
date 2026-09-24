@@ -8066,6 +8066,29 @@ function saveLearn(L){
   }
  }catch(e){}
 }
+// 联赛代码翻译成中文
+const LG_ZH={
+ 'slv.1':'萨尔瓦多甲','gua.1':'危地马拉甲','col.1':'哥伦比亚甲','usa.1':'美职联',
+ 'usa.usl.1':'美乙','ned.cup':'荷兰杯','ned.1':'荷甲','ned.2':'荷乙',
+ 'esp.1':'西甲','esp.2':'西乙','eng.1':'英超','eng.2':'英冠',
+ 'ger.1':'德甲','ger.2':'德乙','ita.1':'意甲','ita.2':'意乙',
+ 'fra.1':'法甲','fra.2':'法乙','por.1':'葡超','por.2':'葡甲',
+ 'uefa.champions':'欧冠','uefa.europa':'欧联','uefa.europa_conf':'欧协联',
+ 'uefa.nations':'欧国联','fifa.world':'世界杯','euro':'欧洲杯',
+ 'copa.america':'美洲杯','asian.cup':'亚洲杯','afcon':'非洲杯',
+ 'concacaf.nations.league':'中北美国联','concacaf.gold.cup':'中北美金杯',
+ 'jpn.1':'日本J1','jpn.2':'日本J2','jpn.cup':'天皇杯',
+ 'kor.1':'韩国K1','chn.1':'中超','bra.1':'巴甲','arg.1':'阿甲',
+ 'ned.cup':'荷兰杯','esp.copa':'国王杯','ita.coppa':'意大利杯','eng.fa':'足总杯'
+};
+function lgZh(code){
+ if(!code)return '未知联赛';
+ if(LG_ZH[code])return LG_ZH[code];
+ // 模糊匹配
+ const lower=code.toLowerCase();
+ for(const k in LG_ZH){if(lower.startsWith(k)||k.startsWith(lower))return LG_ZH[k];}
+ return code;
+}
 // 判断比赛是否正规
 // 正规比赛：所有联赛前三级、所有杯赛、国家队正式比赛
 // 野鸡比赛：友谊赛（驱动力不足）、第四级以下、U系列青年赛
@@ -8460,7 +8483,7 @@ function renderLearnPanel(){
    detailHtml+='<div>Brier 误差：'+p.brier.toFixed(3)+'（越低越准）</div>';
    detailHtml+='</div>';
    html+='<li class="ln-item '+cls+' ln-clickable" data-detail="'+detailId+'">'+
-    '<small style="opacity:.7;font-size:10px">['+escHtml(p.lg||'未知联赛')+']</small> '+
+    '<small style="opacity:.7;font-size:10px">['+escHtml(lgZh(p.lg||''))+']</small> '+
     '<b>'+escHtml(zhTeam(p.hName,null))+' '+p.hg+'-'+p.ag+' '+escHtml(zhTeam(p.aName,null))+'</b>　预测：'+ARROW[p.arg]+
     (p.hit?' <span class="ln-tag g">✓ 命中</span>':' <span class="ln-tag r">✗ 偏差</span>')+recHtml+'<br>'+tags+detailHtml+'</li>';
   });
