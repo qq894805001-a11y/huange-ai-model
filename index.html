@@ -7840,57 +7840,74 @@ function saveLearn(L){
   }
  }catch(e){}
 }
-// 立即同步学习数据到GitHub（手动点按钮用）
-async function syncLearnToGithubNow(token,L){
+// 合并学习数据（云端+本地，最新优先）
+function mergeLearnData(cloud,local){
+ const merged={preds:{},settled:{},teamAdj:{}};
+ // 合并preds（预测记录）
+ Object.keys(cloud.preds||{}).forEach(k=>{merged.preds[k]=cloud.preds[k];});
+ Object.keys(local.preds||{}).forEach(k=>{
+  if(!merged.preds[k]||(local.preds[k].ts||0)>(merged.preds[k].ts||0)){
+   merged.preds[k]=local.preds[k];
+  }
+ });
+ // 合并settled（复盘记录）
+ Object.keys(cloud.settled||{}).forEach(k=>{merged.settled[k]=cloud.settled[k];});
+ Object.keys(local.settled||{}).forEach(k=>{
+  if(!merged.settled[k]||(local.settled[k].setTs||0)>(merged.settled[k].setTs||0)){
+   merged.settled[k]=local.settled[k];
+  }
+ });
+ // 合并teamAdj（球队调整参数）
+ Object.keys(cloud.teamAdj||{}).forEach(k=>{merged.teamAdj[k]=cloud.teamAdj[k];});
+ Object.keys(local.teamAdj||{}).forEach(k=>{
+  if(!merged.teamAdj[k]||(local.teamAdj[k].last||0)>(merged.teamAdj[k].last||0)){
+   merged.teamAdj[k]=local.teamAdj[k];
+  }
+ });
+ return merged;
+}
+// 立即同步学习数据到GitHub（手动点按钮用，智能合并）
+async function syncLearnToGithubNow(token,localL){
  const owner='qq894805001-a11y';
  const repo='huange-ai-model';
  const path='data/learn_data.json';
  const apiUrl=`https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
- // 先获取现有文件的sha
+ // 先获取云端现有数据
  let sha=null;
+ let cloudL={preds:{},settled:{},teamAdj:{}};
  const getResp=await fetch(apiUrl,{headers:{'Authorization':'token '+token,'User-Agent':'ai-model'}});
  if(getResp.ok){
   const getJson=await getResp.json();
   sha=getJson.sha;
+  // 解码云端内容
+  const cloudContent=decodeURIComponent(escape(atob(getJson.content)));
+  cloudL=JSON.parse(cloudContent);
  }
- // 上传新内容
- const content=btoa(unescape(encodeURIComponent(JSON.stringify(L,null,2))));
+ // 智能合并：云端+本地，最新优先
+ const merged=mergeLearnData(cloudL,localL);
+ // 上传合并后的数据
+ const content=btoa(unescape(encodeURIComponent(JSON.stringify(merged,null,2))));
  const putResp=await fetch(apiUrl,{
   method:'PUT',
   headers:{'Authorization':'token '+token,'Content-Type':'application/json','User-Agent':'ai-model'},
-  body:JSON.stringify({message:'Manual sync learn data',content:content,sha:sha})
+  body:JSON.stringify({message:'Smart merge learn data',content:content,sha:sha})
  });
  if(!putResp.ok){
   const errText=await putResp.text();
   throw new Error('HTTP '+putResp.status+': '+errText);
  }
+ // 合并后的数据保存到本地
+ localStorage.setItem(LEARN_KEY,JSON.stringify(merged));
+ console.log('[Sync] 合并完成：云端'+Object.keys(cloudL.settled||{}).length+'场 + 本地'+Object.keys(localL.settled||{}).length+'场 = 合并后'+Object.keys(merged.settled||{}).length+'场');
 }
-// 自动同步学习数据到GitHub
+// 自动同步学习数据到GitHub（智能合并，防抖）
 let ghSyncTimer=null;
 function syncLearnToGithub(token,L){
  if(ghSyncTimer)clearTimeout(ghSyncTimer);
  ghSyncTimer=setTimeout(async()=>{
   try{
-   const owner='qq894805001-a11y';
-   const repo='huange-ai-model';
-   const path='data/learn_data.json';
-   const apiUrl=`https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
-   // 先获取现有文件的sha
-   let sha=null;
-   const getResp=await fetch(apiUrl,{headers:{'Authorization':'token '+token,'User-Agent':'ai-model'}});
-   if(getResp.ok){
-    const getJson=await getResp.json();
-    sha=getJson.sha;
-   }
-   // 上传新内容
-   const content=btoa(unescape(encodeURIComponent(JSON.stringify(L,null,2))));
-   const putResp=await fetch(apiUrl,{
-    method:'PUT',
-    headers:{'Authorization':'token '+token,'Content-Type':'application/json','User-Agent':'ai-model'},
-    body:JSON.stringify({message:'Auto-sync learn data',content:content,sha:sha})
-   });
-   if(putResp.ok)console.log('[AutoSync] 学习数据已自动同步到GitHub');
-   else console.log('[AutoSync] 同步失败:',putResp.status);
+   await syncLearnToGithubNow(token,L);
+   console.log('[AutoSync] 学习数据已自动同步到GitHub');
   }catch(e){console.log('[AutoSync] 同步错误:',e.message);}
  },3000); // 3秒防抖，避免频繁请求
 }
