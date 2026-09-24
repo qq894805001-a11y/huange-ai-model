@@ -734,6 +734,434 @@ try{
 }catch(e){}
 // ==================== 名字库结束 ====================
 
+// ============================================================
+// 球员能力学习与状态跟踪机制
+// 核心功能：
+// 1. 球员名字翻译（中文↔英文↔拼音）
+// 2. 球员能力学习（根据比赛表现调整能力值）
+// 3. 球员状态跟踪（伤病、疲劳、近期表现）
+// 4. 跨球队关联（俱乐部球员→国家队）
+// ============================================================
+
+const PLAYER_DB_PATH = path.join(__dirname, '..', '..', 'data', 'db2_master', 'players', 'player_db.json');
+const PLAYER_NAME_LIB_PATH = path.join(__dirname, '..', '..', 'data', 'db2_master', 'players', 'player_name_lib.json');
+
+// 球员名字库（中文↔英文↔拼音映射，自动学习）
+let PLAYER_NAME_LIB = {};
+
+// 球员数据库
+let PLAYER_DB = {};
+
+// 加载球员名字库
+try {
+  if (fs.existsSync(PLAYER_NAME_LIB_PATH)) {
+    PLAYER_NAME_LIB = JSON.parse(fs.readFileSync(PLAYER_NAME_LIB_PATH, 'utf-8'));
+    console.log('  球员名字库已加载: ' + Object.keys(PLAYER_NAME_LIB).length + '条');
+  }
+} catch (e) {}
+
+// 加载球员数据库
+try {
+  if (fs.existsSync(PLAYER_DB_PATH)) {
+    PLAYER_DB = JSON.parse(fs.readFileSync(PLAYER_DB_PATH, 'utf-8'));
+    console.log('  球员数据库已加载: ' + Object.keys(PLAYER_DB).length + '名球员');
+  }
+} catch (e) {}
+
+// 保存球员名字库
+function savePlayerNameLib() {
+  try {
+    ensureDir(path.dirname(PLAYER_NAME_LIB_PATH));
+    fs.writeFileSync(PLAYER_NAME_LIB_PATH, JSON.stringify(PLAYER_NAME_LIB, null, 2), 'utf-8');
+  } catch (e) {}
+}
+
+// 保存球员数据库
+function savePlayerDB() {
+  try {
+    ensureDir(path.dirname(PLAYER_DB_PATH));
+    fs.writeFileSync(PLAYER_DB_PATH, JSON.stringify(PLAYER_DB, null, 2), 'utf-8');
+  } catch (e) {}
+}
+
+// 球员名字规范化（转成小写、去特殊字符、去空格）
+function normalizePlayerName(name) {
+  if (!name) return '';
+  return String(name).toLowerCase()
+    .replace(/[\.\,\'\-]/g, '')
+    .replace(/\s+/g, '')
+    .trim();
+}
+
+// 球员名字翻译：返回标准中文名
+function translatePlayerName(name, teamContext = '') {
+  if (!name) return name;
+  
+  const key = normalizePlayerName(name);
+  
+  // 如果已经是中文，直接返回
+  if (/[\u4e00-\u9fa5]/.test(name)) {
+    if (!PLAYER_NAME_LIB[key]) {
+      PLAYER_NAME_LIB[key] = { zh: name, en: '', aliases: [], team: teamContext };
+      savePlayerNameLib();
+    }
+    return name;
+  }
+  
+  // 从名字库查找
+  if (PLAYER_NAME_LIB[key] && PLAYER_NAME_LIB[key].zh) {
+    return PLAYER_NAME_LIB[key].zh;
+  }
+  
+  // 没找到，返回原名，并自动学习
+  if (!PLAYER_NAME_LIB[key]) {
+    PLAYER_NAME_LIB[key] = { zh: name, en: name, aliases: [], team: teamContext };
+    savePlayerNameLib();
+  }
+  
+  return name;
+}
+
+// 学习球员名字映射
+function learnPlayerName(alias, standardZhName, teamContext = '') {
+  const key = normalizePlayerName(alias);
+  if (!PLAYER_NAME_LIB[key]) {
+    PLAYER_NAME_LIB[key] = { zh: standardZhName, en: alias, aliases: [], team: teamContext };
+  } else {
+    PLAYER_NAME_LIB[key].zh = standardZhName;
+    if (teamContext) PLAYER_NAME_LIB[key].team = teamContext;
+  }
+  if (alias !== standardZhName && !PLAYER_NAME_LIB[key].aliases.includes(alias)) {
+    PLAYER_NAME_LIB[key].aliases.push(alias);
+  }
+  savePlayerNameLib();
+}
+
+// 根据球队级别估算球员初始能力值
+function estimateInitialAbility(playerName, position, teamName, teamTier) {
+  // 基础能力值根据球队级别
+  const baseAbility = {
+    'S': 82, 'A': 75, 'B': 68, 'C': 60
+  };
+  
+  const base = baseAbility[teamTier] || 65;
+  
+  // 根据位置微调
+  let ability = {
+    overall: base,
+    attacking: base,
+    defending: base,
+    passing: base,
+    shooting: base,
+    speed: base + 2,
+    physical: base
+  };
+  
+  if (position) {
+    const pos = position.toLowerCase();
+    if (pos.includes('forward') || pos.includes('striker') || pos.includes('前锋') || pos.includes('中锋')) {
+      ability.attacking = base + 5;
+      ability.shooting = base + 8;
+      ability.defending = base - 10;
+    } else if (pos.includes('midfielder') || pos.includes('中场') || pos.includes('前卫')) {
+      ability.passing = base + 6;
+      ability.attacking = base + 2;
+      ability.defending = base + 2;
+    } else if (pos.includes('defender') || pos.includes('后卫') || pos.includes('back')) {
+      ability.defending = base + 8;
+      ability.attacking = base - 8;
+      ability.physical = base + 3;
+    } else if (pos.includes('goalkeeper') || pos.includes('门将') || pos.includes('守门员')) {
+      ability.defending = base + 10;
+      ability.physical = base + 5;
+      ability.attacking = base - 15;
+      ability.shooting = base - 15;
+    }
+  }
+  
+  return ability;
+}
+
+// 获取或创建球员记录
+function getOrCreatePlayer(playerName, teamName = '', position = '', teamTier = 'B') {
+  const zhName = translatePlayerName(playerName, teamName);
+  const key = normalizePlayerName(zhName);
+  
+  if (!PLAYER_DB[key]) {
+    PLAYER_DB[key] = {
+      id: key,
+      name: zhName,
+      name_en: /[\u4e00-\u9fa5]/.test(playerName) ? '' : playerName,
+      aliases: [],
+      team: teamName,
+      nationality: '',
+      position: position,
+      ability: estimateInitialAbility(playerName, position, teamName, teamTier),
+      form: {
+        recent_matches: 0,
+        avg_rating: 6.5,
+        goals: 0,
+        assists: 0,
+        yellow_cards: 0,
+        red_cards: 0,
+        trend: 'stable'
+      },
+      status: {
+        injured: false,
+        injury_type: '',
+        suspended: false,
+        suspension_reason: '',
+        fatigue: 30,
+        last_match: '',
+        consecutive_matches: 0
+      },
+      clubs: teamName ? [teamName] : [],
+      national_team: '',
+      learn_count: 0,
+      last_updated: new Date().toISOString()
+    };
+  }
+  
+  // 更新所属球队
+  if (teamName && !PLAYER_DB[key].clubs.includes(teamName)) {
+    PLAYER_DB[key].clubs.push(teamName);
+    PLAYER_DB[key].team = teamName;
+  }
+  if (position && !PLAYER_DB[key].position) {
+    PLAYER_DB[key].position = position;
+  }
+  
+  return PLAYER_DB[key];
+}
+
+// 球员能力学习：根据比赛表现调整能力值
+function learnPlayerAbility(playerKey, performance) {
+  const player = PLAYER_DB[playerKey];
+  if (!player) return;
+  
+  player.learn_count++;
+  
+  // 学习率：随着学习次数增加，调整幅度减小（收敛）
+  const learningRate = Math.max(0.02, 0.1 / (1 + player.learn_count * 0.05));
+  
+  // 评分影响整体能力
+  if (performance.rating !== undefined && performance.rating > 0) {
+    const ratingDiff = (performance.rating - 6.5) * 2; // 6.5分为基准
+    player.ability.overall += ratingDiff * learningRate;
+    player.ability.overall = Math.max(40, Math.min(99, player.ability.overall));
+  }
+  
+  // 进球影响进攻和射门
+  if (performance.goals > 0) {
+    player.ability.attacking += performance.goals * 0.5 * learningRate * 10;
+    player.ability.shooting += performance.goals * 0.8 * learningRate * 10;
+    player.form.goals += performance.goals;
+  }
+  
+  // 助攻影响传球
+  if (performance.assists > 0) {
+    player.ability.passing += performance.assists * 0.6 * learningRate * 10;
+    player.form.assists += performance.assists;
+  }
+  
+  // 防守表现影响防守能力
+  if (performance.defensive_actions !== undefined) {
+    player.ability.defending += (performance.defensive_actions - 3) * 0.3 * learningRate * 10;
+  }
+  
+  // 红黄牌记录
+  if (performance.yellow_card) player.form.yellow_cards++;
+  if (performance.red_card) {
+    player.form.red_cards++;
+    player.status.suspended = true;
+    player.status.suspension_reason = '红牌停赛';
+  }
+  
+  // 更新近期状态
+  player.form.recent_matches++;
+  if (performance.rating) {
+    player.form.avg_rating = (player.form.avg_rating * (player.form.recent_matches - 1) + performance.rating) / player.form.recent_matches;
+  }
+  
+  // 状态趋势
+  if (performance.rating > 7.5) player.form.trend = 'up';
+  else if (performance.rating < 5.5) player.form.trend = 'down';
+  else player.form.trend = 'stable';
+  
+  // 更新疲劳度
+  if (performance.minutes_played > 60) {
+    player.status.fatigue = Math.min(100, player.status.fatigue + 15);
+  } else if (performance.minutes_played > 0) {
+    player.status.fatigue = Math.min(100, player.status.fatigue + 5);
+  }
+  player.status.last_match = performance.match_date || new Date().toISOString().slice(0, 10);
+  player.status.consecutive_matches++;
+  
+  // 疲劳度自然恢复（每天减10）
+  // 这个在每次加载时根据last_match计算
+  
+  player.last_updated = new Date().toISOString();
+}
+
+// 更新球员伤病状态
+function updatePlayerInjury(playerKey, injuryInfo) {
+  const player = PLAYER_DB[playerKey];
+  if (!player) return;
+  
+  player.status.injured = injuryInfo.injured || false;
+  player.status.injury_type = injuryInfo.type || '';
+  if (injuryInfo.expected_return) {
+    player.status.expected_return = injuryInfo.expected_return;
+  }
+  player.last_updated = new Date().toISOString();
+}
+
+// 计算球队整体能力（考虑球员能力和状态）
+function calculateTeamAbility(teamName, players = []) {
+  if (players.length === 0) {
+    // 从球员数据库中查找该球队的球员
+    for (const key in PLAYER_DB) {
+      if (PLAYER_DB[key].team === teamName || PLAYER_DB[key].clubs.includes(teamName)) {
+        players.push(PLAYER_DB[key]);
+      }
+    }
+  }
+  
+  if (players.length === 0) {
+    return { overall: 65, attacking: 65, defending: 65, depth: 0 };
+  }
+  
+  // 计算首发11人的平均能力（如果有首发数据）
+  // 否则取能力最高的11人
+  const sortedPlayers = players.sort((a, b) => b.ability.overall - a.ability.overall);
+  const topPlayers = sortedPlayers.slice(0, 11);
+  
+  let overall = 0, attacking = 0, defending = 0, passing = 0;
+  let statusFactor = 0;
+  
+  for (const p of topPlayers) {
+    overall += p.ability.overall;
+    attacking += p.ability.attacking;
+    defending += p.ability.defending;
+    passing += p.ability.passing;
+    
+    // 状态修正：伤病减20%，疲劳超过70减10%，状态好加5%
+    let factor = 1;
+    if (p.status.injured) factor -= 0.2;
+    if (p.status.fatigue > 70) factor -= 0.1;
+    if (p.form.trend === 'up') factor += 0.05;
+    if (p.form.trend === 'down') factor -= 0.05;
+    statusFactor += factor;
+  }
+  
+  const count = topPlayers.length;
+  statusFactor = statusFactor / count;
+  
+  return {
+    overall: Math.round((overall / count) * statusFactor),
+    attacking: Math.round((attacking / count) * statusFactor),
+    defending: Math.round((defending / count) * statusFactor),
+    passing: Math.round((passing / count) * statusFactor),
+    depth: players.length,
+    status_factor: Math.round(statusFactor * 100) / 100,
+    top_players: topPlayers.slice(0, 5).map(p => ({
+      name: p.name,
+      position: p.position,
+      ability: Math.round(p.ability.overall),
+      form: p.form.trend,
+      injured: p.status.injured,
+      fatigue: p.status.fatigue
+    }))
+  };
+}
+
+// 跨球队关联：获取国家队球员的俱乐部表现
+function getNationalTeamPlayersWithClubForm(nationalTeamName) {
+  const result = [];
+  
+  for (const key in PLAYER_DB) {
+    const player = PLAYER_DB[key];
+    if (player.national_team === nationalTeamName) {
+      // 找到该球员的俱乐部
+      const club = player.clubs.find(c => c !== nationalTeamName) || player.team;
+      result.push({
+        ...player,
+        club: club,
+        club_form: player.form,
+        club_ability: player.ability
+      });
+    }
+  }
+  
+  return result;
+}
+
+// 从比赛阵容中学习球员
+function learnPlayersFromLineups(matchId, homeTeam, awayTeam, lineups, teamTier) {
+  if (!lineups) return;
+  
+  const teams = [
+    { name: homeTeam, data: lineups.home || lineups[0] },
+    { name: awayTeam, data: lineups.away || lineups[1] }
+  ];
+  
+  for (const team of teams) {
+    if (!team.data) continue;
+    
+    const players = team.data.startXI || team.data.players || [];
+    for (const p of players) {
+      const playerName = p.player?.name || p.name || '';
+      const position = p.player?.position || p.position || '';
+      const number = p.player?.number || p.number;
+      
+      if (playerName) {
+        const player = getOrCreatePlayer(playerName, team.name, position, teamTier);
+        // 记录球衣号码
+        if (number && !player.jersey_number) {
+          player.jersey_number = number;
+        }
+      }
+    }
+    
+    // 替补球员
+    const substitutes = team.data.substitutes || [];
+    for (const p of substitutes) {
+      const playerName = p.player?.name || p.name || '';
+      const position = p.player?.position || p.position || '';
+      if (playerName) {
+        getOrCreatePlayer(playerName, team.name, position, teamTier);
+      }
+    }
+  }
+}
+
+// 从伤停名单中学习球员状态
+function learnPlayersFromInjuries(injuries, teamName) {
+  if (!injuries || !Array.isArray(injuries)) return;
+  
+  for (const inj of injuries) {
+    const playerName = inj.player?.name || inj.name || '';
+    if (playerName) {
+      const player = getOrCreatePlayer(playerName, teamName, inj.player?.position || '');
+      updatePlayerInjury(player.id, {
+        injured: true,
+        type: inj.type || inj.reason || '受伤',
+        expected_return: inj.expected_return || ''
+      });
+    }
+  }
+}
+
+// 定期保存球员数据
+function savePlayerData() {
+  savePlayerNameLib();
+  savePlayerDB();
+}
+
+// ==================== 球员学习模块结束 ====================
+
+
+
 
 
 // 工具函数
@@ -1162,7 +1590,21 @@ async function supplementWithApiFootball(allMatches, detailCache) {
           if (!detailCache[eventId]) detailCache[eventId] = {};
           detailCache[eventId].lineups_apiFootball = lineupsData.response;
           detailCache[eventId]._apiFootballLineups = true;
-          console.log(`    ✓ 阵容数据已获取`);
+          console.log('    ✓ 阵容数据已获取');
+          
+          // 从阵容中学习球员
+          try {
+            learnPlayersFromLineups(
+              eventId,
+              match.home_team_zh || match.home_team,
+              match.away_team_zh || match.away_team,
+              lineupsData.response,
+              tier
+            );
+            console.log('    ✓ 已从阵容学习球员');
+          } catch (e) {
+            console.log('    ⚠ 球员学习失败: ' + e.message);
+          }
         }
       }
       
@@ -1178,7 +1620,16 @@ async function supplementWithApiFootball(allMatches, detailCache) {
           if (!detailCache[eventId]) detailCache[eventId] = {};
           detailCache[eventId].injuries_apiFootball = injuriesData.response;
           detailCache[eventId]._apiFootballInjuries = true;
-          console.log(`    ✓ 伤停数据已获取（${injuriesData.response.length}人）`);
+          console.log('    ✓ 伤停数据已获取（' + injuriesData.response.length + '人）');
+          
+          // 从伤停名单中学习球员状态
+          try {
+            learnPlayersFromInjuries(injuriesData.response, match.home_team_zh || match.home_team);
+            learnPlayersFromInjuries(injuriesData.response, match.away_team_zh || match.away_team);
+            console.log('    ✓ 已从伤停名单更新球员状态');
+          } catch (e) {
+            console.log('    ⚠ 伤停球员状态更新失败: ' + e.message);
+          }
         }
       }
       
@@ -1210,7 +1661,14 @@ async function supplementWithApiFootball(allMatches, detailCache) {
     if (i < toFetch.length - 1) await sleep(CONFIG.requestDelayMs);
   }
   
-  console.log(`  本次补充 ${supplementedCount} 场`);
+  console.log('  本次补充 ' + supplementedCount + ' 场');
+  
+  // 保存球员数据
+  try {
+    savePlayerData();
+    console.log('  球员数据已保存');
+  } catch (e) {}
+  
   return detailCache;
 }
 
@@ -1443,8 +1901,52 @@ async function supplementWithEspn(allMatches, detailCache) {
 async function saveMergedDetails(detailCache) {
   console.log('\n=== [数据库2] 第五步：保存融合后的详情 ===');
   
+  // 为每场比赛计算球队整体能力（基于球员能力和状态）
+  let teamAbilityCalculated = 0;
+  for (const eventId in detailCache) {
+    const detail = detailCache[eventId];
+    const homeTeam = detail.home_team_zh || detail.home_team || '';
+    const awayTeam = detail.away_team_zh || detail.away_team || '';
+    
+    if (homeTeam && awayTeam) {
+      try {
+        const homeAbility = calculateTeamAbility(homeTeam);
+        const awayAbility = calculateTeamAbility(awayTeam);
+        
+        detail.team_ability = {
+          home: homeAbility,
+          away: awayAbility,
+          diff: homeAbility.overall - awayAbility.overall
+        };
+        
+        // 跨球队关联：如果是国家队比赛，关联俱乐部球员表现
+        if (homeTeam.length <= 4 || homeTeam.indexOf('国家队') >= 0) {
+          const homeNationalPlayers = getNationalTeamPlayersWithClubForm(homeTeam);
+          if (homeNationalPlayers.length > 0) {
+            detail.national_team_players = detail.national_team_players || {};
+            detail.national_team_players.home = homeNationalPlayers.slice(0, 11);
+          }
+        }
+        if (awayTeam.length <= 4 || awayTeam.indexOf('国家队') >= 0) {
+          const awayNationalPlayers = getNationalTeamPlayersWithClubForm(awayTeam);
+          if (awayNationalPlayers.length > 0) {
+            detail.national_team_players = detail.national_team_players || {};
+            detail.national_team_players.away = awayNationalPlayers.slice(0, 11);
+          }
+        }
+        
+        teamAbilityCalculated++;
+      } catch (e) {
+        // 单场计算失败不影响其他
+      }
+    }
+  }
+  
   saveJson(path.join(CONFIG.db2Dir, 'current', 'match_details.json'), detailCache);
-  console.log(`  已保存 ${Object.keys(detailCache).length} 场融合详情到数据库2`);
+  console.log('  已保存 ' + Object.keys(detailCache).length + ' 场融合详情到数据库2');
+  if (teamAbilityCalculated > 0) {
+    console.log('  已计算 ' + teamAbilityCalculated + ' 场比赛的球队整体能力');
+  }
 }
 
 // ============================================================
