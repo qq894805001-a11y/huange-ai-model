@@ -59,7 +59,7 @@ async function syncToGithub(page) {
       const syncKeys = ['gc_learn_v1','gc_self_learn','gc_odds_learner','gc_live_snap_v1',
                         'gc_dyn','gc_zhcache_v1','gc_espn_codes','gc_backtest',
                         'gc_afb_map','gc_afb_quota','gc_quota_v2','gc_users_v1',
-                        'gc_odds_history_v1'];
+                        'gc_odds_history_v1','gc_home_odds_v1'];
       for (let i = 0; i < localStorage.length; i++) {
         const k = localStorage.key(i);
         if (k && (syncKeys.includes(k) || k.startsWith('gc_afb_extra_'))) {
