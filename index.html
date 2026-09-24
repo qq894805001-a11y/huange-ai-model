@@ -2101,6 +2101,12 @@ select{font-family:var(--font-body);}
   <button onclick="loadSelfApiOddsFromGithub();location.reload();" style="background:#2a2a3e;color:#fff;border:1px solid #444;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px">
     刷新盘口数据
   </button>
+  <button onclick="pullCloudLearnData();" style="background:#2a2a3e;color:#fff;border:1px solid #444;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px;margin-left:4px">
+    拉取云端学习数据
+  </button>
+  <button onclick="uploadLearnDataToGithub();" style="background:#2a2a3e;color:#fff;border:1px solid #444;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px;margin-left:4px">
+    上传本地学习数据
+  </button>
 </div>
 
 <!-- ========== 登录遮罩层 ========== -->
@@ -7587,6 +7593,166 @@ async function loadSelfApiOddsFromGithub(){
     console.log('加载新API盘口失败:', e.message);
   }
 }
+
+// ========== 云端同步功能 ==========
+// 从GitHub加载学习数据（复盘记录）
+async function loadLearnDataFromGithub(){
+  try{
+    const url = 'https://raw.githubusercontent.com/qq894805001-a11y/huange-ai-model/main/data/learn_data.json?t=' + Date.now();
+    const res = await fetch(url);
+    if(!res.ok) return;
+    const data = await res.json();
+    if(data){
+      window.gc_learn_v1 = data;
+      console.log('从GitHub加载学习数据成功');
+      if(typeof renderReview === 'function') renderReview();
+    }
+  }catch(e){
+    console.log('加载学习数据失败:', e.message);
+  }
+}
+
+// 上传本地学习数据到GitHub（合并，不覆盖云端新数据）
+async function uploadLearnDataToGithub(){
+  try{
+    // 先读云端数据
+    let cloud = {};
+    try{
+      const res = await fetch('https://raw.githubusercontent.com/qq894805001-a11y/huange-ai-model/main/data/learn_data.json?t=' + Date.now());
+      if(res.ok) cloud = await res.json();
+    }catch(e){}
+    // 合并：本地和云端的复盘记录合并，按时间去重，新的覆盖旧的
+    const local = window.gc_learn_v1 || {};
+    const allReviews = {};
+    // 先放云端的
+    if(cloud.review) cloud.review.forEach(r => { allReviews[r.matchId || r.id] = r; });
+    // 再放本地的（本地新的覆盖云端旧的）
+    if(local.review) local.review.forEach(r => {
+      const id = r.matchId || r.id;
+      if(!allReviews[id] || (r.time||0) > (allReviews[id].time||0)){
+        allReviews[id] = r;
+      }
+    });
+    // 合并统计数据（命中率等，取新的）
+    const merged = Object.assign({}, cloud, local);
+    merged.review = Object.values(allReviews);
+    // 按时间倒序排
+    merged.review.sort((a,b) => (b.time||0) - (a.time||0));
+    // 只保留最近100场
+    merged.review = merged.review.slice(0, 100);
+    // 上传合并后的数据
+    const content = JSON.stringify(merged);
+    const b64 = btoa(unescape(encodeURIComponent(content)));
+    let sha = '';
+    try{
+      const res = await fetch('https://api.github.com/repos/qq894805001-a11y/huange-ai-model/contents/data/learn_data.json');
+      if(res.ok){
+        const f = await res.json();
+        sha = f.sha;
+      }
+    }catch(e){}
+    await fetch('https://api.github.com/repos/qq894805001-a11y/huange-ai-model/contents/data/learn_data.json', {
+      method: 'PUT',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        message: '同步学习数据（合并）',
+        content: b64,
+        sha: sha
+      })
+    });
+    alert('学习数据已合并同步到云端！');
+    window.gc_learn_v1 = merged;
+  }catch(e){
+    alert('上传失败: ' + e.message);
+  }
+}
+
+// 拉取云端学习数据
+async function pullCloudLearnData(){
+  try{
+    await loadLearnDataFromGithub();
+    alert('已从云端拉取学习数据！');
+    location.reload();
+  }catch(e){
+    alert('拉取失败: ' + e.message);
+  }
+}
+
+// 从GitHub加载手动盘口
+async function loadManualOddsFromGithub(){
+  try{
+    const url = 'https://raw.githubusercontent.com/qq894805001-a11y/huange-ai-model/main/data/manual_odds.json?t=' + Date.now();
+    const res = await fetch(url);
+    if(!res.ok) return;
+    const data = await res.json();
+    if(data){
+      window.manualOdds = data;
+      console.log('从GitHub加载手动盘口成功:', Object.keys(data).length, '场');
+    }
+  }catch(e){
+    console.log('加载手动盘口失败:', e.message);
+  }
+}
+
+// 上传手动盘口到GitHub
+async function saveManualOddsToGithub(){
+  try{
+    const content = JSON.stringify(window.manualOdds || {});
+    const b64 = btoa(unescape(encodeURIComponent(content)));
+    // 先获取文件SHA
+    let sha = '';
+    try{
+      const res = await fetch('https://api.github.com/repos/qq894805001-a11y/huange-ai-model/contents/data/manual_odds.json');
+      if(res.ok){
+        const f = await res.json();
+        sha = f.sha;
+      }
+    }catch(e){}
+    await fetch('https://api.github.com/repos/qq894805001-a11y/huange-ai-model/contents/data/manual_odds.json', {
+      method: 'PUT',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        message: '更新手动盘口',
+        content: b64,
+        sha: sha
+      })
+    });
+    console.log('手动盘口已上传到云端');
+    alert('已保存到云端！');
+  }catch(e){
+    console.log('上传失败:', e.message);
+    alert('保存失败: ' + e.message);
+  }
+}
+
+// 自动清理过期数据
+function cleanupOldData(){
+  try{
+    // 清理手动盘口（24小时前的）
+    if(window.manualOdds){
+      const now = Date.now();
+      for(const id in window.manualOdds){
+        if(now - window.manualOdds[id].time > 24*60*60*1000){
+          delete window.manualOdds[id];
+        }
+      }
+    }
+    // 清理学习数据（90天前的复盘记录）
+    if(window.gc_learn_v1 && window.gc_learn_v1.review){
+      const now = Date.now();
+      window.gc_learn_v1.review = window.gc_learn_v1.review.filter(r => {
+        return now - (r.time || 0) < 90*24*60*60*1000;
+      });
+    }
+  }catch(e){}
+}
+
+// 页面加载完成后，自动从云端加载数据
+window.addEventListener('load', async function(){
+  cleanupOldData();
+  await loadLearnDataFromGithub();
+  await loadManualOddsFromGithub();
+});
 // 页面加载时自动加载新API盘口
 loadSelfApiOddsFromGithub();
 // 手动输入盘口
