@@ -7136,8 +7136,10 @@ function renderLearnPanel(){
   html+='</div>';
  }
  if(recent.length){
-  html+='<div class="ln-sep mk-sep">最近复盘（点击展开详情）</div><ul class="ln-list">';
-  recent.forEach((p,pi)=>{
+  html+='<div class="ln-sep mk-sep">最近复盘（点击展开详情）</div>'+
+  '<label style="display:flex;align-items:center;gap:6px;font-size:12px;margin:6px 0;cursor:pointer"><input type="checkbox" id="only-major-review" style="width:14px;height:14px"> 只看正规比赛</label>'+
+  '<ul class="ln-list">';
+  recent.forEach((p,pi)=>{ const onlyMajor=document.getElementById('only-major-review')?document.getElementById('only-major-review').checked:false; if(onlyMajor && !isMajorLg(p.lg)) return;
    const cls=p.hit?'hit':'miss';
    const tags=p.reasons.map(r=>'<span class="ln-tag '+(r.t==='g'?'g':r.t==='r'?'r':'')+'">'+escHtml(r.x)+'</span>').join('')+'<span class="ln-tag" style="background:#333">'+escHtml(lgZh(p.lg))+'</span>'+(isMajorLg(p.lg)?'':'<span class="ln-tag">低权重</span>');
    // 大小球/让球推荐
@@ -7168,11 +7170,14 @@ function renderLearnPanel(){
    if(p.mkt)detailHtml+='<div>市场赔率（去水）：主 '+p1(p.mkt.h)+' / 平 '+p1(p.mkt.d)+' / 客 '+p1(p.mkt.a)+'</div>';
    detailHtml+='<div>Brier 误差：'+p.brier.toFixed(3)+'（越低越准）</div>';
    detailHtml+='</div>';
-   html+='<li class="ln-item '+cls+' ln-clickable" data-detail="'+detailId+'">'+
+   html+='<li class="ln-item '+cls+' ln-clickable" data-detail="'+detailId+'" '+(pi>=15?'style="display:none"':'')+'>'+
     '<b><span style="color:#94a3b8;font-size:11px;font-weight:normal;margin-right:4px">'+escHtml(lgZh(p.lg))+'</span>'+escHtml(zhTeam(p.hName,null))+' '+p.hg+'-'+p.ag+' '+escHtml(zhTeam(p.aName,null))+'</b>　预测：'+ARROW[p.arg]+
     (p.hit?' <span class="ln-tag g">✓ 命中</span>':' <span class="ln-tag r">✗ 偏差</span>')+recHtml+'<br>'+tags+detailHtml+'</li>';
   });
   html+='</ul>';
+  if(recent.length>15){
+    html+='<button id="expand-review" style="width:100%;padding:8px;background:rgba(255,255,255,.05);border:1px solid #333;border-radius:6px;color:#ccc;cursor:pointer;margin-top:8px">展开全部（共'+Math.min(recent.length,30)+'条，其余AI已自动学习）</button>';
+  }
  }
  html+='<button class="ln-btn" id="ln-settle">立即拉取赛果复盘学习</button>';
  html+='<button class="ln-btn" id="ln-token" style="border-color:var(--line);color:var(--ink-faint);margin-top:6px;">设置GitHub Token</button>';
@@ -7466,12 +7471,20 @@ function lgZh(code){
   };
   return map[code] || code;
 }
+// 比赛分级权重
+function getMatchWeight(code){
+  if(!code) return 1.0;
+  code = code.toLowerCase();
+  if(code.includes('u17') || code.includes('u19') || code.includes('u21') || code.includes('youth') || code.includes('u20')) return 0.3;
+  if(code.includes('friendly') || code.includes('women')) return 0.6;
+  if(code.includes('fifa.world') || code.includes('uefa.champions') || code.includes('uefa.europa') || code.includes('euro') || code.includes('copa.america')) return 1.5;
+  if(code.includes('eng.1') || code.includes('esp.1') || code.includes('ger.1') || code.includes('ita.1') || code.includes('fra.1') || code.includes('jpn.1') || code.includes('kor.1') || code.includes('chn.1') || code.includes('bra.1') || code.includes('arg.1') || code.includes('usa.1') || code.includes('ned.1') || code.includes('por.1') || code.includes('uefa.nations')) return 1.2;
+  if(code.includes('eng.2') || code.includes('esp.2') || code.includes('ger.2') || code.includes('ita.2') || code.includes('fra.2') || code.includes('jpn.2') || code.includes('bra.2') || code.includes('ned.2') || code.includes('usa.usl.1')) return 1.0;
+  return 1.0;
+}
 // 判断是否正规比赛
 function isMajorLg(code){
-  if(!code) return true;
-  code = code.toLowerCase();
-  if(code.includes('friendly') || code.includes('u17') || code.includes('u19') || code.includes('u21') || code.includes('youth')) return false;
-  return true;
+  return getMatchWeight(code) >= 1.0;
 }
 // 获取比赛学习权重
 function getMatchWeight(code){
@@ -7501,6 +7514,14 @@ function isMajorLg(code){
   if(code.includes('friendly') || code.includes('u17') || code.includes('u19') || code.includes('u21') || code.includes('youth')) return false;
   return true;
 }
+// 展开复盘按钮
+document.addEventListener('click',function(e){
+  if(e.target && e.target.id==='expand-review'){
+    const lis=document.querySelectorAll('.ln-list li');
+    lis.forEach((li,i)=>{ if(i>=15) li.style.display='block'; }); e.target.textContent='收起'; e.target.onclick=function(){ lis.forEach((li,i)=>{ if(i>=15) li.style.display='none'; }); e.target.style.display='block'; e.target.textContent='展开全部'; }
+    e.target.style.display='none';
+  }
+});
 window.addEventListener('load',async function(){await loadLearnDataFromGithub();});
 </script>
 </body>
