@@ -7612,9 +7612,19 @@ async function loadLearnDataFromGithub(){
   }
 }
 
+// 读取GitHub Token
+function getGithubToken(){
+  return localStorage.getItem('gc_github_token') || '';
+}
+
 // 上传本地学习数据到GitHub（合并，不覆盖云端新数据）
 async function uploadLearnDataToGithub(){
   try{
+    const token = getGithubToken();
+    if(!token){
+      alert('请先点"设置GitHub Token"输入你的Token！');
+      return;
+    }
     // 先读云端数据
     let cloud = {};
     try{
@@ -7653,7 +7663,7 @@ async function uploadLearnDataToGithub(){
     }catch(e){}
     await fetch('https://api.github.com/repos/qq894805001-a11y/huange-ai-model/contents/data/learn_data.json', {
       method: 'PUT',
-      headers: {'Content-Type': 'application/json'},
+      headers: {'Content-Type': 'application/json', 'Authorization': 'token ' + getGithubToken()},
       body: JSON.stringify({
         message: '同步学习数据（合并）',
         content: b64,
@@ -7664,6 +7674,15 @@ async function uploadLearnDataToGithub(){
     window.gc_learn_v1 = merged;
   }catch(e){
     alert('上传失败: ' + e.message);
+  }
+}
+
+// 设置GitHub Token
+function setGithubToken(){
+  const t = prompt('请输入你的GitHub Personal Access Token（需要repo权限）:');
+  if(t){
+    localStorage.setItem('gc_github_token', t.trim());
+    alert('Token已保存！');
   }
 }
 
@@ -7710,7 +7729,7 @@ async function saveManualOddsToGithub(){
     }catch(e){}
     await fetch('https://api.github.com/repos/qq894805001-a11y/huange-ai-model/contents/data/manual_odds.json', {
       method: 'PUT',
-      headers: {'Content-Type': 'application/json'},
+      headers: {'Content-Type': 'application/json', 'Authorization': 'token ' + getGithubToken()},
       body: JSON.stringify({
         message: '更新手动盘口',
         content: b64,
