@@ -1,0 +1,74 @@
+name: 欢哥AI模型 - 双数据库数据抓取与融合
+
+on:
+  schedule:
+    # 每15分钟运行一次
+    - cron: '*/15 * * * *'
+  workflow_dispatch:  # 支持手动触发
+  push:
+    paths:
+      - '.github/scripts/*.js'
+      - '.github/workflows/*.yml'
+
+jobs:
+  fetch-and-merge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 设置Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 显示当前时间
+        run: |
+          echo "当前时间(UTC): $(date -u)"
+          echo "当前时间(北京): $(TZ='Asia/Shanghai' date)"
+
+      - name: 第一步：抓取数据库1（云端自建API原始数据）
+        env:
+          SELF_API_KEY: ${{ secrets.SELF_API_KEY }}
+        run: node .github/scripts/fetch-db1.js
+
+      - name: 第二步：融合数据库2（从数据库1提取 + 其他API融合完善）
+        env:
+          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+          BIG_BALLS_KEY: ${{ secrets.BIG_BALLS_KEY }}
+        run: node .github/scripts/merge-db2.js
+
+      - name: 检查数据变化
+        id: check_changes
+        run: |
+          git add data/
+          if git diff --staged --quiet; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "数据无变化，无需提交"
+          else
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "数据有变化，准备提交"
+            git diff --staged --stat
+          fi
+
+      - name: 提交数据到仓库
+        if: steps.check_changes.outputs.has_changes == 'true'
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git commit -m "数据更新 $(TZ='Asia/Shanghai' date '+%Y-%m-%d %H:%M')"
+          git push
+
+      - name: 完成
+        run: |
+          echo "========================================"
+          echo "  双数据库抓取与融合完成！"
+          echo "  数据库1: data/db1_cloud_api/ (云端API原始数据)"
+          echo "  数据库2: data/db2_master/ (融合后的完整数据)"
+          echo "  网页端只读数据库2"
+          echo "  时间: $(TZ='Asia/Shanghai' date)"
+          echo "========================================"
