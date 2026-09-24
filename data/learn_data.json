@@ -1,6 +1,3 @@
 {
-  "gc_zhcache_v1": "{}",
-  "gc_learn_v1": "{\"preds\":{},\"settled\":{},\"teamAdj\":{},\"stats\":{\"n\":0,\"hit\":0,\"brier\":0,\"ouN\":0,\"ouHit\":0,\"spN\":0,\"spHit\":0}}",
-  "gc_afb_quota": "{\"date\":\"2026-09-24\",\"count\":2,\"limit\":95}",
-  "gc_afb_extra_2026-09-24": "{\"ts\":1790230559435,\"data\":[]}"
+  "gc_zhcache_v1": "{}"
 }
