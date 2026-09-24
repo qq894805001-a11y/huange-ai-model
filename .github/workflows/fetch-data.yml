@@ -40,6 +40,8 @@ jobs:
         env:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
           BIG_BALLS_KEY: ${{ secrets.BIG_BALLS_KEY }}
+          BAIDU_TRANSLATE_APP_ID: ${{ secrets.BAIDU_TRANSLATE_APP_ID }}
+          BAIDU_TRANSLATE_SECRET_KEY: ${{ secrets.BAIDU_TRANSLATE_SECRET_KEY }}
         run: node .github/scripts/merge-db2.js
 
       - name: 检查数据变化
