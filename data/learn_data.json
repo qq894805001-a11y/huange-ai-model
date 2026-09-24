@@ -1,1 +1,4 @@
-{"gc_zhcache_v1":"{}","preds":{},"settled":{},"teamAdj":{},"stats":{"n":0,"brier":0,"hit":0},"review":[]}
+{
+  "gc_zhcache_v1": "{}",
+  "gc_learn_v1": "{\"gc_zhcache_v1\":\"{}\"}"
+}
