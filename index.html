@@ -7127,6 +7127,9 @@ function renderLearnPanel(){
   html+='<div class="ln-sep mk-sep">最近复盘（点击展开详情）</div><ul class="ln-list">';
   recent.forEach((p,pi)=>{
    const cls=p.hit?'hit':'miss';
+   const lgName = p.lg ? (LG_ZH[p.lg]||p.lg) : '未知联赛';
+   const isMajor = !(p.lg && (p.lg.includes('friendly')||p.lg.includes('u17')||p.lg.includes('u19')||p.lg.includes('u21')));
+   const weightTag = isMajor ? '<span class="ln-tag g">正规赛</span>' : '<span class="ln-tag">低权重</span>';
    const tags=p.reasons.map(r=>'<span class="ln-tag '+(r.t==='g'?'g':r.t==='r'?'r':'')+'">'+escHtml(r.x)+'</span>').join('');
    // 大小球/让球推荐
    let recHtml='';
@@ -7142,6 +7145,7 @@ function renderLearnPanel(){
      const spHit=p.recResult&&p.recResult.spHit;
      const spActual=p.recResult?('净胜'+p.recResult.spActual):'';
      recHtml+='<span class="ln-tag '+(spHit===true?'g':spHit===false?'r':'')+'">让球 '+spPickLab+' '+(spHit===true?'✓':spHit===false?'✗':'—')+(spActual?' '+spActual:'')+'</span>';
+   recHtml += '<span class="ln-tag" style="background:#333">'+escHtml(lgName)+'</span> ' + weightTag;
     }
    }
    // 详情（默认隐藏，点击展开）
@@ -7437,6 +7441,18 @@ function manualInputOdds(matchId){
   alert('盘口已录入！AI会重新模拟推荐');
   renderHomeList();
 }
+// 联赛代码翻译成中文
+const LG_ZH={
+ 'slv.1':'萨尔瓦多甲','gua.1':'危地马拉甲','col.1':'哥伦比亚甲','usa.1':'美职联',
+ 'usa.usl.1':'美乙','ned.cup':'荷兰杯','ned.1':'荷甲','ned.2':'荷乙',
+ 'esp.1':'西甲','esp.2':'西乙','eng.1':'英超','eng.2':'英冠',
+ 'ger.1':'德甲','ger.2':'德乙','ita.1':'意甲','ita.2':'意乙',
+ 'fra.1':'法甲','fra.2':'法乙','por.1':'葡超','por.2':'葡甲',
+ 'uefa.champions':'欧冠','uefa.europa':'欧联','uefa.europa_conf':'欧协联',
+ 'uefa.nations':'欧国联','fifa.world':'世界杯','euro':'欧洲杯',
+ 'jpn.1':'日本J1','jpn.2':'日本J2','jpn.cup':'天皇杯',
+ 'kor.1':'韩国K1','chn.1':'中超','bra.1':'巴甲','arg.1':'阿甲'
+};
 window.addEventListener('load',async function(){await loadLearnDataFromGithub();});
 </script>
 </body>
