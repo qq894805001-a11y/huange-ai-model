@@ -4305,7 +4305,22 @@ const ESPN_GROUPS=[
   ['fifa.worldq.uefa','世预赛·欧洲','C',1.50,1.15,.90,0],['fifa.worldq.conmebol','世预赛·南美','C',1.30,.98,.82,0],
   ['fifa.worldq.concacaf','世预赛·中北美','C',1.40,1.05,.78,0],['fifa.worldq.afc','世预赛·亚洲','C',1.40,1.05,.74,0],
   ['fifa.worldq.caf','世预赛·非洲','C',1.30,.98,.72,0],['fifa.worldq.ofc','世预赛·大洋洲','C',1.35,1.00,.68,0],
-  ['club.friendly','俱乐部友谊赛','C',1.50,1.15,.80,0],['fifa.friendly','国家队友谊赛','C',1.40,1.05,.80,0]]}
+  ['club.friendly','俱乐部友谊赛','C',1.50,1.15,.80,0],['fifa.friendly','国家队友谊赛','C',1.40,1.05,.80,0]]},
+ {g:'亚洲联赛',list:[
+  ['jpn.1','日本J1','L',1.55,1.20,.88,1],['jpn.2','日本J2','L',1.45,1.10,.78,1],
+  ['jpn.3','日本J3','L',1.35,1.00,.68,0],['jpn.cup','天皇杯','C',1.40,1.05,.80,1],
+  ['jpn.league_cup','日本联赛杯','C',1.40,1.05,.75,0],['jpn.we','日本女足WE','L',1.30,.95,.60,0],
+  ['kor.1','韩国K1','L',1.50,1.15,.85,1],['kor.2','韩国K2','L',1.40,1.05,.72,0],
+  ['chn.1','中超','L',1.45,1.10,.78,1],['chn.2','中甲','L',1.35,1.00,.68,0],
+  ['sau.1','沙特联','L',1.60,1.25,.88,1],['qat.1','卡塔尔联','L',1.45,1.10,.75,0],
+  ['uae.1','阿联酋超','L',1.45,1.10,.75,0],['aus.1','澳超','L',1.45,1.10,.75,0]
+ ]},
+ {g:'中北美&加勒比',list:[
+  ['usa.1','美职联','L',1.40,1.05,.85,1],['usa.usl.1','美乙','L',1.30,.95,.70,0],
+  ['mex.1','墨西哥甲','L',1.35,.98,.82,1],['mex.2','墨西哥乙','L',1.25,.90,.68,0],
+  ['concacaf.gold.cup','中北美金杯','C',1.45,1.10,.80,1],['concacaf.champions','中北美冠军杯','C',1.40,1.05,.78,0],
+  ['caribbean.cup','加勒比杯','C',1.30,.95,.65,0]
+ ]}
 ];
 const ESPN_LEAGUES={};
 ESPN_GROUPS.forEach(grp=>grp.list.forEach(x=>{ESPN_LEAGUES[x[0]]={name:x[1],type:x[2],h:x[3],a:x[4],s:x[5],hot:!!x[6],group:grp.g};}));
@@ -7379,6 +7394,38 @@ function route(){
 window.addEventListener('hashchange',route);
 // 定时自动结算赛果（每20分钟）
 setInterval(()=>{if(!document.hidden)settleLearned();},20*60*1000);
+// 联赛代码翻译成中文
+const LG_ZH={
+ 'slv.1':'萨尔瓦多甲','gua.1':'危地马拉甲','col.1':'哥伦比亚甲','usa.1':'美职联',
+ 'usa.usl.1':'美乙','ned.cup':'荷兰杯','ned.1':'荷甲','ned.2':'荷乙',
+ 'esp.1':'西甲','esp.2':'西乙','eng.1':'英超','eng.2':'英冠',
+ 'ger.1':'德甲','ger.2':'德乙','ita.1':'意甲','ita.2':'意乙',
+ 'fra.1':'法甲','fra.2':'法乙','por.1':'葡超','por.2':'葡甲',
+ 'uefa.champions':'欧冠','uefa.europa':'欧联','uefa.europa_conf':'欧协联',
+ 'uefa.nations':'欧国联','fifa.world':'世界杯','euro':'欧洲杯',
+ 'copa.america':'美洲杯','asian.cup':'亚洲杯','afcon':'非洲杯',
+ 'concacaf.nations.league':'中北美国联','concacaf.gold.cup':'中北美金杯',
+ 'jpn.1':'日本J1','jpn.2':'日本J2','jpn.cup':'天皇杯',
+ 'kor.1':'韩国K1','chn.1':'中超','bra.1':'巴甲','arg.1':'阿甲'
+};
+function lgZh(code){
+  if(!code) return '未知联赛';
+  if(LG_ZH[code]) return LG_ZH[code];
+  const lower = code.toLowerCase();
+  for(const k in LG_ZH){if(lower.startsWith(k)||k.startsWith(lower)) return LG_ZH[k];}
+  return code;
+}
+// 判断比赛是否正规
+function isMajorMatch(lgCode){
+  if(!lgCode) return true;
+  lgCode = lgCode.toLowerCase();
+  if(lgCode.includes('friendly')||lgCode.includes('int.friendly')||lgCode.includes('club.friendly')) return false;
+  if(lgCode.includes('u17')||lgCode.includes('u18')||lgCode.includes('u19')||lgCode.includes('u20')||lgCode.includes('u21')||lgCode.includes('u23')||lgCode.includes('youth')) return false;
+  if(lgCode.includes('cup')||lgCode.includes('copa')||lgCode.includes('dfb')||lgCode.includes('coppa')||lgCode.includes('supercopa')) return true;
+  if(lgCode.includes('uefa.')||lgCode.includes('fifa.')||lgCode.includes('world')||lgCode.includes('euro')||lgCode.includes('nations.league')) return true;
+  if(lgCode.match(/\.(1|2|3)$/)||lgCode.match(/\.(1|2|3)\./)) return true;
+  return true;
+}
 // 自动清理过期数据
 function cleanupOldData(){
   const now = Date.now();
