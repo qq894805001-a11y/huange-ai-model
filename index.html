@@ -8039,26 +8039,25 @@ function saveLearn(L){
   }
  }catch(e){}
 }
-// 判断比赛是否正规（乙级以上）
-// 正规比赛：五大联赛、二级联赛、重要杯赛、国家队大赛
-// 野鸡比赛：低级别联赛、小国家联赛、友谊赛
+// 判断比赛是否正规
+// 正规比赛：所有联赛前三级、所有杯赛、国家队正式比赛
+// 野鸡比赛：友谊赛（驱动力不足）、第四级以下、U系列青年赛
 function isMajorMatch(lgCode){
- if(!lgCode)return false;
+ if(!lgCode)return true; // 不知道的默认算正规
  lgCode=lgCode.toLowerCase();
- // 友谊赛不算正规
- if(lgCode.includes('friendly')||lgCode.includes('int.friendly'))return false;
- // 五大联赛
- const majorLeagues=['eng.1','spa.1','ger.1','ita.1','fra.1','eng.2','spa.2','ger.2','ita.2','fra.2',
-  'uefa.champions','uefa.europa','uefa.europa_conf','uefa.nations',
-  'world','euro','copa.america','asian.cup','afcon'];
- for(const lg of majorLeagues){
-  if(lgCode===lg||lgCode.startsWith(lg+'.')||lgCode.startsWith(lg+'_'))return true;
- }
- // 二级联赛（各国第二级）
- if(lgCode.match(/\.(2|ii)$/)||lgCode.includes('.2.'))return true;
- // 杯赛（各国杯赛）
- if(lgCode.includes('cup')||lgCode.includes('copa')||lgCode.includes('dfb')||lgCode.includes('serie.a.coppa'))return true;
- return false;
+ // 友谊赛不算正规（驱动力不足，经常轮换练兵）
+ if(lgCode.includes('friendly')||lgCode.includes('int.friendly')||lgCode.includes('club.friendly'))return false;
+ // U系列青年赛不算正规
+ if(lgCode.includes('u17')||lgCode.includes('u18')||lgCode.includes('u19')||lgCode.includes('u20')||lgCode.includes('u21')||lgCode.includes('u23')||lgCode.includes('youth'))return false;
+ // 杯赛都算正规（足总杯、国王杯、欧冠等都是正式比赛）
+ if(lgCode.includes('cup')||lgCode.includes('copa')||lgCode.includes('dfb')||lgCode.includes('coppa')||lgCode.includes('supercopa')||lgCode.includes('super.cup'))return true;
+ // 国际比赛都算正规
+ if(lgCode.includes('uefa.')||lgCode.includes('fifa.')||lgCode.includes('world')||lgCode.includes('euro')||lgCode.includes('copa.america')||lgCode.includes('asian.cup')||lgCode.includes('afcon')||lgCode.includes('nations.league'))return true;
+ // 联赛前三级都算正规
+ if(lgCode.match(/\.(1|2|3)$/)||lgCode.match(/\.(1|2|3)\./))return true;
+ // 第四级及以下算半正规（权重低一点，但还是算）
+ // 其他默认算正规
+ return true;
 }
 // 从settled重新计算stats
 function recalcStats(settled,onlyMajor){
@@ -8434,6 +8433,7 @@ function renderLearnPanel(){
    detailHtml+='<div>Brier 误差：'+p.brier.toFixed(3)+'（越低越准）</div>';
    detailHtml+='</div>';
    html+='<li class="ln-item '+cls+' ln-clickable" data-detail="'+detailId+'">'+
+    '<small style="opacity:.7;font-size:10px">['+escHtml(p.lg||'未知联赛')+']</small> '+
     '<b>'+escHtml(zhTeam(p.hName,null))+' '+p.hg+'-'+p.ag+' '+escHtml(zhTeam(p.aName,null))+'</b>　预测：'+ARROW[p.arg]+
     (p.hit?' <span class="ln-tag g">✓ 命中</span>':' <span class="ln-tag r">✗ 偏差</span>')+recHtml+'<br>'+tags+detailHtml+'</li>';
   });
