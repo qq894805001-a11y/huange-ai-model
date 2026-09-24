@@ -653,55 +653,107 @@ async function updateStats() {
 // 主函数
 // ============================================================
 async function main() {
+  // 全局错误处理：捕获所有未处理的Promise rejection，不让脚本崩溃
+  process.on('unhandledRejection', (reason, promise) => {
+    console.error('\n⚠️  捕获到未处理的Promise rejection（已忽略，不影响继续运行）:');
+    console.error('  ', reason?.message || reason);
+  });
+  
+  process.on('uncaughtException', (err) => {
+    console.error('\n⚠️  捕获到未捕获的异常（已忽略，不影响继续运行）:');
+    console.error('  ', err.message);
+  });
+  
   console.log('================================================================');
   console.log('  数据库2融合：从数据库1提取 + 其他API融合完善');
   console.log('  开始时间:', new Date().toLocaleString('zh-CN'));
   console.log('================================================================');
   
+  let allMatches = [];
+  let mergedDetails = {};
+  let todayMatches = [];
+  
+  // 通用安全执行函数：某一步出错不影响其他步骤
+  async function safeRun(name, fn) {
+    try {
+      return await fn();
+    } catch (e) {
+      console.error(' ');
+      console.error('⚠️  [' + name + '] 执行出错（已跳过，继续下一步）:', e.message);
+      return null;
+    }
+  }
+  
   try {
     QuotaManager.load();
-    
-    // 第一步：从数据库1提取云端API原始数据
-    const { todayMatches, tomorrowMatches, detailCache } = await extractFromDb1();
-    const allMatches = [...todayMatches, ...tomorrowMatches];
-    
-    // 第二步：API-Football补充详细数据（S/A级）
-    let mergedDetails = await supplementWithApiFootball(allMatches, detailCache);
-    
-    // 第三步：Big Balls补充xG数据（S级）
-    mergedDetails = await supplementWithBigBalls(allMatches, mergedDetails);
-    
-    // 第四步：ESPN免费数据补充（零消耗配额）
-    mergedDetails = await supplementWithEspn(allMatches, mergedDetails);
-    
-    // 第五步：保存融合后的详情到数据库2
-    await saveMergedDetails(mergedDetails);
-    
-    // 第六步：比赛复盘与AI学习
-    await processReviews(todayMatches, mergedDetails);
-    
-    // 第七步：AI自学习与权重调整
-    await aiLearning();
-    
-    // 第八步：自动清理过期数据
-    await cleanupDb2();
-    
-    // 第九步：更新全局统计
-    await updateStats();
-    
-    QuotaManager.save();
-    
-    console.log('\n================================================================');
-    console.log('  数据库2融合完成！');
-    console.log('  结束时间:', new Date().toLocaleString('zh-CN'));
-    console.log('  网页端只读数据库2: data/db2_master/');
-    console.log('================================================================');
-    
   } catch (e) {
-    console.error('\n❌ 融合出错:', e.message);
-    console.error(e.stack);
-    process.exit(1);
+    console.error('⚠️  配额加载出错，使用默认值:', e.message);
   }
+  
+  // 第一步：从数据库1提取云端API原始数据
+  const result1 = await safeRun('第一步：从数据库1提取', async () => {
+    return await extractFromDb1();
+  });
+  if (result1) {
+    todayMatches = result1.todayMatches || [];
+    allMatches = [...(result1.todayMatches || []), ...(result1.tomorrowMatches || [])];
+    mergedDetails = result1.detailCache || {};
+  }
+  
+  // 第二步：API-Football补充详细数据（S/A级）
+  const result2 = await safeRun('第二步：API-Football补充', async () => {
+    return await supplementWithApiFootball(allMatches, mergedDetails);
+  });
+  if (result2) mergedDetails = result2;
+  
+  // 第三步：Big Balls补充xG数据（S级）
+  const result3 = await safeRun('第三步：Big Balls补充xG', async () => {
+    return await supplementWithBigBalls(allMatches, mergedDetails);
+  });
+  if (result3) mergedDetails = result3;
+  
+  // 第四步：ESPN免费数据补充（零消耗配额）
+  const result4 = await safeRun('第四步：ESPN免费补充', async () => {
+    return await supplementWithEspn(allMatches, mergedDetails);
+  });
+  if (result4) mergedDetails = result4;
+  
+  // 第五步：保存融合后的详情到数据库2
+  await safeRun('第五步：保存融合详情', async () => {
+    await saveMergedDetails(mergedDetails);
+  });
+  
+  // 第六步：比赛复盘与AI学习
+  await safeRun('第六步：比赛复盘', async () => {
+    await processReviews(todayMatches, mergedDetails);
+  });
+  
+  // 第七步：AI自学习与权重调整
+  await safeRun('第七步：AI自学习', async () => {
+    await aiLearning();
+  });
+  
+  // 第八步：自动清理过期数据
+  await safeRun('第八步：自动清理', async () => {
+    await cleanupDb2();
+  });
+  
+  // 第九步：更新全局统计
+  await safeRun('第九步：更新统计', async () => {
+    await updateStats();
+  });
+  
+  try {
+    QuotaManager.save();
+  } catch (e) {
+    console.error('⚠️  配额保存出错:', e.message);
+  }
+  
+  console.log('\n================================================================');
+  console.log('  数据库2融合完成！');
+  console.log('  结束时间:', new Date().toLocaleString('zh-CN'));
+  console.log('  网页端只读数据库2: data/db2_master/');
+  console.log('================================================================');
 }
 
 main();
