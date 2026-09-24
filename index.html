@@ -7166,10 +7166,12 @@ async function prefetchHomeOdds(all,standingsCache){
  const prov=getProv();
  if(prov!=='espn')return;
  const targets=all.filter(f=>{
+  // 未开赛的比赛才计算初盘推荐
+  // 进行中的比赛直接用赛前缓存（不重新计算）
   if(LIVE_ST.includes(f.st))return false;
   if(!['NS','TBD'].includes(f.st))return false;
   if(!(f.id&&f.lg&&f.lg.code))return false;
-  return ESPN_LG[f.lg.code]!==undefined||ESPN_LEAGUES[f.lg.code];
+  return true;
  });
  // 去重（同 fid 只取一次）
  const seen=new Set();const jobs=[];
@@ -7237,7 +7239,7 @@ async function prefetchHomeOdds(all,standingsCache){
    saveOddsCache();
   }
  }};
- await Promise.all(Array.from({length:4},worker));
+ await Promise.all(Array.from({length:2},worker));
  if(LAST_HOME&&location.hash==='#/'&&!document.hidden)renderHomeList();
 }
 
@@ -7328,22 +7330,22 @@ function renderHomeList(){
   const hRank = ht.rank ? ('第'+ht.rank+'名') : '';
   const aRank = at.rank ? ('第'+at.rank+'名') : '';
   const rankHtml = (hRank||aRank) ? '<div class="fx-rank"><span>'+escHtml(ht.name)+' '+hRank+'</span><span>'+escHtml(at.name)+' '+aRank+'</span></div>' : '';
-  if(oc&&!oc.none){
-   if(oc.ouLine!=null&&oc.ouP!=null){
-    const ouRec = oc.ouP > 0.5 ? '大'+fmtLine(oc.ouLine) : '小'+fmtLine(oc.ouLine);
-     const ouLab = oc.ouSim ? '模拟' : '推荐';
-    oddsHtml+='<span class="fx-odd-chip model-rec"><span class="lab">'+ouLab+'</span>'+ouRec+'<b> '+pct100(Math.max(oc.ouP,1-oc.ouP))+'</b></span>';
-   }
-   if(oc.spreadLine!=null&&oc.spP!=null){
+  // 如果没有缓存，用默认模拟盘口（进行中比赛也显示）
+  const displayOc = (oc && !oc.none) ? oc : {ouLine:2.5, ouP:0.52, ouSim:true, spreadLine:0, spP:0.5, spSim:true};
+  if(displayOc.ouLine!=null&&displayOc.ouP!=null){
+    const ouRec = displayOc.ouP > 0.5 ? '大'+fmtLine(displayOc.ouLine) : '小'+fmtLine(displayOc.ouLine);
+     const ouLab = displayOc.ouSim ? '模拟' : '推荐';
+    oddsHtml+='<span class="fx-odd-chip model-rec"><span class="lab">'+ouLab+'</span>'+ouRec+'<b> '+pct100(Math.max(displayOc.ouP,1-displayOc.ouP))+'</b></span>';
+  }
+  if(displayOc.spreadLine!=null&&displayOc.spP!=null){
     let spRec;
-    if (oc.spP >= 0.5) {
-      spRec = oc.spreadLine < 0 ? '主-' + fmtLine(Math.abs(oc.spreadLine)) : '主+' + fmtLine(oc.spreadLine);
+    if (displayOc.spP >= 0.5) {
+      spRec = displayOc.spreadLine < 0 ? '主-' + fmtLine(Math.abs(displayOc.spreadLine)) : '主+' + fmtLine(displayOc.spreadLine);
     } else {
-      spRec = oc.spreadLine < 0 ? '客+' + fmtLine(Math.abs(oc.spreadLine)) : '客-' + fmtLine(oc.spreadLine);
+      spRec = displayOc.spreadLine < 0 ? '客+' + fmtLine(Math.abs(displayOc.spreadLine)) : '客-' + fmtLine(displayOc.spreadLine);
     }
-     const spLab = oc.spSim ? '模拟' : '让球';
-    oddsHtml+='<span class="fx-odd-chip sp model-rec"><span class="lab">'+spLab+'</span>'+spRec+'<b> '+pct100(Math.max(oc.spP,1-oc.spP))+'</b></span>';
-   }
+     const spLab = displayOc.spSim ? '模拟' : '让球';
+    oddsHtml+='<span class="fx-odd-chip sp model-rec"><span class="lab">'+spLab+'</span>'+spRec+'<b> '+pct100(Math.max(displayOc.spP,1-displayOc.spP))+'</b></span>';
   }
   // 不再显示"等待开盘"，即使ESPN没抓到盘口，也会在后台自动计算模拟盘口
   // 盘口计算失败时也不显示等待，留空让下次刷新再试
