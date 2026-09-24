@@ -7840,6 +7840,31 @@ function saveLearn(L){
   }
  }catch(e){}
 }
+// 立即同步学习数据到GitHub（手动点按钮用）
+async function syncLearnToGithubNow(token,L){
+ const owner='qq894805001-a11y';
+ const repo='huange-ai-model';
+ const path='data/learn_data.json';
+ const apiUrl=`https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
+ // 先获取现有文件的sha
+ let sha=null;
+ const getResp=await fetch(apiUrl,{headers:{'Authorization':'token '+token,'User-Agent':'ai-model'}});
+ if(getResp.ok){
+  const getJson=await getResp.json();
+  sha=getJson.sha;
+ }
+ // 上传新内容
+ const content=btoa(unescape(encodeURIComponent(JSON.stringify(L,null,2))));
+ const putResp=await fetch(apiUrl,{
+  method:'PUT',
+  headers:{'Authorization':'token '+token,'Content-Type':'application/json','User-Agent':'ai-model'},
+  body:JSON.stringify({message:'Manual sync learn data',content:content,sha:sha})
+ });
+ if(!putResp.ok){
+  const errText=await putResp.text();
+  throw new Error('HTTP '+putResp.status+': '+errText);
+ }
+}
 // 自动同步学习数据到GitHub
 let ghSyncTimer=null;
 function syncLearnToGithub(token,L){
@@ -7858,7 +7883,7 @@ function syncLearnToGithub(token,L){
     sha=getJson.sha;
    }
    // 上传新内容
-   const content=Buffer.from(JSON.stringify(L,null,2),'utf-8').toString('base64');
+   const content=btoa(unescape(encodeURIComponent(JSON.stringify(L,null,2))));
    const putResp=await fetch(apiUrl,{
     method:'PUT',
     headers:{'Authorization':'token '+token,'Content-Type':'application/json','User-Agent':'ai-model'},
@@ -8133,6 +8158,7 @@ function renderLearnPanel(){
  }
  html+='<button class="ln-btn" id="ln-settle">立即拉取赛果复盘学习</button>';
  html+='<button class="ln-btn" id="ln-gh-set" style="margin-top:8px;background:var(--line)">🔗 设置GitHub Token（手机电脑同步）</button>';
+ html+='<button class="ln-btn" id="ln-gh-sync" style="margin-top:8px;background:var(--green);color:#000">☁️ 立即同步学习数据到云端</button>';
  html+='<p class="pitch-note">学习数据自动保存，100天后自动清理旧数据；修正系数保守限幅 ±15%，样本不足 3 场不生效，100 天自动清理，避免过拟合。<br>设置GitHub Token后，学习数据自动同步到云端，手机电脑同步看。</p></div>';
  box.innerHTML=html;
  const b1=document.getElementById('ln-settle');if(b1)b1.onclick=async()=>{
@@ -8148,6 +8174,17 @@ function renderLearnPanel(){
   renderLearnPanel();
  };
  const b2=document.getElementById('ln-clear');if(b2)b2.onclick=()=>{localStorage.removeItem(LEARN_KEY);renderLearnPanel();toast('学习数据已清空');};
+ const b4=document.getElementById('ln-gh-sync');if(b4)b4.onclick=async()=>{
+  const token=localStorage.getItem('gc_gh_token');
+  if(!token){toast('⚠️ 请先点"设置GitHub Token"按钮输入Token！');return;}
+  b4.textContent='同步中…';b4.disabled=true;
+  try{
+   const L=loadLearn();
+   await syncLearnToGithubNow(token,L);
+   toast('✅ 学习数据已同步到云端！手机刷新即可看到');
+  }catch(e){toast('❌ 同步失败：'+e.message);}
+  b4.textContent='☁️ 立即同步学习数据到云端';b4.disabled=false;
+ };
  const b3=document.getElementById('ln-gh-set');if(b3)b3.onclick=()=>{
   const cur=localStorage.getItem('gc_gh_token')||'';
   const token=prompt('请输入你的GitHub Personal Access Token（需要repo权限）：',cur);
