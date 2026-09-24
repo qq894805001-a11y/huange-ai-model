@@ -8018,7 +8018,7 @@ function convertSelfApiMatch(m){
     if(m.date && m.time){
       // date格式是日/月/年，比如24/09/2026
       const parts = m.date.split('/');
-      const dateStr = parts[2] + '-' + parts[1] + '-' + parts[0]; // 2026-09-24
+      const dateStr = parts[2] + '-' + parts[1] + '-' + parts[0]; // 年-月-日 2026-09-24 // 2026-09-24
       dateISO = new Date(dateStr + 'T' + m.time + ':00+08:00').toISOString();
     }
   }catch(e){}
