@@ -7532,16 +7532,34 @@ async function loadSelfApiOddsFromGithub(){
     console.log('从GitHub加载新API盘口:', Object.keys(data.matches).length, '场比赛');
     const norm = n => String(n||'').toLowerCase().replace(/[^a-z0-9\u4e00-\u9fa5]/g, '');
     let merged = 0;
+    let added = 0;
+    if(!LAST_HOME) LAST_HOME = {all: [], standingsCache: {}};
     for(const key in data.matches){
       const sm = data.matches[key];
-      if(!sm.odds || !sm.oddsAvailable) continue;
       const sh = norm(sm.homeTeam), sa = norm(sm.awayTeam);
-      if(!LAST_HOME || !LAST_HOME.all) continue;
-      const match = LAST_HOME.all.find(f=>{
+      // 先找ESPN里有没有这场
+      let match = LAST_HOME.all.find(f=>{
         const fh = norm(f.home.name), fa = norm(f.away.name);
         return (fh.includes(sh) || sh.includes(fh) || fa.includes(sa) || sa.includes(fa));
       });
-      if(match){
+      // 如果ESPN没有，就新建一个比赛对象加进去
+      if(!match){
+        const matchId = 'self_' + sm.eventId;
+        match = {
+          id: matchId,
+          home: {name: sm.homeTeam, id: matchId+'_h'},
+          away: {name: sm.awayTeam, id: matchId+'_a'},
+          lg: {code: sm.league, name: sm.league},
+          st: sm.status === 'ft' ? 'FT' : (sm.status === 'live' ? '2H' : 'NS'),
+          hg: sm.homeScore || 0,
+          ag: sm.awayScore || 0,
+          dateISO: new Date(sm.date + 'T' + sm.time + ':00+08:00').toISOString()
+        };
+        LAST_HOME.all.push(match);
+        added++;
+      }
+      // 加盘口数据
+      if(sm.odds && sm.oddsAvailable){
         const o = sm.odds;
         let ouLine = 2.5;
         let ouOver = o.over_25;
@@ -7563,7 +7581,7 @@ async function loadSelfApiOddsFromGithub(){
         merged++;
       }
     }
-    console.log('合并了', merged, '场真实盘口');
+    console.log('合并了', merged, '场真实盘口，新增了', added, '场ESPN没有的比赛');
     if(typeof renderHomeList === 'function') renderHomeList();
   }catch(e){
     console.log('加载新API盘口失败:', e.message);
