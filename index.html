@@ -1440,8 +1440,9 @@ function showLoginMsg(text, ok) {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-  // 页面加载时自动从云端同步学习数据
+  // 页面加载时自动从云端同步学习数据和盘口推荐
   loadLearnFromCloud();
+  loadOddsFromCloud();
   const loginBtn = document.getElementById('cloud-login-btn');
   const regBtn = document.getElementById('cloud-register-btn');
 
@@ -7014,8 +7015,50 @@ async function fetchHomeFixtures(d0Str,d1Str,onMatch){
 }
 
 let HOME_OFFSET=0,HOME_TIMER=null,LAST_HOME=null;
-// 首页卡片盘口摘要缓存：{[fid]:{ouLine,ouP,spreadLine,spP}}
+// 首页卡片盘口摘要缓存：{[fid]:{ouLine,ouP,spreadLine,spP,ts}}
+// 云端同步：从GitHub读取，AI-Bot自动上传
+const HOME_ODDS_CACHE_KEY='gc_home_odds_v1';
+const HOME_ODDS_CACHE_MAX_AGE=90*24*3600*1000; // 90天
 const HOME_ODDS_CACHE={};
+// 页面加载时先从localStorage恢复（快速显示）
+try{
+ const saved=JSON.parse(localStorage.getItem(HOME_ODDS_CACHE_KEY)||'{}');
+ const now=Date.now();
+ let cleaned=0;
+ for(const fid in saved){
+  if(now-(saved[fid].ts||0)<HOME_ODDS_CACHE_MAX_AGE){
+   HOME_ODDS_CACHE[fid]=saved[fid];
+  }else{cleaned++;}
+ }
+ if(cleaned>0)console.log('[OddsCache] 清理过期缓存'+cleaned+'条');
+}catch(e){}
+// 再从GitHub云端加载最新盘口推荐（手机电脑同步）
+async function loadOddsFromCloud(){
+ try{
+  const url='https://raw.githubusercontent.com/qq894805001-a11y/huange-ai-model/main/data/home_odds.json?t='+Date.now();
+  const r=await fetch(url,{cache:'no-store'});
+  if(!r.ok)return;
+  const cloud=await r.json();
+  let updated=0;
+  for(const fid in cloud){
+   const c=cloud[fid];
+   const local=HOME_ODDS_CACHE[fid];
+   // 云端数据更新（ts更大）就覆盖
+   if(!local||(c.ts||0)>(local.ts||0)){
+    HOME_ODDS_CACHE[fid]=c;
+    updated++;
+   }
+  }
+  if(updated>0){
+   saveOddsCache();
+   console.log('[OddsCloud] 从云端同步'+updated+'条盘口推荐');
+   if(LAST_HOME&&location.hash==='#/'&&!document.hidden)renderHomeList();
+  }
+ }catch(e){console.log('[OddsCloud] 加载失败:',e.message);}
+}
+function saveOddsCache(){
+ try{localStorage.setItem(HOME_ODDS_CACHE_KEY,JSON.stringify(HOME_ODDS_CACHE));}catch(e){}
+}
 function addDays(d,n){const x=new Date(d);x.setDate(x.getDate()+n);return x;}
 function homeDayMd(d){return(d.getMonth()+1)+'/'+d.getDate();}
 function bjDateStr(d){return d.toLocaleDateString('sv',{timeZone:'Asia/Shanghai'});}
@@ -7170,6 +7213,7 @@ async function prefetchHomeOdds(all,standingsCache){
    }catch(e){
     // predict失败时也生成默认模拟盘口，不设none
     HOME_ODDS_CACHE[f.id]={ouLine:2.5,ouP:0.52,ouSim:true,spreadLine:0,spP:0.5,spSim:true,ts:Date.now()};
+    saveOddsCache();
     scheduleRender();
     continue;
    }
@@ -7185,10 +7229,12 @@ async function prefetchHomeOdds(all,standingsCache){
     rec.spreadLine=spLine;rec.spP=sp.winExp;
     if(!hasRealSp)rec.spSim=true;
     HOME_ODDS_CACHE[f.id]=rec;
+    saveOddsCache();
    scheduleRender();
   }catch(e){
    // 整个catch也生成默认模拟盘口
    HOME_ODDS_CACHE[f.id]={ouLine:2.5,ouP:0.52,ouSim:true,spreadLine:0,spP:0.5,spSim:true,ts:Date.now()};
+   saveOddsCache();
   }
  }};
  await Promise.all(Array.from({length:4},worker));
