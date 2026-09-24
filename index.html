@@ -2097,6 +2097,11 @@ select{font-family:var(--font-body);}
 </style>
 </head>
 <body>
+<div style="position:fixed;top:10px;right:10px;z-index:99999">
+  <button onclick="loadSelfApiOddsFromGithub();location.reload();" style="background:#2a2a3e;color:#fff;border:1px solid #444;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px">
+    刷新盘口数据
+  </button>
+</div>
 
 <!-- ========== 登录遮罩层 ========== -->
 <div id="login-mask" style="position:fixed;inset:0;z-index:99999;background:linear-gradient(135deg,#0a1a2e 0%,#0d2818 100%);display:flex;align-items:center;justify-content:center;">
@@ -4305,7 +4310,7 @@ const ESPN_GROUPS=[
 const ESPN_LEAGUES={};
 ESPN_GROUPS.forEach(grp=>grp.list.forEach(x=>{ESPN_LEAGUES[x[0]]={name:x[1],type:x[2],h:x[3],a:x[4],s:x[5],hot:!!x[6],group:grp.g};}));
 function defaultEspnCodes(){const c=[];ESPN_GROUPS.forEach(g=>g.list.forEach(x=>c.push(x[0])));return c;}
-function getEspnCodes(){try{const v=JSON.parse(localStorage.getItem('gc_espn_codes')||'null');if(Array.isArray(v)&&v.length)return v.filter(c=>ESPN_LEAGUES[c]);}catch(e){}return defaultEspnCodes();}
+function getEspnCodes(){return defaultEspnCodes();}
 function setEspnCodes(arr){try{localStorage.setItem('gc_espn_codes',JSON.stringify(arr));}catch(e){}}
 const PROVIDER_META={
  espn:{name:'ESPN 免注册源',limit:'无明确限制 · 秒级 · 含统计阵容'},
@@ -7469,6 +7474,56 @@ async function uploadManualOddsToCloud(){
     console.log('上传手动盘口失败:', e.message);
   }
 }
+// 从GitHub加载新API盘口数据
+async function loadSelfApiOddsFromGithub(){
+  try{
+    const url = 'https://raw.githubusercontent.com/qq894805001-a11y/huange-ai-model/main/data/self_api_odds.json?t=' + Date.now();
+    const res = await fetch(url);
+    if(!res.ok) return;
+    const data = await res.json();
+    if(!data || !data.matches) return;
+    console.log('从GitHub加载新API盘口:', Object.keys(data.matches).length, '场比赛');
+    const norm = n => String(n||'').toLowerCase().replace(/[^a-z0-9\u4e00-\u9fa5]/g, '');
+    let merged = 0;
+    for(const key in data.matches){
+      const sm = data.matches[key];
+      if(!sm.odds || !sm.oddsAvailable) continue;
+      const sh = norm(sm.homeTeam), sa = norm(sm.awayTeam);
+      if(!LAST_HOME || !LAST_HOME.all) continue;
+      const match = LAST_HOME.all.find(f=>{
+        const fh = norm(f.home.name), fa = norm(f.away.name);
+        return (fh.includes(sh) || sh.includes(fh) || fa.includes(sa) || sa.includes(fa));
+      });
+      if(match){
+        const o = sm.odds;
+        let ouLine = 2.5;
+        let ouOver = o.over_25;
+        let ouUnder = o.under_25;
+        if(!ouOver || !ouUnder){
+          if(o.over_35){ouLine=3.5;ouOver=o.over_35;ouUnder=o.under_35;}
+          else if(o.over_15){ouLine=1.5;ouOver=o.over_15;ouUnder=o.under_15;}
+          else {ouLine=null;ouOver=null;ouUnder=null;}
+        }
+        HOME_ODDS_CACHE[match.id] = {
+          ouLine: ouLine,
+          ouP: ouOver&&ouUnder ? ouOver/(ouOver+ouUnder) : 0.5,
+          ouSim: false,
+          spreadLine: o.asian_handicap,
+          spP: o.asian_home&&o.asian_away ? o.asian_home/(o.asian_home+o.asian_away) : 0.5,
+          spSim: false,
+          none: false
+        };
+        merged++;
+      }
+    }
+    console.log('合并了', merged, '场真实盘口');
+    if(typeof renderHomeList === 'function') renderHomeList();
+  }catch(e){
+    console.log('加载新API盘口失败:', e.message);
+  }
+}
+// 页面加载时自动加载新API盘口
+loadSelfApiOddsFromGithub();
 // 手动输入盘口
 window.manualOdds = function(fid){
   const ouLine = prompt('输入大小球盘口（比如2.5）：', '2.5');
