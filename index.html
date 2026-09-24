@@ -7839,9 +7839,33 @@ function saveLearn(L){
   }
  }catch(e){}
 }
+// 从settled重新计算stats
+function recalcStats(settled){
+ let n=0,hit=0,brier=0,ouN=0,ouHit=0,spN=0,spHit=0;
+ Object.values(settled||{}).forEach(s=>{
+  n++;
+  // 方向命中
+  if(s.res){
+   const p=s.res==='w'?s.W:s.res==='d'?s.D:s.L;
+   brier+=[s.W-s.resW,s.D-s.resD,s.L-s.resL].reduce((a,b)=>a+b*b,0);
+   if((s.res==='w'&&s.W>=s.D&&s.W>=s.L)||(s.res==='d'&&s.D>=s.W&&s.D>=s.L)||(s.res==='l'&&s.L>=s.W&&s.L>=s.D))hit++;
+  }
+  // 大小球命中
+  if(s.ouLine&&s.ouRes){
+   ouN++;
+   if((s.ouRes==='over'&&s.ouPred==='over')||(s.ouRes==='under'&&s.ouPred==='under'))ouHit++;
+  }
+  // 让球命中
+  if(s.spLine&&s.spRes){
+   spN++;
+   if(s.spRes===s.spPred)spHit++;
+  }
+ });
+ return {n:n,hit:hit,brier:brier,ouN:ouN,ouHit:ouHit,spN:spN,spHit:spHit};
+}
 // 合并学习数据（云端+本地，最新优先）
 function mergeLearnData(cloud,local){
- const merged={preds:{},settled:{},teamAdj:{}};
+ const merged={preds:{},settled:{},teamAdj:{},stats:{n:0,hit:0,brier:0,ouN:0,ouHit:0,spN:0,spHit:0}};
  // 合并preds（预测记录）
  Object.keys(cloud.preds||{}).forEach(k=>{merged.preds[k]=cloud.preds[k];});
  Object.keys(local.preds||{}).forEach(k=>{
@@ -7863,6 +7887,8 @@ function mergeLearnData(cloud,local){
    merged.teamAdj[k]=local.teamAdj[k];
   }
  });
+ // 重新计算stats
+ merged.stats=recalcStats(merged.settled);
  return merged;
 }
 // 立即同步学习数据到GitHub（手动点按钮用，智能合并）
