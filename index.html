@@ -1440,6 +1440,8 @@ function showLoginMsg(text, ok) {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
+  // 页面加载时自动从云端同步学习数据
+  loadLearnFromCloud();
   const loginBtn = document.getElementById('cloud-login-btn');
   const regBtn = document.getElementById('cloud-register-btn');
 
@@ -7732,9 +7734,30 @@ setTimeout(() => {
 
 /* ================= 自学习引擎 ================= */
 const LEARN_KEY='gc_learn_v1';
+let cloudLearnLoaded=false;
 function loadLearn(){
- try{return Object.assign({preds:{},settled:{},teamAdj:{},stats:{n:0,brier:0,hit:0}},JSON.parse(localStorage.getItem(LEARN_KEY)||'{}'));}
- catch(e){return {preds:{},settled:{},teamAdj:{},stats:{n:0,brier:0,hit:0}};}
+ try{return Object.assign({preds:{},settled:{},teamAdj:{},stats:{n:0,brier:0,hit:0,ouN:0,ouHit:0,spN:0,spHit:0}},JSON.parse(localStorage.getItem(LEARN_KEY)||'{}'));}
+ catch(e){return {preds:{},settled:{},teamAdj:{},stats:{n:0,brier:0,hit:0,ouN:0,ouHit:0,spN:0,spHit:0}};}
+}
+// 从GitHub云端加载学习数据（电脑和手机同步）
+async function loadLearnFromCloud(){
+ if(cloudLearnLoaded)return;
+ try{
+  const url='https://raw.githubusercontent.com/qq894805001-a11y/huange-ai-model/main/data/learn_data.json?t='+Date.now();
+  const r=await fetch(url,{cache:'no-store'});
+  if(!r.ok)return;
+  const cloud=await r.json();
+  const local=loadLearn();
+  // 云端数据更新就用云端的（比较settled里最新的setTs）
+  const cloudLatest=Math.max(0,...Object.values(cloud.settled||{}).map(x=>x.setTs||0));
+  const localLatest=Math.max(0,...Object.values(local.settled||{}).map(x=>x.setTs||0));
+  if(cloudLatest>=localLatest){
+   localStorage.setItem(LEARN_KEY,JSON.stringify(cloud));
+   cloudLearnLoaded=true;
+   console.log('[Cloud] 学习数据已从云端加载，共'+Object.keys(cloud.settled||{}).length+'场复盘');
+   if(typeof renderLearn==='function')renderLearn();
+  }
+ }catch(e){console.log('[Cloud] 加载学习数据失败:',e.message);}
 }
 function saveLearn(L){try{localStorage.setItem(LEARN_KEY,JSON.stringify(L));if(typeof Cloud!=='undefined'&&Cloud.token)Cloud.markDirty();}catch(e){}}
 // 学习修正系数（≥3 场样本启用，45 天衰减，clamp 防过拟合）
