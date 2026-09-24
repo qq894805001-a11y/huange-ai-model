@@ -1386,10 +1386,13 @@ function loadJson(filePath, defaultValue = null) {
 }
 
 function getDates() {
+  // 使用北京时间（UTC+8），避免日期判断错误
   const now = new Date();
-  const today = now.toISOString().slice(0, 10);
-  const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
-  return { today, tomorrow };
+  const beijingTime = new Date(now.getTime() + 8 * 60 * 60 * 1000);
+  const today = beijingTime.toISOString().slice(0, 10);
+  const tomorrow = new Date(beijingTime.getTime() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  const yesterday = new Date(beijingTime.getTime() - 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  return { today, tomorrow, yesterday };
 }
 
 function parseMatchTime(dateStr, timeStr) {
@@ -1404,8 +1407,31 @@ function parseMatchTime(dateStr, timeStr) {
 }
 
 function isMatchFinished(match) {
-  const status = (match.status || match.status_zh || '').toLowerCase();
-  return status.includes('完') || status.includes('结束') || status.includes('ft') || status.includes('full');
+  const status = String(match.status || match.status_zh || '').toLowerCase();
+  
+  // 明确的已结束状态关键词
+  const finishedKeywords = ['完', '结束', '终场', '完场', 'ft', 'full', 'finished', 'complete', 'aet', 'pen', 'postp.'];
+  for (const kw of finishedKeywords) {
+    if (status.includes(kw)) return true;
+  }
+  
+  // status是数字时，2通常表示已结束（API-Football格式）
+  const statusNum = parseInt(status);
+  if (!isNaN(statusNum) && statusNum >= 2 && statusNum <= 7) return true;
+  
+  // 如果有比分且比赛时间已过3小时以上，认为已结束
+  const hasScore = match.home_score !== null && match.home_score !== undefined && 
+                    match.away_score !== null && match.away_score !== undefined &&
+                    match.home_score !== '' && match.away_score !== '';
+  if (hasScore) {
+    const matchTime = parseMatchTime(match.date, match.time);
+    if (matchTime) {
+      const hoursDiff = (new Date() - matchTime) / (1000 * 60 * 60);
+      if (hoursDiff > 3) return true; // 比赛开始3小时后，基本已结束
+    }
+  }
+  
+  return false;
 }
 
 function shouldSupplement(match) {
