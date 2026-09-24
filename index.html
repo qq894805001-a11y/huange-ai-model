@@ -7826,7 +7826,7 @@ async function loadLearnFromCloud(){
    localStorage.setItem(LEARN_KEY,JSON.stringify(cloud));
    cloudLearnLoaded=true;
    console.log('[Cloud] 学习数据已从云端加载，共'+Object.keys(cloud.settled||{}).length+'场复盘');
-   if(typeof renderLearn==='function')renderLearn();
+   if(typeof renderLearnPanel==='function')renderLearnPanel();
   }
  }catch(e){console.log('[Cloud] 加载学习数据失败:',e.message);}
 }
