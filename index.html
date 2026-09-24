@@ -6175,6 +6175,14 @@ function espnState(type){
 }
 function normFixture(prov,raw){
  try{
+  // 统一规范化队名和联赛名，确保所有API返回的数据都能统一识别
+  const normalizeResult = (res) => {
+    if(!res) return res;
+    if(res.lg && res.lg.name) res.lg.name = normalizeLeagueName(res.lg.name);
+    if(res.home && res.home.name) res.home.name = normalizeTeamName(res.home.name);
+    if(res.away && res.away.name) res.away.name = normalizeTeamName(res.away.name);
+    return res;
+  };
   if(prov==='espn'){
    const e=raw,comp=e.competitions[0],status=comp.status||e.status;
    let st=espnState(status.type);
@@ -6342,6 +6350,695 @@ const MATCH_FULL_CACHE={};
 // match_full请求限流：每秒最多2个请求
 let matchFullLastReqTime=0;
 let matchFullReqCount=0;
+
+// ==================== 统一名字库（队名+联赛名）====================
+// 作用：让所有API（云端、ESPN、API-Football等）返回的不同格式名字，都能统一识别，避免匹配失败
+// 自动学习：每次从API获取到新名字，自动加入名字库，保存到localStorage
+const NAME_LIB_STORAGE_KEY = 'huange_ai_name_lib_v1';
+
+// 队名库：{别名(小写无空格): 标准中文名}
+let TEAM_NAME_LIB = {
+  // 英超
+  'manchesterunited': '曼联', 'manutd': '曼联', 'manchesterunitedfc': '曼联',
+  'manchestercity': '曼城', 'mancity': '曼城', 'manchestercityfc': '曼城',
+  'liverpool': '利物浦', 'liverpoolfc': '利物浦',
+  'chelsea': '切尔西', 'chelseafc': '切尔西',
+  'arsenal': '阿森纳', 'arsenalfc': '阿森纳',
+  'tottenham': '热刺', 'tottenhamhotspur': '热刺', 'spurs': '热刺',
+  'newcastle': '纽卡斯尔', 'newcastleunited': '纽卡斯尔', 'newcastleunitedfc': '纽卡斯尔',
+  'astonvilla': '阿斯顿维拉', 'astonvillafc': '阿斯顿维拉',
+  'manunited': '曼联',
+  // 西甲
+  'realmadrid': '皇家马德里', 'realmadridcf': '皇家马德里', 'madrid': '皇家马德里',
+  'fcbarcelona': '巴塞罗那', 'barcelona': '巴塞罗那', 'barca': '巴塞罗那',
+  'atleticomadrid': '马德里竞技', 'atletico': '马德里竞技', 'atleticomadrid': '马德里竞技',
+  'sevilla': '塞维利亚', 'sevillafc': '塞维利亚',
+  'valencia': '瓦伦西亚', 'valenciacf': '瓦伦西亚',
+  'realsociedad': '皇家社会', 'realsociedad': '皇家社会',
+  'athleticbilbao': '毕尔巴鄂竞技', 'athleticclub': '毕尔巴鄂竞技', 'bilbao': '毕尔巴鄂竞技',
+  // 意甲
+  'juventus': '尤文图斯', 'juventusfc': '尤文图斯', 'juve': '尤文图斯',
+  'acmilan': 'AC米兰', 'milan': 'AC米兰',
+  'intermilan': '国际米兰', 'inter': '国际米兰', 'internazionale': '国际米兰',
+  'napoli': '那不勒斯', 'sscnapoli': '那不勒斯',
+  'roma': '罗马', 'asaroma': '罗马',
+  'lazio': '拉齐奥', 'sslazio': '拉齐奥',
+  'atalanta': '亚特兰大', 'atalantabc': '亚特兰大',
+  'fiorentina': '佛罗伦萨', 'acffiorentina': '佛罗伦萨',
+  // 德甲
+  'bayernmunich': '拜仁慕尼黑', 'bayern': '拜仁慕尼黑', 'fcbayernmunchen': '拜仁慕尼黑',
+  'borussiadortmund': '多特蒙德', 'dortmund': '多特蒙德', 'bvb': '多特蒙德',
+  'rb leipzig': '莱比锡红牛', 'rbleipzig': '莱比锡红牛', 'leipzig': '莱比锡红牛',
+  'bayerleverkusen': '勒沃库森', 'leverkusen': '勒沃库森',
+  'schalke04': '沙尔克04', 'schalke': '沙尔克04',
+  'wolfsburg': '沃尔夫斯堡', 'vflwolfsburg': '沃尔夫斯堡',
+  // 法甲
+  'parissaintgermain': '巴黎圣日耳曼', 'psg': '巴黎圣日耳曼', 'paris': '巴黎圣日耳曼',
+  'marseille': '马赛', 'om': '马赛', 'olympiquedemarseille': '马赛',
+  'lyon': '里昂', 'ol': '里昂', 'olympique lyonnais': '里昂',
+  'monaco': '摩纳哥', 'asmonaco': '摩纳哥',
+  'lille': '里尔', 'lilleosc': '里尔',
+  // 国家队
+  'netherlands': '荷兰', 'holland': '荷兰', 'ned': '荷兰',
+  'germany': '德国', 'deutschland': '德国', 'ger': '德国',
+  'france': '法国', 'fra': '法国',
+  'spain': '西班牙', 'esp': '西班牙',
+  'england': '英格兰', 'eng': '英格兰',
+  'italy': '意大利', 'ita': '意大利',
+  'portugal': '葡萄牙', 'por': '葡萄牙',
+  'brazil': '巴西', 'bra': '巴西',
+  'argentina': '阿根廷', 'arg': '阿根廷',
+  'belgium': '比利时', 'bel': '比利时',
+  'croatia': '克罗地亚', 'cro': '克罗地亚',
+  'denmark': '丹麦', 'den': '丹麦',
+  'sweden': '瑞典', 'swe': '瑞典',
+  'norway': '挪威', 'nor': '挪威',
+  'switzerland': '瑞士', 'sui': '瑞士',
+  'austria': '奥地利', 'aut': '奥地利',
+  'wales': '威尔士', 'wal': '威尔士',
+  'scotland': '苏格兰', 'sco': '苏格兰',
+  'ireland': '爱尔兰', 'irl': '爱尔兰', 'republicofireland': '爱尔兰',
+  'serbia': '塞尔维亚', 'srb': '塞尔维亚',
+  'greece': '希腊', 'gre': '希腊',
+  'poland': '波兰', 'pol': '波兰',
+  'turkey': '土耳其', 'tur': '土耳其',
+  'ukraine': '乌克兰', 'ukr': '乌克兰',
+  'russia': '俄罗斯', 'rus': '俄罗斯',
+  'japan': '日本', 'jpn': '日本',
+  'southkorea': '韩国', 'korea': '韩国', 'kor': '韩国',
+  'china': '中国', 'chn': '中国', 'chinapr': '中国',
+  'australia': '澳大利亚', 'aus': '澳大利亚',
+  'saudiarabia': '沙特阿拉伯', 'saudi': '沙特阿拉伯', 'ksa': '沙特阿拉伯',
+  'iran': '伊朗', 'irn': '伊朗',
+  'qatar': '卡塔尔', 'qat': '卡塔尔',
+  'unitedstates': '美国', 'usa': '美国', 'us': '美国',
+  'mexico': '墨西哥', 'mex': '墨西哥',
+  'canada': '加拿大', 'can': '加拿大',
+  'egypt': '埃及', 'egy': '埃及',
+  'morocco': '摩洛哥', 'mar': '摩洛哥',
+  'nigeria': '尼日利亚', 'nga': '尼日利亚',
+  'senegal': '塞内加尔', 'sen': '塞内加尔',
+  'ghana': '加纳', 'gha': '加纳',
+  'cameroon': '喀麦隆', 'cmr': '喀麦隆',
+  'ivorycoast': '科特迪瓦', 'cotedivoire': '科特迪瓦', 'civ': '科特迪瓦',
+  'algeria': '阿尔及利亚', 'alg': '阿尔及利亚',
+  'tunisia': '突尼斯', 'tun': '突尼斯',
+  'israel': '以色列', 'isr': '以色列',
+  'czechrepublic': '捷克', 'czech': '捷克', 'cze': '捷克',
+  'hungary': '匈牙利', 'hun': '匈牙利',
+  'romania': '罗马尼亚', 'rou': '罗马尼亚',
+  'slovakia': '斯洛伐克', 'svk': '斯洛伐克',
+  'slovenia': '斯洛文尼亚', 'svn': '斯洛文尼亚',
+  'bulgaria': '保加利亚', 'bul': '保加利亚',
+  'albania': '阿尔巴尼亚', 'alb': '阿尔巴尼亚',
+  'iceland': '冰岛', 'isl': '冰岛',
+  'finland': '芬兰', 'fin': '芬兰',
+  'estonia': '爱沙尼亚', 'est': '爱沙尼亚',
+  'latvia': '拉脱维亚', 'lat': '拉脱维亚',
+  'lithuania': '立陶宛', 'ltu': '立陶宛',
+  'malta': '马耳他', 'mlt': '马耳他',
+  'cyprus': '塞浦路斯', 'cyp': '塞浦路斯',
+  'luxembourg': '卢森堡', 'lux': '卢森堡',
+  'andorra': '安道尔', 'and': '安道尔',
+  'sanmarino': '圣马力诺', 'smr': '圣马力诺',
+  'gibraltar': '直布罗陀', 'gib': '直布罗陀',
+  'liechtenstein': '列支敦士登', 'lie': '列支敦士登',
+  'luxembourg': '卢森堡', 'lux': '卢森堡',
+  'malta': '马耳他', 'mlt': '马耳他',
+  'iceland': '冰岛', 'isl': '冰岛',
+  'finland': '芬兰', 'fin': '芬兰',
+  'estonia': '爱沙尼亚', 'est': '爱沙尼亚',
+  'latvia': '拉脱维亚', 'lat': '拉脱维亚',
+  'lithuania': '立陶宛', 'ltu': '立陶宛',
+  'cyprus': '塞浦路斯', 'cyp': '塞浦路斯',
+  'kosovo': '科索沃', 'kos': '科索沃',
+  'bosniaandherzegovina': '波黑', 'bosnia': '波黑', 'bih': '波黑',
+  'northmacedonia': '北马其顿', 'macedonia': '北马其顿', 'mkd': '北马其顿',
+  'montenegro': '黑山', 'mne': '黑山',
+  'armenia': '亚美尼亚', 'arm': '亚美尼亚',
+  'georgia': '格鲁吉亚', 'geo': '格鲁吉亚',
+  'azerbaijan': '阿塞拜疆', 'aze': '阿塞拜疆',
+  'kazakhstan': '哈萨克斯坦', 'kaz': '哈萨克斯坦',
+  'uzbekistan': '乌兹别克斯坦', 'uzb': '乌兹别克斯坦',
+  'thailand': '泰国', 'tha': '泰国',
+  'vietnam': '越南', 'vie': '越南',
+  'indonesia': '印度尼西亚', 'idn': '印度尼西亚',
+  'malaysia': '马来西亚', 'mas': '马来西亚',
+  'singapore': '新加坡', 'sgp': '新加坡',
+  'philippines': '菲律宾', 'phi': '菲律宾',
+  'india': '印度', 'ind': '印度',
+  'hongkong': '中国香港', 'hk': '中国香港',
+  'chinesetaipei': '中国台北', 'taiwan': '中国台北',
+  'newzealand': '新西兰', 'nzl': '新西兰',
+  'southafrica': '南非', 'rsa': '南非',
+  'kenya': '肯尼亚', 'ken': '肯尼亚',
+  'angola': '安哥拉', 'ang': '安哥拉',
+  'mozambique': '莫桑比克', 'moz': '莫桑比克',
+  'zambia': '赞比亚', 'zam': '赞比亚',
+  'zimbabwe': '津巴布韦', 'zim': '津巴布韦',
+  'uganda': '乌干达', 'uga': '乌干达',
+  'tanzania': '坦桑尼亚', 'tan': '坦桑尼亚',
+  'rwanda': '卢旺达', 'rwa': '卢旺达',
+  'burkinafaso': '布基纳法索', 'bfa': '布基纳法索',
+  'mali': '马里', 'mli': '马里',
+  'niger': '尼日尔', 'nig': '尼日尔',
+  'chad': '乍得', 'cha': '乍得',
+  'sudan': '苏丹', 'sdn': '苏丹',
+  'ethiopia': '埃塞俄比亚', 'eth': '埃塞俄比亚',
+  'libya': '利比亚', 'lby': '利比亚',
+  'jordan': '约旦', 'jor': '约旦',
+  'iraq': '伊拉克', 'irq': '伊拉克',
+  'syria': '叙利亚', 'syr': '叙利亚',
+  'lebanon': '黎巴嫩', 'lbn': '黎巴嫩',
+  'palestine': '巴勒斯坦', 'ple': '巴勒斯坦',
+  'oman': '阿曼', 'oma': '阿曼',
+  'yemen': '也门', 'yem': '也门',
+  'kuwait': '科威特', 'kuw': '科威特',
+  'bahrain': '巴林', 'bhr': '巴林',
+  'unitedarabemirates': '阿联酋', 'uae': '阿联酋',
+  'syria': '叙利亚',
+  'venezuela': '委内瑞拉', 'ven': '委内瑞拉',
+  'colombia': '哥伦比亚', 'col': '哥伦比亚',
+  'peru': '秘鲁', 'per': '秘鲁',
+  'chile': '智利', 'chi': '智利',
+  'ecuador': '厄瓜多尔', 'ecu': '厄瓜多尔',
+  'bolivia': '玻利维亚', 'bol': '玻利维亚',
+  'paraguay': '巴拉圭', 'par': '巴拉圭',
+  'uruguay': '乌拉圭', 'uru': '乌拉圭',
+  'costarica': '哥斯达黎加', 'crc': '哥斯达黎加',
+  'panama': '巴拿马', 'pan': '巴拿马',
+  'honduras': '洪都拉斯', 'hon': '洪都拉斯',
+  'guatemala': '危地马拉', 'gua': '危地马拉',
+  'elsalvador': '萨尔瓦多', 'slv': '萨尔瓦多',
+  'nicaragua': '尼加拉瓜', 'nic': '尼加拉瓜',
+  'haiti': '海地', 'hai': '海地',
+  'dominicanrepublic': '多米尼加', 'dom': '多米尼加',
+  'cuba': '古巴', 'cub': '古巴',
+  'jamaica': '牙买加', 'jam': '牙买加',
+  'trinidadandtobago': '特立尼达和多巴哥', 'tri': '特立尼达和多巴哥',
+  // 中北美及加勒比海其他国家队
+  'puertorico': '波多黎各', 'pur': '波多黎各',
+  'guyana': '圭亚那', 'guy': '圭亚那',
+  'caymanislands': '开曼群岛', 'cay': '开曼群岛',
+  'dominica': '多米尼克', 'dma': '多米尼克',
+  'curacao': '库拉索', 'cuw': '库拉索',
+  'barbados': '巴巴多斯', 'brb': '巴巴多斯',
+  'bermuda': '百慕大', 'ber': '百慕大',
+  'bahamas': '巴哈马', 'bah': '巴哈马',
+  'belize': '伯利兹', 'blz': '伯利兹',
+  'grenada': '格林纳达', 'grn': '格林纳达',
+  'saintlucia': '圣卢西亚', 'lca': '圣卢西亚',
+  'saintvincentandthegrenadines': '圣文森特和格林纳丁斯', 'vin': '圣文森特和格林纳丁斯',
+  'antiguaandbarbuda': '安提瓜和巴布达', 'atg': '安提瓜和巴布达',
+  'saintkittsandnevis': '圣基茨和尼维斯', 'skn': '圣基茨和尼维斯',
+  'aruba': '阿鲁巴', 'aru': '阿鲁巴',
+  'suriname': '苏里南', 'sur': '苏里南',
+  'frenchguiana': '法属圭亚那',
+  'guadeloupe': '瓜德罗普',
+  'martinique': '马提尼克',
+  'saintmartin': '圣马丁',
+  'britishvirginislands': '英属维尔京群岛',
+  'usvirginislands': '美属维尔京群岛',
+  'turksandcaicosislands': '特克斯和凯科斯群岛',
+  'anguilla': '安圭拉',
+  'montserrat': '蒙特塞拉特',
+  // 德国低级别联赛球队
+  'sportfreundesiegen': '锡根体育之友',
+  'rwoberhausen': '奥伯豪森红白',
+  'rotweissoberhausen': '奥伯豪森红白',
+  'msvduisburg': '杜伊斯堡',
+  'darmstadt98': '达姆施塔特98',
+  'saintpauli': '圣保利',
+  'fckaiserslautern': '凯泽斯劳滕',
+  'hannover96': '汉诺威96',
+  'nurnberg': '纽伦堡',
+  'hamburger': '汉堡',
+  'schalke04': '沙尔克04',
+  'herthabsc': '柏林赫塔',
+  'eintrachtbraunschweig': '不伦瑞克',
+  'karlsruhersc': '卡尔斯鲁厄',
+  'hansarostock': '罗斯托克',
+  'holsteinkiel': '基尔',
+  'scpaderborn': '帕德博恩',
+  'svsandhausen': '桑德豪森',
+  'fcingolstadt04': '因戈尔施塔特',
+  'vflbochum': '波鸿',
+  'fortunadusseldorf': '杜塞尔多夫',
+  'heidenheim': '海登海姆',
+  'mainz05': '美因茨',
+  'freiburg': '弗赖堡',
+  'hoffenheim': '霍芬海姆',
+  'augsburg': '奥格斯堡',
+  'wolfsburg': '沃尔夫斯堡',
+  'mgladbach': '门兴格拉德巴赫',
+  'borussiamonchengladbach': '门兴格拉德巴赫',
+  'eintrachtfrankfurt': '法兰克福',
+  'bayerleverkusen': '勒沃库森',
+  'rbleipzig': '莱比锡红牛',
+  'dortmund': '多特蒙德',
+  'bayernmunich': '拜仁慕尼黑',
+  'stuttgart': '斯图加特',
+  'unionberlin': '柏林联合',
+  'cologne': '科隆',
+  'fckoln': '科隆',
+  'werderbremen': '云达不莱梅',
+  'bochum': '波鸿',
+  // 英格兰低级别联赛/全国联赛球队
+  'aldershot': '奥尔德肖特镇', 'aldershottown': '奥尔德肖特镇',
+  'altrincham': '阿尔特林查姆',
+  'barrow': '巴罗', 'barrowafc': '巴罗',
+  'borehamwood': '博勒姆伍德', 'borehamwoodfc': '博勒姆伍德',
+  'bostonunited': '波士顿联', 'bostonunitedfc': '波士顿联',
+  'carlisleunited': '卡莱尔联', 'carlisle': '卡莱尔联',
+  'eastleigh': '伊斯特利', 'eastleighfc': '伊斯特利',
+  'fchalifaxtown': '哈利法克斯', 'halifaxtown': '哈利法克斯', 'halifax': '哈利法克斯',
+  'forestgreenrovers': '森林绿流浪者', 'forestgreen': '森林绿流浪者', 'fgr': '森林绿流浪者',
+  'gateshead': '盖茨黑德', 'gatesheadfc': '盖茨黑德',
+  'harrogatetown': '哈罗盖特镇', 'harrogate': '哈罗盖特镇',
+  'hartlepoolunited': '哈特尔浦联', 'hartlepool': '哈特尔浦联',
+  'kidderminsterharriers': '基德明斯特猎鹰', 'kidderminster': '基德明斯特猎鹰',
+  'scunthorpeunited': '斯肯索普联', 'scunthorpe': '斯肯索普联',
+  'solihullmoors': '索利赫尔摩尔', 'solihull': '索利赫尔摩尔',
+  'southendunited': '绍森德联', 'southend': '绍森德联',
+  'suttonunited': '萨顿联', 'sutton': '萨顿联',
+  'tamworth': '塔姆沃思', 'tamworthfc': '塔姆沃思',
+  'wealdstone': '维尔德斯通', 'wealdstonefc': '维尔德斯通',
+  'woking': '沃金', 'wokingfc': '沃金',
+  'worthing': '沃辛', 'worthingfc': '沃辛',
+  'yeoviltown': '约维尔镇', 'yeovil': '约维尔镇',
+  'afcfylde': 'AFC菲尔德', 'fylde': 'AFC菲尔德',
+  'afchornchurch': 'AFC霍恩彻奇', 'hornchurch': 'AFC霍恩彻奇',
+  'rochdale': '罗奇代尔', 'rochdaleafc': '罗奇代尔',
+  'oldhamathletic': '奥尔德姆竞技', 'oldham': '奥尔德姆竞技',
+  'chesterfield': '切斯特菲尔德', 'chesterfieldfc': '切斯特菲尔德',
+  'barnet': '巴尼特', 'barnetfc': '巴尼特',
+  'doverathletic': '多佛竞技', 'dover': '多佛竞技',
+  'maidstoneunited': '梅德斯通联', 'maidstone': '梅德斯通联',
+  'dorkingwanders': '多金流浪者', 'dorking': '多金流浪者',
+  'maidenheadunited': '梅登黑德联', 'maidenhead': '梅登黑德联',
+  'bromley': '布罗姆利', 'bromleyfc': '布罗姆利',
+  'ebbsfleetunited': '埃伯斯弗利特联', 'ebbsfleet': '埃伯斯弗利特联',
+  'oxfordcity': '牛津城', 'oxfordcityfc': '牛津城',
+  'avonley': '埃文利',
+  'hemeltown': '赫默尔镇',
+  'wellingunited': '韦林联',
+  'sloughtown': '斯劳镇',
+  'bathcity': '巴斯城',
+  'havantwaterlooville': '哈文特滑铁卢',
+  'weston-super-mare': '滨海韦斯顿',
+  'taunttown': '汤顿镇',
+  'truocity': '特鲁罗城',
+  'plymouthparkway': '普利茅斯公园大道',
+  'exetercity': '埃克塞特城',
+  'torquayunited': '托奎联', 'torquay': '托奎联',
+  'hereford': '赫里福德', 'herefordfc': '赫里福德',
+  'gloucestercity': '格洛斯特城',
+  'chorley': '乔利',
+  'curzonashton': '柯曾阿什顿',
+  'darlington': '达灵顿',
+  'farsleyceltic': '法斯利凯尔特人',
+  'southport': '绍斯波特',
+  'spennymoorstown': '斯彭尼穆尔镇',
+  'brackleytown': '布拉克利镇',
+  'banburyunited': '班伯里联',
+  'peterboroughsports': '彼得伯勒体育',
+  'rushdenanddiamonds': '拉什登钻石',
+  'tamworthfc': '塔姆沃思',
+  'leamington': '利明顿',
+  'kingslynn': '金斯林',
+  'alfretontown': '阿尔弗雷顿镇',
+  'bostonunited': '波士顿联',
+  'buxton': '巴克斯顿',
+  'chester': '切斯特',
+  'farsleyceltic': '法斯利凯尔特人',
+  'guiseley': '吉斯利',
+  'mickleover': '米克尔奥弗',
+  'scunthorpeunited': '斯肯索普联',
+  'southshields': '南希尔兹',
+  'spennymoorstown': '斯彭尼穆尔镇',
+  'warringtonrylands': '沃灵顿瑞兰',
+  'workington': '沃金顿',
+  'matlocktown': '马特洛克镇',
+  'whitbytown': '惠特比镇',
+  'marskeunited': '马斯克联',
+  'shildon': '希尔登',
+  'penrith': '彭里斯',
+  'hebburntown': '赫本镇',
+  'stocktontown': '斯托克顿镇',
+  'dunstonuts': '邓斯顿乌茨',
+  'westaucklandtown': '西奥克兰镇',
+  'newcastlebenfield': '纽卡斯尔本菲尔德',
+  'northshields': '北希尔兹',
+  'whickham': '惠克姆',
+  'sunderlandryhope': '桑德兰赖霍普',
+  'consett': '康塞特',
+  'brighoustown': '布里格豪斯镇',
+  'campion': '坎皮恩',
+  'golcarunited': '戈尔卡联',
+  'emley': '埃姆利',
+  'wintertonrangers': '温特顿流浪者',
+  'frickleyathletic': '弗里克利竞技',
+  'sheffieldfc': '谢菲尔德俱乐部',
+  'stocksbridgeparkssteels': '斯托克斯布里奇公园钢铁',
+  'yorkshireamateurs': '约克郡业余',
+  'hallroadunited': '霍尔路联',
+  'northferriby': '北费里比',
+  'barton-town': '巴顿镇',
+  'grimsbyborough': '格里姆斯比自治市',
+  'brigg': '布里格',
+  'cleethorpes': '克利索普斯',
+  'lincolnunited': '林肯联',
+  'sleafordtown': '斯利福德镇',
+  'holbeachunited': '霍尔比奇联',
+  'deepingrangers': '迪平流浪者',
+  'wisbechtown': '威斯比奇镇',
+  'yaxley': '亚克斯利',
+  'corbytown': '科比镇',
+  'daventrytown': '达文特里镇',
+  'dunstabletown': '邓斯特布尔镇',
+  'leightontown': '莱顿镇',
+  'biggleswadetown': '比格尔斯韦德镇',
+  'bedfordtown': '贝德福德镇',
+  'stotfold': '斯托特福德',
+  'arleseytown': '阿尔西镇',
+  'baldocktown': '鲍多克镇',
+  'colneyheath': '科尔尼希思',
+  'leverstockgreen': '莱弗斯托克格林',
+  'hadley': '哈德利',
+  'cockfosters': '科克福斯特斯',
+  'raynerslane': '雷纳斯巷',
+  'ascotunited': '阿斯科特联',
+  'binfield': '宾菲尔德',
+  'thatchamtown': '撒彻姆镇',
+  'readingcity': '雷丁城',
+  'marlow': '马洛',
+  'highwycombe': '海威科姆',
+  'flackwellheath': '弗拉克威尔希思',
+  'risboroughrangers': '里斯伯勒流浪者',
+  'tringathletic': '特林竞技',
+  'leightonbuzzard': '莱顿巴扎德',
+  'ampthilltown': '安普西尔镇',
+  'dunstable': '邓斯特布尔',
+  'totternhoe': '托特诺霍',
+  'stonyStratford': '斯托尼斯特拉特福德',
+  'newportpagnelltown': '纽波特帕格内尔镇',
+  'wellingboroughtown': '韦林伯勒镇',
+  'cogenhoeunited': '科根霍联',
+  'northamptononley': '北安普顿昂利',
+  'raunds': '朗兹',
+  'desboroughtown': '德斯伯勒镇',
+  'peterboroughnorthernstar': '彼得伯勒北极星',
+  'blackstones': '布莱克斯通斯',
+  'bournetown': '伯恩镇',
+  'pinchbeckunited': '平奇贝克联',
+  'holbeach': '霍尔比奇',
+  'marchtown': '马奇镇',
+  'wisbechstmarys': '威斯比奇圣玛丽',
+  'downhammarket': '唐汉姆市场',
+  'kingslynnreserves': '金斯林预备队',
+  'fakenhamtown': '费克纳姆镇',
+  'swaffhamtown': '斯沃弗姆镇',
+  'derehamtown': '德里厄姆镇',
+  'wroxham': '罗克瑟姆',
+  'greatyarmouth': '大雅茅斯',
+  'lowestofttown': '洛斯托夫特镇',
+  'leiston': '莱斯顿',
+  'needhammarket': '尼德姆市场',
+  'stowmarket': '斯托马基特',
+  'felixstowe': '费利克斯托',
+  'hadleighunited': '哈德利联',
+  'longmelford': '朗梅尔福德',
+  'whittonunited': '惠顿联',
+  'woodbridge': '伍德布里奇',
+  'framlinghamtown': '弗拉明翰镇',
+  'halesworth': '黑尔斯沃思',
+  'diss': '迪斯',
+  'gorleston': '戈尔斯顿',
+  'greatyarmouthtown': '大雅茅斯镇',
+  'caistorrovers': '凯斯特流浪者',
+  'briggstown': '布里格斯镇',
+  'bottesfordtown': '博特斯福德镇',
+  'grimsby': '格里姆斯比',
+  'cleethorpes': '克利索普斯',
+  'immingham': '伊明厄姆',
+  'barton': '巴顿',
+  'winterton': '温特顿',
+  'applebyfrodingham': '阿普比弗罗丁厄姆',
+  'bottesford': '博特斯福德',
+  'brigg': '布里格',
+  'caistor': '凯斯特',
+  'hullunited': '赫尔联',
+  'hedonrangers': '赫登流浪者',
+  'northferriby': '北费里比',
+  'skegnesstown': '斯凯格内斯镇',
+  'spaldingunited': '斯波尔丁联',
+  'bostona': '波士顿',
+  'sleaford': '斯利福德',
+  'grantham': '格兰瑟姆',
+  'newark': '纽瓦克',
+  'lincoln': '林肯',
+  'gainsborough': '盖恩斯伯勒',
+  'worksop': '沃克索普',
+  'retford': '雷特福德',
+  'dronfield': '德龙菲尔德',
+  'sheffield': '谢菲尔德',
+  'rotherham': '罗瑟勒姆',
+  'doncaster': '唐卡斯特',
+  'barnsley': '巴恩斯利',
+  'wakefield': '韦克菲尔德',
+  'leeds': '利兹',
+  'bradford': '布拉德福德',
+  'huddersfield': '哈德斯菲尔德',
+  'halifax': '哈利法克斯',
+  'burnley': '伯恩利',
+  'blackburn': '布莱克本',
+  'preston': '普雷斯顿',
+  'blackpool': '布莱克浦',
+  'fleetwood': '弗利特伍德',
+  'morecambe': '莫克姆',
+  'barrow': '巴罗',
+  'carlisle': '卡莱尔',
+  'whitehaven': '怀特黑文',
+  'workington': '沃金顿',
+  'penrith': '彭里斯',
+  'carlisleunited': '卡莱尔联',
+  'gretna': '格雷特纳',
+  'annanathletic': '安南竞技',
+  'queenofthesouth': '南方女王',
+  'stranraer': '斯特兰拉尔',
+  'ayrunited': '艾尔联',
+  'kilmarnock': '基尔马诺克',
+  'motherwell': '马瑟韦尔',
+  'hamiltonacademical': '汉密尔顿学院',
+  'standrews': '圣安德鲁斯',
+  'stmirren': '圣米伦',
+  'partickthistle': '帕尔蒂克蓟花',
+  'rangers': '流浪者',
+  'celtic': '凯尔特人',
+  'aberdeen': '阿伯丁',
+  'dundeeunited': '邓迪联',
+  'dundee': '邓迪',
+  'stjohnstone': '圣约翰斯通',
+  'hibernian': '希伯尼安',
+  'heartofmidlothian': '哈茨',
+  'hearts': '哈茨',
+  'rosscounty': '罗斯郡',
+  'invernesscaledonianthistle': '因弗内斯喀里多尼亚蓟花',
+  'livingston': '利文斯顿',
+};
+
+// 联赛名库：{别名(小写无空格): 标准中文名}
+let LEAGUE_NAME_LIB = {
+  // 欧洲五大联赛
+  'premierleague': '英超', 'epl': '英超', 'englishpremierleague': '英超',
+  'laliga': '西甲', 'laligasantander': '西甲', 'spanishlaliga': '西甲',
+  'seriea': '意甲', 'serieatim': '意甲', 'italianseriea': '意甲',
+  'bundesliga': '德甲', 'germanbundesliga': '德甲',
+  'ligue1': '法甲', 'ligue1uber': '法甲', 'frenchligue1': '法甲',
+  // 其他欧洲联赛
+  'eredivisie': '荷甲', 'dutcheredivisie': '荷甲',
+  'primeiraliga': '葡超', 'portugueseprimeiraliga': '葡超',
+  'superlig': '土超', 'turkishsuperlig': '土超',
+  'jupilerproleague': '比甲', 'belgianproleague': '比甲',
+  'superleague': '希超', 'greeksuperleague': '希超',
+  'ekstraklasa': '波超', 'polishekstraklasa': '波超',
+  'nationalliga': '瑞士超', 'swisssuperleague': '瑞士超',
+  'allsvenskan': '瑞典超', 'swedishallsvenskan': '瑞典超',
+  'eliteserien': '挪威超', 'norwegianeliteserien': '挪威超',
+  'danishsuperliga': '丹超', 'superligaden': '丹超',
+  'russianpremierleague': '俄超', 'rpl': '俄超',
+  'ukrainianpremierleague': '乌超', 'ukrpremier': '乌超',
+  'austrianbundesliga': '奥甲', 'bundesligaustria': '奥甲',
+  'czechfirstleague': '捷甲', 'czechfortunaliga': '捷甲',
+  'hungariannbii': '匈甲', 'nbii': '匈甲',
+  'romanianliga1': '罗甲', 'liga1': '罗甲',
+  'serbiansuperliga': '塞尔超', 'serbiansuperleague': '塞尔超',
+  'croatianfirstleague': '克甲', 'hnl': '克甲',
+  'slovaksuperliga': '斯伐超', 'slovakfortunaliga': '斯伐超',
+  'slovenianprvaliga': '斯亚超', 'slovenianprvaliga': '斯亚超',
+  'bulgarianfirstleague': '保甲', 'bulgarianparva liga': '保甲',
+  'israeli premier league': '以超', 'israelipremierleague': '以超',
+  'cyprusfirstdivision': '塞浦甲', 'cypriotfirstdivision': '塞浦甲',
+  // 杯赛
+  'uefachampionsleague': '欧冠', 'championsleague': '欧冠', 'ucl': '欧冠',
+  'uefaeuropaleague': '欧联', 'europaleague': '欧联', 'uel': '欧联',
+  'uefaconferenceleague': '欧协联', 'conferenceleague': '欧协联',
+  'uefanationsleague': '欧国联', 'nationsleague': '欧国联',
+  'fifaworldcup': '世界杯', 'worldcup': '世界杯',
+  'uefaeuropeanchampionship': '欧洲杯', 'euro': '欧洲杯',
+  'copaamerica': '美洲杯', 'copa america': '美洲杯',
+  'afcon': '非洲杯', 'africancupofnations': '非洲杯',
+  'asiancup': '亚洲杯', 'afcasiancup': '亚洲杯',
+  'facup': '足总杯', 'thefacup': '足总杯',
+  'eplcup': '联赛杯', 'carabaocup': '联赛杯', 'eflcup': '联赛杯',
+  'copadelrey': '国王杯', 'spanishcopadelrey': '国王杯',
+  'coppaitalia': '意大利杯', 'italiancup': '意大利杯',
+  'dfbpokal': '德国杯', 'germandfbpokal': '德国杯',
+  'coupedefrance': '法国杯', 'frenchcoupedefrance': '法国杯',
+  // 亚洲联赛
+  'j1league': '日职联', 'jleague': '日职联', 'japanj1league': '日职联',
+  'j2league': '日职乙', 'japanj2league': '日职乙',
+  'jleaguecup': '日联杯', 'jleaguecup': '日联杯',
+  'emperorscup': '天皇杯', 'japanemperorscup': '天皇杯',
+  'kleague1': '韩K联', 'kleague': '韩K联', 'koreakleague1': '韩K联',
+  'kleague2': '韩K2联', 'koreakleague2': '韩K2联',
+  'kfa cup': '韩国杯', 'koreanfa cup': '韩国杯',
+  'chinesesuperleague': '中超', 'csl': '中超',
+  'chineseleagueone': '中甲', 'china leagueone': '中甲',
+  'chinesefacup': '足协杯', 'chinafacup': '足协杯',
+  'saudi pro league': '沙特联', 'spl': '沙特联', 'saudiarabianproleague': '沙特联',
+  'uae pro league': '阿联酋超', 'uaeproleague': '阿联酋超',
+  'qatar stars league': '卡塔尔联', 'qatarstarsleague': '卡塔尔联',
+  'iran pro league': '伊朗超', 'iranproleague': '伊朗超',
+  'iraq premier league': '伊拉克超', 'iraqpremierleague': '伊拉克超',
+  'thai premier league': '泰超', 'thaileague1': '泰超',
+  'vietnam v.league1': '越南联', 'vleague1': '越南联',
+  'malaysiasuperleague': '马来超', 'malaysiasuperleague': '马来超',
+  'indonesialiga1': '印尼超', 'liga1indonesia': '印尼超',
+  'indiansuperleague': '印度超', 'isl': '印度超',
+  'a-league': '澳超', 'aleague': '澳超', 'australiana-league': '澳超',
+  'newzealandfootballchampionship': '新西兰超',
+  // 美洲联赛
+  'mls': '美职联', 'majorleaguesoccer': '美职联',
+  'uslchampionship': '美冠', 'usl': '美冠',
+  'ligamx': '墨超', 'mexicanligamx': '墨超',
+  'brazilianSerieA': '巴甲', 'brasileirao': '巴甲', 'seriea brazil': '巴甲',
+  'brazilianSerieB': '巴乙', 'brasileiraoserieb': '巴乙',
+  'argentineprimera': '阿甲', 'argentineprimeradivision': '阿甲',
+  'colombianprimeraa': '哥甲', 'colombianligabetplay': '哥甲',
+  'chileanprimeradivision': '智甲', 'chileanprimera': '智甲',
+  'peruvianprimeradivision': '秘鲁甲', 'peruvianliga1': '秘鲁甲',
+  'ecuadorianseriea': '厄瓜多尔甲', 'ecuadorianligapro': '厄瓜多尔甲',
+  'bolivianprimeradivision': '玻甲', 'bolivianligapro': '玻甲',
+  'paraguayanprimeradivision': '巴拉圭甲', 'paraguayandivisionprofesional': '巴拉圭甲',
+  'uruguayanprimeradivision': '乌拉甲', 'uruguayanligaprofesional': '乌拉甲',
+  'venezuelanprimeradivision': '委甲', 'venezuelanligafutve': '委甲',
+  'concacafchampionsleague': '中北美冠', 'concacafchampionscup': '中北美冠',
+  'copalibertadores': '解放者杯', 'libertadores': '解放者杯',
+  'copasudamericana': '南美杯', 'sudamericana': '南美杯',
+  // 非洲联赛
+  'egyptianpremierleague': '埃及超', 'egyptianpremierleague': '埃及超',
+  'southafricanpremierleague': '南非超', 'dstvpremiership': '南非超',
+  'nigerianprofessionalfootballleague': '尼日超', 'npfl': '尼日超',
+  'moroccanbotola': '摩洛哥超', 'botola': '摩洛哥超',
+  'tunisianligue1': '突尼斯甲', 'tunisianligueprofessionnelle1': '突尼斯甲',
+  'algerianligue1': '阿尔及利亚甲', 'algerianligueprofessionnelle1': '阿尔及利亚甲',
+  'kenyanpremierleague': '肯尼亚超', 'kenyanpremierleague': '肯尼亚超',
+  'ghananpremierleague': '加纳超', 'ghanapremierleague': '加纳超',
+  'senegaleseligue1': '塞内加尔甲', 'senegalligue1': '塞内加尔甲',
+  'camerooneliteone': '喀麦隆甲', 'camerooneliteone': '喀麦隆甲',
+  'ivorycoastligue1': '科特迪瓦甲', 'cotedivoireligue1': '科特迪瓦甲',
+  'ca fchampionsleague': '非冠', 'cafchampionsleague': '非冠',
+  'cafconfederationcup': '非联杯', 'cafconfederationcup': '非联杯',
+};
+
+// 从localStorage加载名字库
+try{
+  const saved = localStorage.getItem(NAME_LIB_STORAGE_KEY);
+  if(saved){
+    const data = JSON.parse(saved);
+    if(data.teams) TEAM_NAME_LIB = Object.assign({}, TEAM_NAME_LIB, data.teams);
+    if(data.leagues) LEAGUE_NAME_LIB = Object.assign({}, LEAGUE_NAME_LIB, data.leagues);
+  }
+}catch(e){}
+
+// 保存名字库到localStorage
+function saveNameLib(){
+  try{
+    localStorage.setItem(NAME_LIB_STORAGE_KEY, JSON.stringify({
+      teams: TEAM_NAME_LIB,
+      leagues: LEAGUE_NAME_LIB
+    }));
+  }catch(e){}
+}
+
+// 名字规范化：去掉空格、特殊字符，转小写，支持特殊字符转换
+function normalizeNameKey(name){
+  let s = (name || '').toString().toLowerCase();
+  // 特殊字符转换
+  const charMap = {'ç':'c','ñ':'n','ä':'a','ö':'o','ü':'u','ß':'ss','à':'a','á':'a','â':'a','ã':'a','å':'a','æ':'ae','è':'e','é':'e','ê':'e','ë':'e','ì':'i','í':'i','î':'i','ï':'i','ð':'d','ò':'o','ó':'o','ô':'o','õ':'o','ø':'o','ù':'u','ú':'u','û':'u','ý':'y','þ':'th','ÿ':'y','ą':'a','ć':'c','č':'c','ď':'d','ę':'e','ě':'e','ĺ':'l','ł':'l','ń':'n','ő':'o','ř':'r','ś':'s','š':'s','ť':'t','ų':'u','ű':'u','ź':'z','ż':'z','ž':'z'};
+  for(const k in charMap){
+    s = s.replace(new RegExp(k, 'g'), charMap[k]);
+  }
+  return s.replace(/[^a-z0-9一-龥]/g, '');
+}
+
+// 队名规范化：返回标准中文名
+function normalizeTeamName(name){
+  if(!name) return name;
+  const key = normalizeNameKey(name);
+  // 如果已经是中文，直接返回
+  if(/[一-龥]/.test(name) && !TEAM_NAME_LIB[key]){
+    // 自动学习：中文名字直接加入
+    TEAM_NAME_LIB[key] = name;
+    saveNameLib();
+    return name;
+  }
+  // 从名字库查找
+  if(TEAM_NAME_LIB[key]){
+    return TEAM_NAME_LIB[key];
+  }
+  // 没找到，返回原名，并自动学习
+  TEAM_NAME_LIB[key] = name;
+  saveNameLib();
+  return name;
+}
+
+// 联赛名规范化：返回标准中文名
+function normalizeLeagueName(name){
+  if(!name) return name;
+  const key = normalizeNameKey(name);
+  // 如果已经是中文，直接返回
+  if(/[一-龥]/.test(name) && !LEAGUE_NAME_LIB[key]){
+    LEAGUE_NAME_LIB[key] = name;
+    saveNameLib();
+    return name;
+  }
+  // 从名字库查找
+  if(LEAGUE_NAME_LIB[key]){
+    return LEAGUE_NAME_LIB[key];
+  }
+  // 没找到，返回原名，并自动学习
+  LEAGUE_NAME_LIB[key] = name;
+  saveNameLib();
+  return name;
+}
+
+// 自动学习队名映射：alias是别名，standardName是标准中文名
+function learnTeamName(alias, standardName){
+  const key = normalizeNameKey(alias);
+  TEAM_NAME_LIB[key] = standardName;
+  saveNameLib();
+}
+
+// 自动学习联赛名映射
+function learnLeagueName(alias, standardName){
+  const key = normalizeNameKey(alias);
+  LEAGUE_NAME_LIB[key] = standardName;
+  saveNameLib();
+}
+// ==================== 名字库结束 ====================
+
 function addDays(d,n){const x=new Date(d);x.setDate(x.getDate()+n);return x;}
 function homeDayMd(d){return(d.getMonth()+1)+'/'+d.getDate();}
 function bjDateStr(d){return d.toLocaleDateString('sv',{timeZone:'Asia/Shanghai'});}
@@ -6579,13 +7276,17 @@ async function renderHomeList(){
   // 云端比赛（id以self_开头）直接用云端返回的中文队名，不走ESPN匹配逻辑
   let ht, at, allBuiltin, lgName;
   if(f.id && f.id.startsWith('self_')){
-    ht = {id: f.home.id, name: f.home.name, rank: null};
-    at = {id: f.away.id, name: f.away.name, rank: null};
+    ht = {id: f.home.id, name: normalizeTeamName(f.home.name), rank: null};
+    at = {id: f.away.id, name: normalizeTeamName(f.away.name), rank: null};
     allBuiltin = false;
-    lgName = f.lg.name;
+    lgName = normalizeLeagueName(f.lg.name);
   }else{
     const resolved = resolveIds(f);
     ht = resolved.ht; at = resolved.at; allBuiltin = resolved.allBuiltin; lgName = resolved.lgName;
+    // 非云端比赛（ESPN等），在渲染的时候对队名和联赛名进行规范化，不影响resolveIds匹配
+    ht = Object.assign({}, ht, {name: normalizeTeamName(ht.name)});
+    at = Object.assign({}, at, {name: normalizeTeamName(at.name)});
+    lgName = normalizeLeagueName(lgName);
   }
   const dt=new Date(f.dateISO);
   const hhmm=dt.toLocaleTimeString('zh-CN',{timeZone:'Asia/Shanghai',hour:'2-digit',minute:'2-digit',hour12:false});
@@ -6830,43 +7531,32 @@ function espnTable(body,lgCode){
 }
 // 多API统一获取盘口，优先级：ESPN > 自建API > API-Football > Big Balls Data
 async function fetchOddsFromAllApis(f, ed){
-  // 云端比赛：优先调用match_full获取11家博彩公司原生盘口，得到实际盘口线
+  // 云端比赛：只从GitHub缓存读取盘口数据（网页端绝对不直接调用云端API！零消耗配额）
   if(f && f.id && f.id.startsWith('self_')){
-    const selfApiKey = 'fmjwx8H7vbA6j8RiPD6sn9UOsrQSvPJ3d478dn4xwN8';
     const selfEventId = f.id.replace('self_', '');
     let selfData = null;
     
-    // 1. 先看缓存
+    // 1. 先看内存缓存
     if(MATCH_FULL_CACHE[selfEventId]){
       selfData = MATCH_FULL_CACHE[selfEventId];
-    }else{
-      // 2. 限流控制：每秒最多2个请求
-      const now = Date.now();
-      if(now - matchFullLastReqTime < 1000){
-        matchFullReqCount++;
-        if(matchFullReqCount >= 2){
-          await new Promise(r => setTimeout(r, 1000 - (now - matchFullLastReqTime)));
-          matchFullReqCount = 0;
-        }
-      }else{
-        matchFullLastReqTime = now;
-        matchFullReqCount = 0;
-      }
-      
-      // 3. 调用match_full
+    }
+    // 2. 从GitHub比赛详情缓存读取（零消耗配额）
+    if(!selfData){
       try{
-        const selfRes = await fetch('http://47.99.155.27:8321/match_full/'+selfEventId, {
-          headers: {'X-API-Token': selfApiKey}
-        });
-        if(selfRes.ok){
-          selfData = await selfRes.json();
-          // 缓存结果，缓存1小时
-          MATCH_FULL_CACHE[selfEventId] = selfData;
-          setTimeout(() => { delete MATCH_FULL_CACHE[selfEventId]; }, 3600000);
+        const detailRes = await fetch('data/db2_master/current/match_details.json', {cache: 'no-store'});
+        if(detailRes.ok){
+          const detailData = await detailRes.json();
+          if(detailData[selfEventId]){
+            selfData = detailData[selfEventId];
+            MATCH_FULL_CACHE[selfEventId] = selfData;
+          }
         }
-      }catch(e){
-        // 请求失败，用列表里的odds兜底
-      }
+      }catch(e){}
+    }
+    // 3. 从GitHub比赛列表的odds字段读取（零消耗配额）
+    if(!selfData && f.odds){
+      // 用比赛列表里的odds作为兜底数据
+      selfData = { odds: f.odds };
     }
     
     // 4. 从match_full的odds_by_bookmaker提取实际主流盘口线
@@ -7056,12 +7746,19 @@ function convertSelfApiMatch(m){
   // 比分
   if(m.home_score != null) hg = parseInt(m.home_score);
   if(m.away_score != null) ag = parseInt(m.away_score);
-  // 联赛信息：用league_zh中文字段
-  const lgCode = 'self_' + (m.league_zh || 'unknown');
-  const lgName = m.league_zh || '未知联赛';
-  // 队名：用home_team_zh/away_team_zh中文字段
-  const homeName = m.home_team_zh || m.home_team || '主队';
-  const awayName = m.away_team_zh || m.away_team || '客队';
+  // 联赛信息：用league_zh中文字段，经过名字库规范化
+  const rawLeagueName = m.league_zh || m.league_name || m.league || '未知联赛';
+  const lgName = normalizeLeagueName(rawLeagueName);
+  const lgCode = 'self_' + lgName;
+  // 队名：用home_team_zh/away_team_zh中文字段，经过名字库规范化
+  const rawHomeName = m.home_team_zh || m.home_team || m.homeTeam || '主队';
+  const rawAwayName = m.away_team_zh || m.away_team || m.awayTeam || '客队';
+  const homeName = normalizeTeamName(rawHomeName);
+  const awayName = normalizeTeamName(rawAwayName);
+  // 自动学习：把原始名字和标准名字建立映射
+  if(rawHomeName !== homeName) learnTeamName(rawHomeName, homeName);
+  if(rawAwayName !== awayName) learnTeamName(rawAwayName, awayName);
+  if(rawLeagueName !== lgName) learnLeagueName(rawLeagueName, lgName);
   return {
     id: 'self_' + m.event_id,
     dateISO: dateISO,
@@ -7106,29 +7803,137 @@ async function fetchSelfApiHomeFixtures(forceRefresh){
   }
 }
 
+// GitHub缓存配置（优先读取GitHub仓库里的缓存数据，不消耗云端API配额）
+const GITHUB_CACHE_URLS = [
+  'https://raw.githubusercontent.com/qq894805001-a11y/huange-ai-model/main/data/self_api_odds.json',
+  'https://raw.githubusercontent.com/qq894805001-a11y/huange-ai-model/master/data/self_api_odds.json'
+];
+let GITHUB_CACHE_DATA = null;
+let GITHUB_CACHE_T = 0;
+const GITHUB_CACHE_TTL = 60000; // 缓存1分钟
+
+// 从GitHub仓库读取缓存数据（无限制，不消耗云端API配额）
+async function fetchGithubCache(){
+  if(GITHUB_CACHE_DATA && Date.now() - GITHUB_CACHE_T < GITHUB_CACHE_TTL){
+    return GITHUB_CACHE_DATA;
+  }
+  for(const url of GITHUB_CACHE_URLS){
+    try{
+      const res = await fetch(url, {cache: 'no-store'});
+      if(res.ok){
+        const data = await res.json();
+        if(data && (data.matches || data.match_full || Object.keys(data).length > 0)){
+          GITHUB_CACHE_DATA = data;
+          GITHUB_CACHE_T = Date.now();
+          return data;
+        }
+      }
+    }catch(e){}
+  }
+  return null;
+}
+
+// 从GitHub缓存中获取比赛列表
+function getMatchesFromGithubCache(cacheData){
+  if(!cacheData) return [];
+  // 格式1: {matches: [...]} 数组
+  if(cacheData.matches && Array.isArray(cacheData.matches)){
+    return cacheData.matches;
+  }
+  // 格式1b: {matches: {event_id: {...}}} 对象（以event_id为key）
+  if(cacheData.matches && typeof cacheData.matches === 'object'){
+    const values = Object.values(cacheData.matches);
+    if(values.length > 0) return values;
+  }
+  // 格式2: {match_full: {event_id: {...}}}
+  if(cacheData.match_full && typeof cacheData.match_full === 'object'){
+    return Object.values(cacheData.match_full);
+  }
+  // 格式3: 直接是数组
+  if(Array.isArray(cacheData)){
+    return cacheData;
+  }
+  // 格式4: 以event_id为key的对象
+  const values = Object.values(cacheData);
+  if(values.length > 0 && values[0] && values[0].event_id){
+    return values;
+  }
+  return [];
+}
+
+// 从GitHub缓存中获取单场比赛详情
+function getMatchDetailFromGithubCache(cacheData, eventId){
+  if(!cacheData || !eventId) return null;
+  const eid = String(eventId);
+  // 格式1: {match_full: {event_id: {...}}}
+  if(cacheData.match_full && cacheData.match_full[eid]){
+    return cacheData.match_full[eid];
+  }
+  // 格式2: {matches: [{event_id: ..., ...}]} 数组
+  if(cacheData.matches && Array.isArray(cacheData.matches)){
+    const found = cacheData.matches.find(m => String(m.event_id) === eid);
+    if(found) return found;
+  }
+  // 格式2b: {matches: {event_id: {...}}} 对象
+  if(cacheData.matches && typeof cacheData.matches === 'object' && cacheData.matches[eid]){
+    return cacheData.matches[eid];
+  }
+  // 格式3: 直接以event_id为key
+  if(cacheData[eid]){
+    return cacheData[eid];
+  }
+  // 格式4: 数组
+  if(Array.isArray(cacheData)){
+    const found = cacheData.find(m => String(m.event_id) === eid);
+    if(found) return found;
+  }
+  return null;
+}
+
 // 多API实时比分和时间缓存
 const LIVE_SCORE_CACHE = {};
 // 云端API今日比赛列表缓存和ID映射
 let SELF_API_MATCHES_CACHE = null;
 let SELF_API_MATCHES_T = 0;
-// 从云端API拉取今日比赛列表，建立队名到event_id的映射
+// 从GitHub缓存读取今日比赛列表（网页端绝对不直接调用云端API！零消耗配额，无限刷新）
 async function getSelfApiMatches(forceRefresh){
-  if(!forceRefresh && SELF_API_MATCHES_CACHE && Date.now()-SELF_API_MATCHES_T < 30000){
+  if(!forceRefresh && SELF_API_MATCHES_CACHE && Date.now()-SELF_API_MATCHES_T < 15000){
     return SELF_API_MATCHES_CACHE;
   }
+  // 只从GitHub缓存读取（零消耗配额，可以无限刷新）
   try{
-    const selfApiKey = 'fmjwx8H7vbA6j8RiPD6sn9UOsrQSvPJ3d478dn4xwN8';
-    const res = await fetch('http://47.99.155.27:8321/api/today', {
-      headers: {'X-API-Token': selfApiKey}
-    });
-    if(res.ok){
-      const data = await res.json();
-      const matches = data.matches || [];
-      SELF_API_MATCHES_CACHE = matches;
-      SELF_API_MATCHES_T = Date.now();
-      return matches;
+    // 读取今天和明天的比赛
+    const [todayRes, tomorrowRes] = await Promise.all([
+      fetch('data/db2_master/current/today.json', {cache: 'no-store'}),
+      fetch('data/db2_master/current/tomorrow.json', {cache: 'no-store'})
+    ]);
+    
+    const allMatches = [];
+    
+    if(todayRes.ok){
+      const todayData = await todayRes.json();
+      if(todayData.matches && Array.isArray(todayData.matches)){
+        allMatches.push(...todayData.matches);
+      }
     }
-  }catch(e){}
+    
+    if(tomorrowRes.ok){
+      const tomorrowData = await tomorrowRes.json();
+      if(tomorrowData.matches && Array.isArray(tomorrowData.matches)){
+        allMatches.push(...tomorrowData.matches);
+      }
+    }
+    
+    if(allMatches.length > 0){
+      SELF_API_MATCHES_CACHE = allMatches;
+      SELF_API_MATCHES_T = Date.now();
+      return allMatches;
+    }
+  }catch(e){
+    console.log('读取GitHub比赛缓存失败:', e.message);
+  }
+  
+  // GitHub缓存读取失败，返回空（网页端绝不直接调用云端API！）
   return [];
 }
 // 通过队名和时间匹配云端API的比赛
@@ -7156,36 +7961,45 @@ async function fetchLiveScoreFromAllApis(f){
   if(LIVE_SCORE_CACHE[ck] && Date.now()-LIVE_SCORE_CACHE[ck].t < 30000){
     return LIVE_SCORE_CACHE[ck].d;
   }
-  // 1. 优先用你的云端自建API（云端有缓存，不消耗本地配额）
+  // 1. 优先从GitHub缓存读取实时比分（网页端绝对不直接调用云端API！零消耗配额）
   try{
     // 云端比赛直接从f.id提取event_id（去掉self_前缀）
     let selfEventId = null;
+    let selfMatch = null;
     if(f.id && f.id.startsWith('self_')){
       selfEventId = f.id.replace('self_', '');
     }else{
       // 非云端比赛，通过队名匹配
-      const selfMatch = await matchSelfApiMatch(f);
+      selfMatch = await matchSelfApiMatch(f);
       if(selfMatch && selfMatch.event_id) selfEventId = selfMatch.event_id;
     }
     if(selfEventId){
-      const selfApiKey = 'fmjwx8H7vbA6j8RiPD6sn9UOsrQSvPJ3d478dn4xwN8';
-      const selfRes = await fetch('http://47.99.155.27:8321/match_full/'+selfEventId, {
-        headers: {'X-API-Token': selfApiKey}
-      });
-      if(selfRes.ok){
-        const selfData = await selfRes.json();
-        if(selfData){
-          const result = {
-            hg: selfData.home_score != null ? parseInt(selfData.home_score) : (selfMatch.home_score != null ? parseInt(selfMatch.home_score) : null),
-            ag: selfData.away_score != null ? parseInt(selfData.away_score) : (selfMatch.away_score != null ? parseInt(selfMatch.away_score) : null),
-            elapsed: selfData.minute != null ? parseInt(selfData.minute) : (selfMatch.minute != null ? parseInt(selfMatch.minute) : null),
-            status: selfData.status || selfMatch.status || null,
-            source: 'self_api'
-          };
-          if(result.hg != null || result.elapsed != null){
-            LIVE_SCORE_CACHE[ck] = {d: result, t: Date.now()};
-            return result;
+      let selfData = null;
+      // 1.1 从GitHub比赛详情缓存读取（零消耗配额）
+      try{
+        const detailRes = await fetch('data/db2_master/current/match_details.json', {cache: 'no-store'});
+        if(detailRes.ok){
+          const detailData = await detailRes.json();
+          if(detailData[selfEventId]){
+            selfData = detailData[selfEventId];
           }
+        }
+      }catch(e){}
+      // 1.2 从GitHub比赛列表读取比分（零消耗配额）
+      if(!selfData && selfMatch){
+        selfData = selfMatch;
+      }
+      if(selfData){
+        const result = {
+          hg: selfData.home_score != null ? parseInt(selfData.home_score) : null,
+          ag: selfData.away_score != null ? parseInt(selfData.away_score) : null,
+          elapsed: selfData.minute != null ? parseInt(selfData.minute) : null,
+          status: selfData.status || selfData.status_zh || null,
+          source: 'github_cache'
+        };
+        if(result.hg != null || result.elapsed != null){
+          LIVE_SCORE_CACHE[ck] = {d: result, t: Date.now()};
+          return result;
         }
       }
     }
