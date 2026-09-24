@@ -2251,9 +2251,14 @@ select{font-family:var(--font-body);}
 .fx-item .fx-odd-chip.waiting{background:rgba(110,133,123,.08);border-color:var(--line-soft);color:var(--ink-faint);font-size:9px;}
 .fx-item .fx-odd-chip.model-rec{background:rgba(0,255,136,.15);border-color:rgba(0,255,136,.4);color:#00ff88;}
 .fx-item .fx-odd-chip.model-rec .lab{color:#00ff88;}
+.fx-item .fx-odd-chip.model-rec.sim{background:rgba(150,170,160,.08);border-color:rgba(150,170,160,.2);color:#8aa892;opacity:0.7;}
+.fx-item .fx-odd-chip.model-rec.sim .lab{color:#8aa892;}
 .fx-item .fx-rank{display:flex;justify-content:space-between;font-size:10.5px;color:#888;margin-top:3px;padding:0 2px;opacity:.85;}
 .fx-item .fx-odd-chip .lab{color:var(--ink-faint);margin-right:3px;}
 .fx-item .fx-go{color:var(--ink-faint);flex:none;}
+.fx-item-wrap{margin-bottom:4px;}
+.fx-manual-btn{width:100%;padding:3px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:4px;color:#888;font-size:10px;cursor:pointer;margin-top:2px;}
+.fx-manual-btn:hover{background:rgba(255,255,255,.1);color:#aaa;}
 .badge{font-family:var(--font-mono);font-size:8.5px;letter-spacing:.06em;padding:1px 5px;border-radius:3px;border:1px solid;white-space:nowrap;}
 .badge.in{color:var(--green);border-color:var(--green-deep);}
 .badge.calc{color:var(--amber);border-color:var(--amber-soft);}
@@ -7570,7 +7575,8 @@ function renderHomeList(){
   if(displayOc.ouLine!=null&&displayOc.ouP!=null){
     const ouRec = displayOc.ouP > 0.5 ? '大'+fmtLine(displayOc.ouLine) : '小'+fmtLine(displayOc.ouLine);
      const ouLab = displayOc.ouSim ? '模拟' : '推荐';
-    oddsHtml+='<span class="fx-odd-chip model-rec"><span class="lab">'+ouLab+'</span>'+ouRec+'<b> '+pct100(Math.max(displayOc.ouP,1-displayOc.ouP))+'</b></span>';
+    const ouCls = displayOc.ouSim ? 'fx-odd-chip model-rec sim' : 'fx-odd-chip model-rec';
+    oddsHtml+='<span class="'+ouCls+'"><span class="lab">'+ouLab+'</span>'+ouRec+'<b> '+pct100(Math.max(displayOc.ouP,1-displayOc.ouP))+'</b></span>';
   }
   if(displayOc.spreadLine!=null&&displayOc.spP!=null){
     let spRec;
@@ -7580,7 +7586,8 @@ function renderHomeList(){
       spRec = displayOc.spreadLine < 0 ? '客+' + fmtLine(Math.abs(displayOc.spreadLine)) : '客-' + fmtLine(displayOc.spreadLine);
     }
      const spLab = displayOc.spSim ? '模拟' : '让球';
-    oddsHtml+='<span class="fx-odd-chip sp model-rec"><span class="lab">'+spLab+'</span>'+spRec+'<b> '+pct100(Math.max(displayOc.spP,1-displayOc.spP))+'</b></span>';
+    const spCls = displayOc.spSim ? 'fx-odd-chip sp model-rec sim' : 'fx-odd-chip sp model-rec';
+    oddsHtml+='<span class="'+spCls+'"><span class="lab">'+spLab+'</span>'+spRec+'<b> '+pct100(Math.max(displayOc.spP,1-displayOc.spP))+'</b></span>';
   }
   // 不再显示"等待开盘"，即使ESPN没抓到盘口，也会在后台自动计算模拟盘口
   // 盘口计算失败时也不显示等待，留空让下次刷新再试
@@ -7588,7 +7595,11 @@ function renderHomeList(){
   let ds='';
   if(prov==='espn')ds=' data-fid="'+f.id+'" data-lg="'+f.lg.code+'"';
   if(isLive)ds+=' data-live="1" data-st="'+st+'" data-min="'+mn+'" data-hg="'+hg+'" data-ag="'+ag+'"'+(prov==='espn'?'':' data-fid="'+f.id+'"');
-  return '<button class="fx-item'+(isLive?' is-live':'')+'" data-h="'+ht.id+'" data-a="'+at.id+'"'+ds+'>'+
+  // 只有需要AI模拟的比赛（没有真实盘口）才显示输盘口按钮
+  const needSim = !oc || oc.none || oc.ouSim;
+  const manualBtn = needSim ? '<button class="fx-manual-btn" onclick="event.stopPropagation();manualOdds(\''+f.id+'\',\''+f.lg.code+'\')" title="手动输入盘口">📝 输盘口</button>' : '';
+  return '<div class="fx-item-wrap">'+
+   '<button class="fx-item'+(isLive?' is-live':'')+'" data-h="'+ht.id+'" data-a="'+at.id+'"'+ds+'>'+
    timeCell+
    '<div class="fx-mid"><div class="fx-league">'+escHtml(leagueLine)+'</div>'+
    '<div class="fx-teams">'+escHtml(ht.name)+'<span class="vs-mini">vs</span>'+escHtml(at.name)+'</div>'+
@@ -7596,7 +7607,9 @@ function renderHomeList(){
    oddsRow+
    '<div class="fx-sub">'+liveBadge+
    '<span class="badge '+(allBuiltin?'in':'calc')+'">'+(allBuiltin?'内置参数':'即时建模')+'</span></div></div>'+
-   '<svg class="fx-go" width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="#6E857B" stroke-width="2" stroke-linecap="round"/></svg></button>';
+   '<svg class="fx-go" width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="#6E857B" stroke-width="2" stroke-linecap="round"/></svg></button>'+
+   manualBtn+
+   '</div>';
  }
  const d0=addDays(new Date(),HOME_OFFSET),d1=addDays(d0,1);
  const d0Str=bjDateStr(d0),d1Str=bjDateStr(d1);
@@ -7689,7 +7702,36 @@ function renderHomeList(){
  }
  if(!html)html='<div class="api-msg">该两天暂无所选赛事的未开赛 / 进行中比赛，可左右切换日期或扩大赛事覆盖范围。<br>免费数据源对低级别赛事覆盖有限。</div>';
  box.innerHTML=html;
- box.querySelectorAll('.fx-item:not([disabled])').forEach(b=>b.onclick=()=>{
+ // 手动输入盘口
+window.manualOdds = function(fid, lgCode){
+  const ouLine = prompt('输入大小球盘口（比如2.5）：', '2.5');
+  if(ouLine===null)return;
+  const spLine = prompt('输入让球盘口（比如-0.5，主队让0.5球；0表示平手）：', '0');
+  if(spLine===null)return;
+  // 保存到缓存
+  HOME_ODDS_CACHE[fid] = {
+    ouLine: parseFloat(ouLine),
+    ouP: 0.5,
+    ouSim: false,
+    spreadLine: parseFloat(spLine),
+    spP: 0.5,
+    spSim: false,
+    none: false,
+    manual: true
+  };
+  // 保存到本地
+  const manualOdds = JSON.parse(localStorage.getItem('manual_odds')||'{}');
+  manualOdds[fid] = {lg:lgCode, ouLine:parseFloat(ouLine), spLine:parseFloat(spLine), ts:Date.now()};
+  localStorage.setItem('manual_odds', JSON.stringify(manualOdds));
+  // 同步到GitHub
+  if(window.syncLearnToGithubNow){
+    try{ syncLearnToGithubNow(); }catch(e){}
+  }
+  // 重新渲染
+  renderHomeList();
+  alert('盘口已保存！AI正在重新模拟分析...');
+};
+box.querySelectorAll('.fx-item:not([disabled])').forEach(b=>b.onclick=()=>{
   const n=document.getElementById('api-neutral')&&document.getElementById('api-neutral').checked?1:0;
   const p=new URLSearchParams({h:b.dataset.h,a:b.dataset.a,hi:'none',ai:'none',n:String(n)});
   if(b.dataset.fid)p.set('fid',b.dataset.fid);
@@ -8243,8 +8285,8 @@ function recordPred(fid,lg,r0,r,H,A,ed,isLive){
     const spLine=ed.odds?(ed.odds.spreadLine!=null?ed.odds.spreadLine:(ed.odds.open&&ed.odds.open.spreadLine)):null;
     if(ouLine==null&&spLine==null)return null;
     const rec={ouLine:null,ouPick:null,ouP:null,spLine:null,spPick:null,spP:null};
-    if(ouLine!=null){const ou=asianSettle(base.mat,ouLine,'ou');rec.ouLine=ouLine;rec.ouPick=ou.winExp>=ou.loseExp?'over':'under';rec.ouP=Math.max(ou.winExp,ou.loseExp);}
-    if(spLine!=null){const sp=asianSettle(base.mat,spLine,'sp');rec.spLine=spLine;rec.spPick=sp.winExp>=sp.loseExp?'win':'lose';rec.spP=Math.max(sp.winExp,sp.loseExp);}
+    if(ouLine!=null){const ou=asianSettle(base.mat,ouLine,'ou');rec.ouLine=ouLine;rec.ouPick=ou.winExp>=ou.loseExp?'over':'under';rec.ouP=Math.max(ou.winExp,ou.loseExp);rec.ouSim=false;}
+    if(spLine!=null){const sp=asianSettle(base.mat,spLine,'sp');rec.spLine=spLine;rec.spPick=sp.winExp>=sp.loseExp?'win':'lose';rec.spP=Math.max(sp.winExp,sp.loseExp);rec.spSim=false;}
     return rec;
    }catch(e){return null;}
   })(),
@@ -8254,8 +8296,8 @@ function recordPred(fid,lg,r0,r,H,A,ed,isLive){
   try{
    const simOuLine=2.5; // 默认模拟盘口
    const simSpLine=0;
-   const rec={ouLine:simOuLine,ouPick:r.W>r.L?'over':'under',ouP:0.5,
-    spLine:simSpLine,spPick:r.W>r.L?'win':'lose',spP:0.5};
+   const rec={ouLine:simOuLine,ouPick:r.W>r.L?'over':'under',ouP:0.5,ouSim:true,
+    spLine:simSpLine,spPick:r.W>r.L?'win':'lose',spP:0.5,spSim:true};
    L.preds[f.id].rec=rec;
   }catch(e){}
  }
@@ -8348,7 +8390,11 @@ async function settleLearned(){
    const timeWeight = Math.pow(0.5, daysAgo / 45); // 半衰期45天
    // 正规比赛权重高，野鸡比赛权重低
    const isMajor = isMajorMatch(p.lg);
-   const baseAlpha = isMajor ? 0.35 : 0.1; // 正规比赛0.35，野鸡比赛0.1
+   let baseAlpha = isMajor ? 0.35 : 0.1; // 正规比赛0.35，野鸡比赛0.1
+   // 如果是AI自己模拟的盘口（没有真实开盘数据），权重再减半，不要影响总体判断
+   if(p.rec && p.rec.ouSim){
+    baseAlpha = baseAlpha * 0.5; // 模拟的权重减半
+   }
    const alpha = baseAlpha * timeWeight;
    
    aH.att=ema(aH.att,hg/Math.max(p.lh,0.25),alpha);
@@ -8475,13 +8521,15 @@ function renderLearnPanel(){
      const ouPickLab=p.rec.ouPick==='over'?('大'+p.rec.ouLine):('小'+p.rec.ouLine);
      const ouHit=p.recResult&&p.recResult.ouHit;
      const ouActual=p.recResult?('实际'+p.recResult.ouActual+'球'):'';
-     recHtml+='<span class="ln-tag '+(ouHit===true?'g':ouHit===false?'r':'')+'">大小球 '+ouPickLab+' '+(ouHit===true?'✓':ouHit===false?'✗':'—')+(ouActual?' '+ouActual:'')+'</span>';
+     const ouSimTag=p.rec.ouSim?'<small style="opacity:.6">(模拟)</small>':'';
+     recHtml+='<span class="ln-tag '+(ouHit===true?'g':ouHit===false?'r':'')+'">大小球 '+ouPickLab+ouSimTag+' '+(ouHit===true?'✓':ouHit===false?'✗':'—')+(ouActual?' '+ouActual:'')+'</span>';
     }
     if(p.rec.spLine!=null){
      const spPickLab=p.rec.spPick==='win'?('主赢盘'):('主输盘');
      const spHit=p.recResult&&p.recResult.spHit;
      const spActual=p.recResult?('净胜'+p.recResult.spActual):'';
-     recHtml+='<span class="ln-tag '+(spHit===true?'g':spHit===false?'r':'')+'">让球 '+spPickLab+' '+(spHit===true?'✓':spHit===false?'✗':'—')+(spActual?' '+spActual:'')+'</span>';
+     const spSimTag=p.rec.spSim?'<small style="opacity:.6">(模拟)</small>':'';
+     recHtml+='<span class="ln-tag '+(spHit===true?'g':spHit===false?'r':'')+'">让球 '+spPickLab+spSimTag+' '+(spHit===true?'✓':spHit===false?'✗':'—')+(spActual?' '+spActual:'')+'</span>';
     }
    }
    // 详情（默认隐藏，点击展开）
