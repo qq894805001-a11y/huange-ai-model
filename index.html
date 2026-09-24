@@ -7213,8 +7213,15 @@ async function prefetchHomeOdds(all,standingsCache){
    try{
     r=predict(ht.id,at.id,{noLearn:false});
    }catch(e){
-    // predict失败时也生成默认模拟盘口，不设none
-    HOME_ODDS_CACHE[f.id]={ouLine:2.5,ouP:0.52,ouSim:true,spreadLine:0,spP:0.5,spSim:true,ts:Date.now()};
+    // predict失败时，根据联赛类型生成合理模拟盘口（不是死板2.5）
+    const lgCode=f.lg.code||'';
+    // 大联赛进球多，小联赛/友谊赛进球少
+    let baseOu=2.5;
+    if(/\.2|\.3|friendly|cup|nations|w\.|u\d/i.test(lgCode))baseOu=2.25;
+    if(/eng\.1|esp\.1|ita\.1|ger\.1|fra\.1|ned\.1/i.test(lgCode))baseOu=2.75;
+    // 主场优势：主队让0.25
+    const baseSp=-0.25;
+    HOME_ODDS_CACHE[f.id]={ouLine:baseOu,ouP:0.5+Math.random()*0.04,ouSim:true,spreadLine:baseSp,spP:0.5+Math.random()*0.04,spSim:true,ts:Date.now()};
     saveOddsCache();
     scheduleRender();
     continue;
@@ -7234,8 +7241,12 @@ async function prefetchHomeOdds(all,standingsCache){
     saveOddsCache();
    scheduleRender();
   }catch(e){
-   // 整个catch也生成默认模拟盘口
-   HOME_ODDS_CACHE[f.id]={ouLine:2.5,ouP:0.52,ouSim:true,spreadLine:0,spP:0.5,spSim:true,ts:Date.now()};
+   // 整个catch也生成合理模拟盘口
+   const lgCode=f.lg.code||'';
+   let baseOu=2.5;
+   if(/\.2|\.3|friendly|cup|nations|w\.|u\d/i.test(lgCode))baseOu=2.25;
+   if(/eng\.1|esp\.1|ita\.1|ger\.1|fra\.1|ned\.1/i.test(lgCode))baseOu=2.75;
+   HOME_ODDS_CACHE[f.id]={ouLine:baseOu,ouP:0.5+Math.random()*0.04,ouSim:true,spreadLine:-0.25,spP:0.5+Math.random()*0.04,spSim:true,ts:Date.now()};
    saveOddsCache();
   }
  }};
