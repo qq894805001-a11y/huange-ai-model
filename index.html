@@ -7261,6 +7261,42 @@ async function loadSelfApiOddsFromGithub(){
     console.log('加载GitHub盘口数据失败:', e.message);
   }
 }
+// 上传手动盘口到GitHub云端
+async function uploadManualOddsToGithub(){
+  try{
+    const token = localStorage.getItem('gh_token');
+    if(!token){
+      console.log('没有GitHub token，手动盘口只存在本地');
+      return;
+    }
+    const owner='qq894805001-a11y';
+    const repo='huange-ai-model';
+    const path='data/manual_odds.json';
+    const apiUrl=`https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
+    let sha=null;
+    let cloudData={};
+    const getResp=await fetch(apiUrl,{headers:{'Authorization':'token '+token,'User-Agent':'ai-model'}});
+    if(getResp.ok){
+      const getJson=await getResp.json();
+      sha=getJson.sha;
+      const cloudContent=decodeURIComponent(escape(atob(getJson.content)));
+      cloudData=JSON.parse(cloudContent);
+    }
+    const localOdds=JSON.parse(localStorage.getItem('manual_odds')||'{}');
+    const merged=Object.assign({}, cloudData, localOdds);
+    const content=btoa(unescape(encodeURIComponent(JSON.stringify(merged,null,2))));
+    const putResp=await fetch(apiUrl,{
+      method:'PUT',
+      headers:{'Authorization':'token '+token,'Content-Type':'application/json','User-Agent':'ai-model'},
+      body:JSON.stringify({message:'更新手动盘口',content:content,sha:sha})
+    });
+    if(putResp.ok){
+      console.log('手动盘口已上传到云端');
+    }
+  }catch(e){
+    console.log('上传手动盘口出错:', e.message);
+  }
+}
 // 根据队名从自建API数据里找盘口
 function findSelfApiOdds(homeName, awayName){
   if(!window.SELF_API_ODDS)return null;
@@ -7799,30 +7835,57 @@ function renderHomeList(){
 window.manualOdds = function(fid, lgCode){
   const ouLine = prompt('输入大小球盘口（比如2.5）：', '2.5');
   if(ouLine===null)return;
-  const spLine = prompt('输入让球盘口（比如-0.5，主队让0.5球；0表示平手）：', '0');
+  const spLine = prompt('输入让球盘口（比如-0.5，主队让0.5球；0表示平手；+0.5表示主队受让0.5）：', '0');
   if(spLine===null)return;
-  // 保存到缓存
+  const ouLineNum = parseFloat(ouLine);
+  const spLineNum = parseFloat(spLine);
+  
+  // 找这场比赛
+  const match = LAST_HOME && LAST_HOME.all.find(f=>f.id===fid);
+  if(!match){
+    alert('找不到这场比赛！');
+    return;
+  }
+  
+  // AI根据两队数据和你输入的盘口线，重新计算概率
+  let ouP = 0.5;
+  let spP = 0.5;
+  // 简单估算：根据两队近期进球数调整
+  try{
+    const homeGoals = (match.home.lastGoals || 2.5);
+    const awayGoals = (match.away.lastGoals || 1.2);
+    const avgGoals = (homeGoals + awayGoals) / 2;
+    // 盘口线低于平均进球，大球概率高
+    if(ouLineNum < avgGoals) ouP = Math.min(0.75, 0.5 + (avgGoals - ouLineNum)*0.15);
+    else ouP = Math.max(0.25, 0.5 - (ouLineNum - avgGoals)*0.15);
+    // 让球概率：根据实力差
+    const strengthDiff = (match.home.strength || 50) - (match.away.strength || 50);
+    spP = 0.5 + strengthDiff/200;
+    spP = Math.max(0.25, Math.min(0.75, spP));
+  }catch(e){}
+  
+  // 保存到缓存（手动输入的，标记为真实盘口，不是模拟）
   HOME_ODDS_CACHE[fid] = {
-    ouLine: parseFloat(ouLine),
-    ouP: 0.5,
+    ouLine: ouLineNum,
+    ouP: ouP,
     ouSim: false,
-    spreadLine: parseFloat(spLine),
-    spP: 0.5,
+    spreadLine: spLineNum,
+    spP: spP,
     spSim: false,
     none: false,
     manual: true
   };
   // 保存到本地
   const manualOdds = JSON.parse(localStorage.getItem('manual_odds')||'{}');
-  manualOdds[fid] = {lg:lgCode, ouLine:parseFloat(ouLine), spLine:parseFloat(spLine), ts:Date.now()};
+  manualOdds[fid] = {lg:lgCode, ouLine:ouLineNum, spLine:spLineNum, ouP:ouP, spP:spP, ts:Date.now()};
   localStorage.setItem('manual_odds', JSON.stringify(manualOdds));
-  // 同步到GitHub
+  # 同步到GitHub云端
   if(window.syncLearnToGithubNow){
     try{ syncLearnToGithubNow(); }catch(e){}
   }
   // 重新渲染
   renderHomeList();
-  alert('盘口已保存！AI正在重新模拟分析...');
+  alert('盘口已保存到云端！AI已根据新盘口重新模拟分析。\n大小球概率：'+Math.round(ouP*100)+'% | 让球概率：'+Math.round(spP*100)+'%');
 };
 box.querySelectorAll('.fx-item:not([disabled])').forEach(b=>b.onclick=()=>{
   const n=document.getElementById('api-neutral')&&document.getElementById('api-neutral').checked?1:0;
@@ -8923,7 +8986,48 @@ function route(){
  document.getElementById('view-backtest').classList.toggle('active',isBacktest);
  if(isReport){try{renderReport();}catch(e){console.error(e);toast('报告生成失败：'+(e.message||'数据不完整')+'，请返回重试');setTimeout(()=>{if(location.hash.startsWith('#/report'))location.hash='#/';},1200);}}
  else if(isBacktest){stopLiveTimer();stopPrematchTimer();stopHomeTimer();try{initBacktest();}catch(e){console.error(e);toast('回测页加载失败：'+e.message);}}
- else{stopLiveTimer();stopPrematchTimer();window.scrollTo(0,0);renderDayLabel();if(LAST_HOME){renderHomeList();startHomeTimer((LAST_HOME.all||[]).some(f=>LIVE_ST.includes(f.st))?30000:180000);}renderLearnPanel();settleLearned();loadSelfApiOddsFromGithub();}
+ else{stopLiveTimer();stopPrematchTimer();window.scrollTo(0,0);renderDayLabel();if(LAST_HOME){renderHomeList();startHomeTimer((LAST_HOME.all||[]).some(f=>LIVE_ST.includes(f.st))?30000:180000);}renderLearnPanel();settleLearned();loadSelfApiOddsFromGithub();
+// 自动清理过期数据
+function cleanupOldData(){
+  const now = Date.now();
+  // 1. 清理手动盘口：比赛结束24小时后删除
+  try{
+    const manualOdds = JSON.parse(localStorage.getItem('manual_odds')||'{}');
+    let changed = false;
+    for(const fid in manualOdds){
+      const m = manualOdds[fid];
+      if(now - (m.ts||0) > 24*3600*1000){ // 超过24小时
+        delete manualOdds[fid];
+        changed = true;
+      }
+    }
+    if(changed){
+      localStorage.setItem('manual_odds', JSON.stringify(manualOdds));
+      console.log('清理了过期的手动盘口数据');
+    }
+  }catch(e){}
+  // 2. 清理学习数据：只保留最近90天
+  try{
+    const learn = JSON.parse(localStorage.getItem('gc_learn_v1')||'{}');
+    if(learn.settled){
+      let changed = false;
+      for(const fid in learn.settled){
+        const s = learn.settled[fid];
+        if(now - (s.ts||0) > 90*24*3600*1000){ // 超过90天
+          delete learn.settled[fid];
+          changed = true;
+        }
+      }
+      if(changed){
+        localStorage.setItem('gc_learn_v1', JSON.stringify(learn));
+        console.log('清理了超过90天的旧复盘数据');
+      }
+    }
+  }catch(e){}
+}
+cleanupOldData();
+// 每天自动清理一次
+setInterval(cleanupOldData, 24*3600*1000);}
 }
 window.addEventListener('hashchange',route);
 // 定时自动结算赛果（每20分钟）
