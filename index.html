@@ -6573,8 +6573,7 @@ function renderHomeList(){
   if(isLive)ds+=' data-live="1" data-st="'+st+'" data-min="'+mn+'" data-hg="'+hg+'" data-ag="'+ag+'"'+(prov==='espn'?'':' data-fid="'+f.id+'"');
   return '<button class="fx-item'+(isLive?' is-live':'')+'" data-h="'+ht.id+'" data-a="'+at.id+'"'+ds+'>'+
    timeCell+
-   '<div class="fx-mid"><div class="fx-league">'+escHtml(leagueLine)+'</div>'+
-   '<div class="fx-teams"><span style="color:#f59e0b;font-size:12px;margin-right:6px">'+escHtml(lgName)+'</span>'+escHtml(ht.name)+'<span class="vs-mini">vs</span>'+escHtml(at.name)+'</div>'+
+   '<div class="fx-mid"><div class="fx-teams"><span style="color:#f59e0b;font-size:12px;margin-right:6px">'+escHtml(lgName)+'</span>'+escHtml(ht.name)+'<span class="vs-mini">vs</span>'+escHtml(at.name)+'</div>'+
    rankHtml+
    oddsRow+
    '<div class="fx-sub">'+liveBadge+
@@ -7086,6 +7085,18 @@ function renderLearnPanel(){
  if(!box)return;
  const L=loadLearn();
  const n=L.stats.n,hitRate=n?L.stats.hit/n:0,brier=n?L.stats.brier/n:null;
+  // 统计大小球和让球命中率
+  let ouN=0,ouHit=0,spN=0,spHit=0;
+  Object.values(L.settled).forEach(s=>{
+    if(s.rec && s.rec.ouLine!=null && s.recResult){
+      ouN++;
+      if(s.recResult.ouHit) ouHit++;
+    }
+    if(s.rec && s.rec.spLine!=null && s.recResult){
+      spN++;
+      if(s.recResult.spHit) spHit++;
+    }
+  });
  const recent=Object.values(L.settled).sort((a,b)=>b.setTs-a.setTs).slice(0,8);
  const adjs=Object.entries(L.teamAdj).filter(([id,a])=>a.n>=3&&(Math.abs(a.att-1)>0.04||Math.abs(a.def-1)>0.04))
   .sort((x,y)=>Math.abs(y[1].att-1)+Math.abs(y[1].def-1)-Math.abs(x[1].att-1)-Math.abs(x[1].def-1)).slice(0,6);
@@ -7094,7 +7105,9 @@ function renderLearnPanel(){
   '<span class="line-deco"></span></h3>';
  html+='<div class="ln-stats"><div class="ln-stat"><b>'+n+'</b><span>已复盘场次</span></div>'+
   '<div class="ln-stat"><b>'+(n?(hitRate*100).toFixed(0)+'%':'—')+'</b><span>方向命中率</span></div>'+
-  '<div class="ln-stat"><b>'+(brier!=null?brier.toFixed(2):'—')+'</b><span>Brier 误差↓</span></div></div>';
+  '<div class="ln-stat"><b>'+(brier!=null?brier.toFixed(2):'—')+'</b><span>Brier 误差↓</span></div>'+
+  '<div class="ln-stat"><b>'+(ouN?Math.round(ouHit/ouN*100)+'%':'—')+'</b><span>大小球命中 '+ouN+'场</span></div>'+
+  '<div class="ln-stat"><b>'+(spN?Math.round(spHit/spN*100)+'%':'—')+'</b><span>让球命中 '+spN+'场</span></div></div>';
  // 概率校准（5 桶，三向概率-结局对）
  if(n>=3){
   const bins=Array.from({length:5},()=>({n:0,p:0,h:0}));
