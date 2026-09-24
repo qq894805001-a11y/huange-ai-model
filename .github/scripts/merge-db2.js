@@ -837,6 +837,192 @@ function learnPlayerName(alias, standardZhName, teamContext = '') {
   savePlayerNameLib();
 }
 
+
+// ============================================================
+// 百度翻译API：自动翻译球员名字为中文
+// 配置：GitHub Secrets 中设置 BAIDU_TRANSLATE_APP_ID 和 BAIDU_TRANSLATE_SECRET_KEY
+// 免费额度：标准版每月200万字符
+// ============================================================
+const BAIDU_APP_ID = process.env.BAIDU_TRANSLATE_APP_ID || '';
+const BAIDU_SECRET_KEY = process.env.BAIDU_TRANSLATE_SECRET_KEY || '';
+const BAIDU_TRANSLATE_ENABLED = !!(BAIDU_APP_ID && BAIDU_SECRET_KEY);
+
+// MD5签名（百度翻译API要求）
+function md5(str) {
+  const crypto = require('crypto');
+  return crypto.createHash('md5').update(str, 'utf-8').digest('hex');
+}
+
+// 调用百度翻译API（支持批量翻译，用换行分隔）
+async function baiduTranslate(text, from = 'en', to = 'zh') {
+  if (!BAIDU_TRANSLATE_ENABLED || !text) return null;
+  
+  try {
+    const salt = Date.now().toString();
+    const sign = md5(BAIDU_APP_ID + text + salt + BAIDU_SECRET_KEY);
+    const url = 'https://fanyi-api.baidu.com/api/trans/vip/translate';
+    const params = new URLSearchParams({
+      q: text,
+      from: from,
+      to: to,
+      appid: BAIDU_APP_ID,
+      salt: salt,
+      sign: sign
+    });
+    
+    const response = await fetch(url + '?' + params.toString(), {
+      method: 'GET',
+      timeout: 10000
+    });
+    
+    const data = await response.json();
+    
+    if (data.error_code) {
+      console.log('  百度翻译错误: ' + data.error_code + ' ' + data.error_msg);
+      return null;
+    }
+    
+    if (data.trans_result && data.trans_result.length > 0) {
+      return data.trans_result.map(item => item.dst);
+    }
+    
+    return null;
+  } catch (e) {
+    console.log('  百度翻译调用失败: ' + e.message);
+    return null;
+  }
+}
+
+// 批量翻译球员名字（每次最多50个，避免超限）
+async function translatePlayerNamesBatch(playerNames, teamContext = '') {
+  if (!BAIDU_TRANSLATE_ENABLED || playerNames.length === 0) return 0;
+  
+  // 过滤掉已经有中文翻译的名字
+  const needTranslate = [];
+  for (const name of playerNames) {
+    const key = normalizePlayerName(name);
+    if (!PLAYER_NAME_LIB[key] || !PLAYER_NAME_LIB[key].zh || PLAYER_NAME_LIB[key].zh === name) {
+      // 排除已经是中文的名字
+      if (!/[\u4e00-\u9fa5]/.test(name)) {
+        needTranslate.push(name);
+      }
+    }
+  }
+  
+  if (needTranslate.length === 0) {
+    console.log('  所有球员名字已有中文翻译，无需翻译');
+    return 0;
+  }
+  
+  console.log('  需要翻译 ' + needTranslate.length + ' 个球员名字');
+  
+  // 分批翻译，每批最多50个
+  const batchSize = 50;
+  let translatedCount = 0;
+  
+  for (let i = 0; i < needTranslate.length; i += batchSize) {
+    const batch = needTranslate.slice(i, i + batchSize);
+    const text = batch.join('\n');
+    
+    console.log('  翻译第 ' + (i / batchSize + 1) + ' 批，' + batch.length + ' 个名字...');
+    
+    const results = await baiduTranslate(text);
+    
+    if (results && results.length === batch.length) {
+      for (let j = 0; j < batch.length; j++) {
+        const originalName = batch[j];
+        const translatedName = results[j].trim();
+        
+        if (translatedName && translatedName !== originalName) {
+          learnPlayerName(originalName, translatedName, teamContext);
+          translatedCount++;
+        }
+      }
+      console.log('  本批翻译成功 ' + translatedCount + ' 个');
+    } else {
+      console.log('  本批翻译失败或结果不匹配');
+    }
+    
+    // 避免调用太频繁，每批之间等待1秒
+    if (i + batchSize < needTranslate.length) {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+  }
+  
+  console.log('  百度翻译完成，共翻译 ' + translatedCount + ' 个球员名字');
+  return translatedCount;
+}
+
+// 从比赛阵容中提取所有球员名字并翻译
+async function translatePlayersFromLineups(lineupsData) {
+  if (!BAIDU_TRANSLATE_ENABLED || !lineupsData) return 0;
+  
+  const allPlayerNames = new Set();
+  
+  try {
+    // 从API-Football格式的阵容中提取球员名字
+    if (lineupsData.response && Array.isArray(lineupsData.response)) {
+      for (const team of lineupsData.response) {
+        const teamName = team.team ? team.team.name : '';
+        
+        // 首发阵容
+        if (team.startXI && Array.isArray(team.startXI)) {
+          for (const item of team.startXI) {
+            if (item.player && item.player.name) {
+              allPlayerNames.add(item.player.name);
+            }
+          }
+        }
+        
+        // 替补阵容
+        if (team.substitutes && Array.isArray(team.substitutes)) {
+          for (const item of team.substitutes) {
+            if (item.player && item.player.name) {
+              allPlayerNames.add(item.player.name);
+            }
+          }
+        }
+        
+        // 教练
+        if (team.coach && team.coach.name) {
+          allPlayerNames.add(team.coach.name);
+        }
+      }
+    }
+    
+    // 从ESPN格式的阵容中提取
+    if (lineupsData.home && lineupsData.away) {
+      for (const side of ['home', 'away']) {
+        const team = lineupsData[side];
+        const teamName = team.team || '';
+        
+        if (team.starters && Array.isArray(team.starters)) {
+          for (const player of team.starters) {
+            if (player.name) allPlayerNames.add(player.name);
+          }
+        }
+        
+        if (team.substitutes && Array.isArray(team.substitutes)) {
+          for (const player of team.substitutes) {
+            if (player.name) allPlayerNames.add(player.name);
+          }
+        }
+      }
+    }
+  } catch (e) {
+    console.log('  提取球员名字失败: ' + e.message);
+  }
+  
+  if (allPlayerNames.size === 0) return 0;
+  
+  console.log('  从阵容中提取到 ' + allPlayerNames.size + ' 个球员名字');
+  return await translatePlayerNamesBatch(Array.from(allPlayerNames));
+}
+
+console.log('百度翻译API: ' + (BAIDU_TRANSLATE_ENABLED ? '已启用' : '未配置（设置 BAIDU_TRANSLATE_APP_ID 和 BAIDU_TRANSLATE_SECRET_KEY 后启用）'));
+// ==================== 百度翻译API结束 ====================
+
+
 // 根据球队级别估算球员初始能力值
 function estimateInitialAbility(playerName, position, teamName, teamTier) {
   // 基础能力值根据球队级别
@@ -1604,6 +1790,18 @@ async function supplementWithApiFootball(allMatches, detailCache) {
             console.log('    ✓ 已从阵容学习球员');
           } catch (e) {
             console.log('    ⚠ 球员学习失败: ' + e.message);
+          }
+          
+          // 用百度翻译API翻译球员名字（显示用中文，内部记录还是用英文名）
+          try {
+            if (typeof translatePlayersFromLineups === 'function') {
+              const translated = await translatePlayersFromLineups(lineupsData);
+              if (translated > 0) {
+                console.log('    ✓ 百度翻译已翻译 ' + translated + ' 个球员名字');
+              }
+            }
+          } catch (e) {
+            console.log('    ⚠ 球员名字翻译失败: ' + e.message);
           }
         }
       }
