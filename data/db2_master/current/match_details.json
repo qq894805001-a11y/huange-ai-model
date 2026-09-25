@@ -1,1 +1,1593 @@
-{}
+{
+  "212591": {
+    "event_id": 212591,
+    "league": "欧国联",
+    "league_zh": "欧国联",
+    "priority": 9,
+    "is_major": false,
+    "home_team": "格鲁吉亚",
+    "away_team": "北爱尔兰",
+    "home_team_zh": "格鲁吉亚",
+    "away_team_zh": "北爱尔兰",
+    "date": "26/09/2026",
+    "time": "00:00",
+    "status": "ft",
+    "status_zh": "全场结束",
+    "score": "0-1",
+    "home_score": 0,
+    "away_score": 1,
+    "minute": 0,
+    "venue": "Boris Paichadze Dinamo Arena",
+    "referee": "Orel Grinfeeld",
+    "odds": {
+      "home_win": 1.88,
+      "draw": 3.65,
+      "away_win": 4.7,
+      "asian_handicap": -0.5,
+      "asian_home": 1.87,
+      "asian_away": 2,
+      "over_25": 2.2,
+      "under_25": 1.75,
+      "btts_yes": 1.97,
+      "btts_no": 1.76
+    },
+    "odds_multi": {
+      "胜平负": {
+        "主队": 1.88,
+        "平局": 3.6,
+        "客队": 4.6
+      },
+      "亚盘": {
+        "主队-0.75": 2.1,
+        "客队-0.75": 1.75,
+        "主队-0.5": 1.8,
+        "客队-0.5": 2,
+        "主队0.0": 1.33,
+        "客队0.0": 3.45,
+        "主队-1.0": 2.6,
+        "客队-1.0": 1.51,
+        "主队-0.25": 1.61,
+        "客队-0.25": 2.5,
+        "主队-2.75": 9.15,
+        "主队-1.75": 4.32,
+        "客队-1.75": 1.22,
+        "主队-1.25": 3,
+        "客队-1.25": 1.4,
+        "主队0.25": 1.25,
+        "客队0.25": 3.9,
+        "主队0.75": 1.12,
+        "客队0.75": 6.31,
+        "主队-2.25": 6.81,
+        "客队-2.25": 1.1,
+        "主队-1.5": 3.86,
+        "客队-1.5": 1.32,
+        "主队-2.5": 7.3,
+        "客队-2.5": 1.1,
+        "主队1.5": 1.02,
+        "客队1.5": 10.5,
+        "主队-2.0": 6.35,
+        "客队-2.0": 1.12,
+        "主队1.0": 1.03,
+        "客队1.0": 9.3,
+        "主队0.5": 1.2,
+        "客队0.5": 4.5
+      },
+      "双方进球": {
+        "是": 2.05,
+        "否": 1.83
+      },
+      "双重机会": {
+        "主队不败": 1.23,
+        "客队不败": 1.98,
+        "分胜负": 1.32
+      },
+      "平局退款": {
+        "主队": 1.35,
+        "客队": 3.4
+      },
+      "大小球(0.5)": {
+        "小0.5": 8.6,
+        "大0.5": 1.06
+      },
+      "大小球(1.5)": {
+        "大1.5": 1.38,
+        "小1.5": 3.15
+      },
+      "大小球(2.5)": {
+        "大2.5": 2.2,
+        "小2.5": 1.75
+      },
+      "大小球(3.5)": {
+        "大3.5": 4.1,
+        "小3.5": 1.26
+      },
+      "总角球": {
+        "大7.5": 1.47,
+        "小7.5": 2.8,
+        "大8.5": 1.79,
+        "小8.5": 2.05,
+        "大9.5": 2.21,
+        "小9.5": 1.67,
+        "大10.5": 2.9,
+        "小10.5": 1.36,
+        "大11.5": 4.33,
+        "小11.5": 1.19
+      }
+    },
+    "polymarket": {},
+    "lineups": {
+      "home": {
+        "formation": "4-3-3",
+        "players": [
+          "25. Giorgi Mamardashvili",
+          "16. Irakli Azarovi",
+          "24. Luka Lochoshvili",
+          "2. Saba Goglichidze",
+          "12. Giorgi Gocholeishvili",
+          "10. Otar Kiteishvili",
+          "8. Giorgi Kochorashvili",
+          "20. Nika Gagnidze",
+          "7. Khvicha Kvaratskhelia",
+          "9. Georges Mikautadze",
+          "25. Otar Kakabadze"
+        ],
+        "count": 11,
+        "players_by_pos": {
+          "门将": [
+            "25. Giorgi Mamardashvili"
+          ],
+          "后卫": [
+            "16. Irakli Azarovi",
+            "24. Luka Lochoshvili",
+            "2. Saba Goglichidze",
+            "12. Giorgi Gocholeishvili"
+          ],
+          "中场": [
+            "10. Otar Kiteishvili",
+            "8. Giorgi Kochorashvili",
+            "20. Nika Gagnidze",
+            "25. Otar Kakabadze"
+          ],
+          "前锋": [
+            "7. Khvicha Kvaratskhelia",
+            "9. Georges Mikautadze"
+          ]
+        }
+      },
+      "away": {
+        "formation": "3-4-2-1",
+        "players": [
+          "1. Bailey Peacock-Farrell",
+          "Jamal Lewis",
+          "17. Paddy McNair",
+          "15. Ruairi McConville",
+          "32. Trai Hume",
+          "8. Ethan Galbraith",
+          "13. Justin Devenny",
+          "19. Shea Charles",
+          "21. Isaac Price",
+          "9. Jamie Reid",
+          "11. Paul Smyth"
+        ],
+        "count": 11,
+        "players_by_pos": {
+          "门将": [
+            "1. Bailey Peacock-Farrell"
+          ],
+          "后卫": [
+            "17. Paddy McNair",
+            "15. Ruairi McConville",
+            "32. Trai Hume"
+          ],
+          "中场": [
+            "Jamal Lewis",
+            "8. Ethan Galbraith",
+            "13. Justin Devenny",
+            "19. Shea Charles",
+            "21. Isaac Price",
+            "11. Paul Smyth"
+          ],
+          "前锋": [
+            "9. Jamie Reid"
+          ]
+        }
+      }
+    },
+    "injuries": [
+      {
+        "team": "主队",
+        "player_name": "Anzor Mekvabishvili",
+        "position": "",
+        "impact": "rotation",
+        "reason": "national_team"
+      },
+      {
+        "team": "客队",
+        "player_name": "Ali McCann",
+        "position": "",
+        "impact": "rotation",
+        "reason": "Hamstring Injury"
+      },
+      {
+        "team": "客队",
+        "player_name": "Bradley Lyons",
+        "position": "",
+        "impact": "rotation",
+        "reason": "Knee Injury"
+      },
+      {
+        "team": "客队",
+        "player_name": "Conor Bradley",
+        "position": "",
+        "impact": "rotation",
+        "reason": "Knee Injury"
+      }
+    ],
+    "stats": [
+      {
+        "team": "客队",
+        "possession": 38,
+        "shots": 11,
+        "shots_on_target": 4,
+        "xg": 0.68,
+        "xg_is_estimate": false,
+        "xg_note": null,
+        "passes": 348,
+        "corners": 1,
+        "fouls": 14,
+        "yellow": 3,
+        "red": 0,
+        "xg_h1": 0.216,
+        "xg_h2": null
+      },
+      {
+        "team": "主队",
+        "possession": 62,
+        "shots": 10,
+        "shots_on_target": 5,
+        "xg": 1.63,
+        "xg_is_estimate": false,
+        "xg_note": null,
+        "passes": 573,
+        "corners": 9,
+        "fouls": 13,
+        "yellow": 1,
+        "red": 0,
+        "xg_h1": 0.047,
+        "xg_h2": null
+      }
+    ],
+    "events": [
+      {
+        "minute": 45,
+        "type": "period",
+        "team": "",
+        "player": "",
+        "detail": ""
+      },
+      {
+        "minute": 46,
+        "type": "substitution",
+        "team": "格鲁吉亚",
+        "player": "G. Chakvetadze 替下 S. Kharebashvili",
+        "detail": ""
+      },
+      {
+        "minute": 62,
+        "type": "varDecision",
+        "team": "格鲁吉亚",
+        "player": "L. Lochoshvili",
+        "detail": ""
+      },
+      {
+        "minute": 64,
+        "type": "card",
+        "team": "北爱尔兰",
+        "player": "D. Ballard",
+        "detail": "yellow"
+      },
+      {
+        "minute": 67,
+        "type": "card",
+        "team": "北爱尔兰",
+        "player": "C. Brown",
+        "detail": "yellow"
+      },
+      {
+        "minute": 72,
+        "type": "substitution",
+        "team": "北爱尔兰",
+        "player": "R. McConville 替下 C. Brown",
+        "detail": ""
+      },
+      {
+        "minute": 73,
+        "type": "substitution",
+        "team": "北爱尔兰",
+        "player": "B. Spencer 替下 P. Kelly",
+        "detail": ""
+      },
+      {
+        "minute": 73,
+        "type": "substitution",
+        "team": "北爱尔兰",
+        "player": "J. Magennis 替下 J. Donley",
+        "detail": ""
+      },
+      {
+        "minute": 77,
+        "type": "substitution",
+        "team": "格鲁吉亚",
+        "player": "O. Kiteishvili 替下 A. Mekvabishvili",
+        "detail": ""
+      },
+      {
+        "minute": 77,
+        "type": "substitution",
+        "team": "格鲁吉亚",
+        "player": "Z. Davitashvili 替下 G. Kvernadze",
+        "detail": ""
+      },
+      {
+        "minute": 85,
+        "type": "substitution",
+        "team": "格鲁吉亚",
+        "player": "I. Beriashvili 替下 S. Goglichidze",
+        "detail": ""
+      },
+      {
+        "minute": 85,
+        "type": "substitution",
+        "team": "格鲁吉亚",
+        "player": "J. Tabidze 替下 L. Lochoshvili",
+        "detail": ""
+      },
+      {
+        "minute": 86,
+        "type": "substitution",
+        "team": "北爱尔兰",
+        "player": "C. O'Neill 替下 T. Atcheson",
+        "detail": ""
+      },
+      {
+        "minute": 90,
+        "type": "injuryTime",
+        "team": "",
+        "player": "",
+        "detail": ""
+      },
+      {
+        "minute": 90,
+        "type": "period",
+        "team": "",
+        "player": "",
+        "detail": ""
+      },
+      {
+        "minute": 90,
+        "type": "card",
+        "team": "北爱尔兰",
+        "player": "J. Devenny",
+        "detail": "yellow"
+      },
+      {
+        "minute": 90,
+        "type": "card",
+        "team": "格鲁吉亚",
+        "player": "K. Kvaratskhelia",
+        "detail": "yellow"
+      },
+      {
+        "minute": 90,
+        "type": "substitution",
+        "team": "北爱尔兰",
+        "player": "P. McNair 替下 D. Ballard",
+        "detail": ""
+      },
+      {
+        "minute": 90,
+        "type": "goal",
+        "team": "北爱尔兰",
+        "player": "S. Charles",
+        "detail": ""
+      }
+    ],
+    "h2h": {
+      "w": 0,
+      "d": 0,
+      "l": 0,
+      "total": 0,
+      "last_meetings": []
+    },
+    "money": {},
+    "broadcasts": [
+      {
+        "channel": "Arena Sport Premium 2",
+        "country": "BA"
+      },
+      {
+        "channel": "Fox Soccer Plus",
+        "country": "BM"
+      },
+      {
+        "channel": "Betano",
+        "country": "BR"
+      },
+      {
+        "channel": "Disney+",
+        "country": "BR"
+      },
+      {
+        "channel": "ESPN 4",
+        "country": "BR"
+      },
+      {
+        "channel": "Disney+ Premium Chile",
+        "country": "CL"
+      },
+      {
+        "channel": "Sport 2",
+        "country": "CZ"
+      },
+      {
+        "channel": "ESPN 2 Sur",
+        "country": "EC"
+      },
+      {
+        "channel": "DAZN",
+        "country": "ES"
+      },
+      {
+        "channel": "DStv Now",
+        "country": "ET"
+      },
+      {
+        "channel": "SuperSport Maximo",
+        "country": "ET"
+      },
+      {
+        "channel": "SuperSport Maximo 2",
+        "country": "ET"
+      },
+      {
+        "channel": "SuperSport Premier League",
+        "country": "ET"
+      },
+      {
+        "channel": "TV2 Play Denmark",
+        "country": "FO"
+      },
+      {
+        "channel": "TV2 Sport X",
+        "country": "FO"
+      },
+      {
+        "channel": "L'Équipe Live Foot",
+        "country": "FR"
+      }
+    ],
+    "team_home": {
+      "name": "格鲁吉亚",
+      "country": "格鲁吉亚",
+      "logo": "",
+      "venue": "Boris Paichadze Dinamo Arena",
+      "coach": ""
+    },
+    "team_away": {
+      "name": "北爱尔兰",
+      "country": "北爱尔兰",
+      "logo": "",
+      "venue": "Boris Paichadze Dinamo Arena",
+      "coach": ""
+    },
+    "players": [],
+    "updated_at": 1790374329.400217,
+    "odds_by_bookmaker": {
+      "bet365": {
+        "胜平负": {
+          "主队": 1.8,
+          "平局": 3.4,
+          "客队": 4.5
+        },
+        "亚盘": {
+          "主队-1.75": 4.15,
+          "客队-1.75": 1.22,
+          "主队-1.25": 2.85,
+          "客队-1.25": 1.4,
+          "主队-0.75": 2.05,
+          "客队-0.75": 1.75,
+          "主队0.25": 1.24,
+          "客队0.25": 3.9,
+          "主队0.75": 1.12,
+          "客队0.75": 6,
+          "主队-2.25": 6.8,
+          "客队-2.25": 1.1,
+          "主队-1.5": 3.3,
+          "客队-1.5": 1.32,
+          "主队-2.5": 7,
+          "客队-2.5": 1.1,
+          "主队-0.5": 1.8,
+          "客队-0.5": 2,
+          "主队0.0": 1.3,
+          "客队0.0": 3.45,
+          "主队0.5": 1.19,
+          "客队0.5": 4.5,
+          "主队-2.0": 6.25,
+          "客队-2.0": 1.12,
+          "主队-1.0": 2.5,
+          "客队-1.0": 1.5,
+          "主队-0.25": 1.55,
+          "客队-0.25": 2.38
+        },
+        "双方进球": {
+          "是": 1.9,
+          "否": 1.8
+        },
+        "平局退款": {
+          "主队": 1.3,
+          "客队": 3.4
+        },
+        "大小球(2.5)": {
+          "大2.5": 2.05,
+          "小2.5": 1.75
+        }
+      },
+      "betfair": {
+        "胜平负": {
+          "主队": 1.8,
+          "平局": 3.25,
+          "客队": 4.2
+        },
+        "双方进球": {
+          "是": 1.91,
+          "否": 1.83
+        },
+        "双重机会": {
+          "主队不败": 1.17,
+          "客队不败": 1.83,
+          "分胜负": 1.25
+        },
+        "大小球(0.5)": {
+          "大0.5": 1.06,
+          "小0.5": 8.5
+        },
+        "大小球(1.5)": {
+          "大1.5": 1.36,
+          "小1.5": 3.1
+        },
+        "大小球(2.5)": {
+          "大2.5": 2.1,
+          "小2.5": 1.65
+        },
+        "大小球(3.5)": {
+          "大3.5": 4.1,
+          "小3.5": 1.22
+        },
+        "总角球": {
+          "大7.5": 1.36,
+          "小7.5": 2.8,
+          "大8.5": 1.67,
+          "小8.5": 2.05,
+          "大9.5": 2.15,
+          "小9.5": 1.6,
+          "大10.5": 2.9,
+          "小10.5": 1.33,
+          "大11.5": 4.33,
+          "小11.5": 1.17
+        }
+      },
+      "bwin": {
+        "胜平负": {
+          "主队": 1.82,
+          "平局": 3.3,
+          "客队": 4.2
+        },
+        "亚盘": {
+          "主队-0.5": 1.77,
+          "客队-0.5": 1.9
+        },
+        "双方进球": {
+          "是": 1.98,
+          "否": 1.72
+        },
+        "平局退款": {
+          "主队": 1.31,
+          "客队": 3.1
+        }
+      },
+      "pinnacle": {
+        "胜平负": {
+          "主队": 1.87,
+          "平局": 3.55,
+          "客队": 4.56
+        },
+        "大小球(1.5)": {
+          "大1.5": 1.38,
+          "小1.5": 3.15
+        },
+        "大小球(2.5)": {
+          "大2.5": 2.2,
+          "小2.5": 1.71
+        },
+        "大小球(3.5)": {
+          "大3.5": 3.98,
+          "小3.5": 1.26
+        },
+        "总角球": {
+          "大7.5": 1.47,
+          "小7.5": 2.62,
+          "大8.5": 1.79,
+          "小8.5": 2.03,
+          "大9.5": 2.21,
+          "小9.5": 1.67
+        }
+      },
+      "unibet": {
+        "胜平负": {
+          "主队": 1.77,
+          "平局": 3.6,
+          "客队": 4.6
+        },
+        "亚盘": {
+          "主队-1.75": 4.2,
+          "客队-1.75": 1.2,
+          "主队-1.25": 2.9,
+          "客队-1.25": 1.37,
+          "主队-0.75": 2,
+          "客队-0.75": 1.75,
+          "主队0.25": 1.25,
+          "客队0.25": 3.75,
+          "主队0.75": 1.12,
+          "客队0.75": 5.75,
+          "主队-2.25": 6.5,
+          "客队-2.25": 1.08,
+          "主队-1.5": 3.3,
+          "客队-1.5": 1.3,
+          "主队-0.5": 1.78,
+          "客队-0.5": 1.98,
+          "主队0.0": 1.3,
+          "客队0.0": 3.3,
+          "主队0.5": 1.2,
+          "客队0.5": 4.25,
+          "主队-2.0": 6,
+          "客队-2.0": 1.1,
+          "主队-1.0": 2.5,
+          "客队-1.0": 1.48,
+          "主队-0.25": 1.54,
+          "客队-0.25": 2.38
+        },
+        "双方进球": {
+          "是": 2.05,
+          "否": 1.73
+        },
+        "平局退款": {
+          "主队": 1.33,
+          "客队": 3.25
+        }
+      },
+      "william-hill": {
+        "胜平负": {
+          "主队": 1.8,
+          "平局": 3.3,
+          "客队": 4
+        },
+        "亚盘": {
+          "主队-0.5": 1.75,
+          "客队-0.5": 1.95
+        },
+        "双方进球": {
+          "是": 1.91,
+          "否": 1.8
+        },
+        "双重机会": {
+          "主队不败": 1.22,
+          "客队不败": 1.91,
+          "分胜负": 1.3
+        },
+        "平局退款": {
+          "主队": 1.35,
+          "客队": 3
+        }
+      }
+    },
+    "match_stats": [
+      {
+        "id": 227000,
+        "event_id": 212591,
+        "team": "away",
+        "possession": 38,
+        "shots": 11,
+        "shots_on_target": 4,
+        "xg": 0.68,
+        "passes": 348,
+        "corners": 1,
+        "fouls": 14,
+        "offsides": 3,
+        "yellow": 3,
+        "red": 0,
+        "updated_at": 1790359077.6494334,
+        "xg_h1": 0.216,
+        "xg_h2": null,
+        "xg_est": null,
+        "xg_est_src": null,
+        "team_zh": "客队"
+      },
+      {
+        "id": 226999,
+        "event_id": 212591,
+        "team": "home",
+        "possession": 62,
+        "shots": 10,
+        "shots_on_target": 5,
+        "xg": 1.63,
+        "passes": 573,
+        "corners": 9,
+        "fouls": 13,
+        "offsides": 0,
+        "yellow": 1,
+        "red": 0,
+        "updated_at": 1790359077.6494334,
+        "xg_h1": 0.047,
+        "xg_h2": null,
+        "xg_est": null,
+        "xg_est_src": null,
+        "team_zh": "主队"
+      }
+    ],
+    "expected_xg": {
+      "found": true,
+      "event_id": 212591,
+      "home_team": "格鲁吉亚",
+      "away_team": "北爱尔兰",
+      "expected_xg": {
+        "home": 1.63,
+        "away": 0.68,
+        "home_h1": 0.05,
+        "away_h1": 0.22,
+        "home_h2": null,
+        "away_h2": null
+      },
+      "home_form": {
+        "n": 1,
+        "xg_for_avg": 1.63,
+        "xg_against_avg": 0.68,
+        "xg_for_h1_avg": 0.047,
+        "xg_against_h1_avg": 0.216,
+        "xg_for_h2_avg": null,
+        "xg_against_h2_avg": null,
+        "home_xg_for_avg": 1.63,
+        "away_xg_for_avg": null
+      },
+      "away_form": {
+        "n": 1,
+        "xg_for_avg": 0.68,
+        "xg_against_avg": 1.63,
+        "xg_for_h1_avg": 0.216,
+        "xg_against_h1_avg": 0.047,
+        "xg_for_h2_avg": null,
+        "xg_against_h2_avg": null,
+        "home_xg_for_avg": null,
+        "away_xg_for_avg": 0.68
+      },
+      "note": "基于双方近10场赛后xG形态(攻击/防守)算术均值估算的赛前预期值, 仅描述历史表现, 非比赛结果预测"
+    },
+    "historical_xg": {
+      "found": false,
+      "event_id": 212591
+    },
+    "historical_odds": {
+      "found": false,
+      "event_id": 212591
+    },
+    "odds_available": true,
+    "_fetchTime": "2026-09-25T22:12:09.560Z",
+    "_eventId": 212591,
+    "_source": "self_api_raw",
+    "_sources": [
+      "db1_cloud_api"
+    ],
+    "team_ability": {
+      "home": {
+        "overall": 65,
+        "attacking": 65,
+        "defending": 65,
+        "depth": 0
+      },
+      "away": {
+        "overall": 65,
+        "attacking": 65,
+        "defending": 65,
+        "depth": 0
+      },
+      "diff": 0
+    }
+  },
+  "212592": {
+    "event_id": 212592,
+    "league": "欧国联",
+    "league_zh": "欧国联",
+    "priority": 9,
+    "is_major": false,
+    "home_team": "亚美尼亚",
+    "away_team": "拉脱维亚",
+    "home_team_zh": "亚美尼亚",
+    "away_team_zh": "拉脱维亚",
+    "date": "26/09/2026",
+    "time": "00:00",
+    "status": "ft",
+    "status_zh": "全场结束",
+    "score": "2-0",
+    "home_score": 2,
+    "away_score": 0,
+    "minute": 0,
+    "venue": "Vazgen Sargsyan Republican Stadium",
+    "referee": "Martin Matoša",
+    "odds": {
+      "home_win": 1.89,
+      "draw": 3.7,
+      "away_win": 4.65,
+      "asian_handicap": -0.5,
+      "asian_home": 1.9,
+      "asian_away": 1.975,
+      "over_25": 2.11,
+      "under_25": 1.82,
+      "btts_yes": 1.88,
+      "btts_no": 1.83
+    },
+    "odds_multi": {
+      "胜平负": {
+        "主队": 1.85,
+        "平局": 3.7,
+        "客队": 4.65
+      },
+      "亚盘": {
+        "主队-1.0": 2.55,
+        "客队-1.0": 1.55,
+        "主队-0.75": 2.15,
+        "客队-0.75": 1.73,
+        "主队-0.5": 1.85,
+        "客队-0.5": 1.98,
+        "主队0.0": 1.33,
+        "客队0.0": 3.45,
+        "主队-0.25": 1.66,
+        "客队-0.25": 2.35,
+        "主队-1.75": 4.5,
+        "客队-1.75": 1.22,
+        "主队-1.25": 3.1,
+        "客队-1.25": 1.4,
+        "主队0.25": 1.29,
+        "客队0.25": 3.7,
+        "主队0.75": 1.14,
+        "客队0.75": 5.75,
+        "主队-2.75": 8.75,
+        "客队-2.75": 1.01,
+        "主队-2.25": 6.68,
+        "客队-2.25": 1.11,
+        "主队-1.5": 3.5,
+        "客队-1.5": 1.32,
+        "主队-2.5": 7,
+        "客队-2.5": 1.1,
+        "主队1.5": 1.03,
+        "客队1.5": 8.8,
+        "主队-2.0": 7,
+        "客队-2.0": 1.12,
+        "主队1.0": 1.05,
+        "客队1.0": 8.5,
+        "主队0.5": 1.23,
+        "客队0.5": 4.25
+      },
+      "双方进球": {
+        "是": 1.91,
+        "否": 1.9
+      },
+      "双重机会": {
+        "主队不败": 1.22,
+        "客队不败": 2.03,
+        "分胜负": 1.31
+      },
+      "平局退款": {
+        "主队": 1.37,
+        "客队": 3.25
+      },
+      "大小球(0.5)": {
+        "小0.5": 10,
+        "大0.5": 1.04
+      },
+      "大小球(1.5)": {
+        "大1.5": 1.36,
+        "小1.5": 3.4
+      },
+      "大小球(2.5)": {
+        "大2.5": 2.08,
+        "小2.5": 1.82
+      },
+      "大小球(3.5)": {
+        "大3.5": 3.66,
+        "小3.5": 1.3
+      },
+      "总角球": {
+        "大7.5": 1.32,
+        "小7.5": 2.82,
+        "大8.5": 1.62,
+        "小8.5": 2.22,
+        "大9.5": 2.04,
+        "小9.5": 1.75,
+        "大10.5": 2.5,
+        "小10.5": 1.4,
+        "大11.5": 3.17,
+        "小11.5": 1.22
+      }
+    },
+    "polymarket": {},
+    "lineups": {
+      "home": {
+        "formation": "3-4-3",
+        "players": [
+          "16. Henri Avagyan",
+          "3. Sergey Muradyan",
+          "5. Styopa Mkrtchyan",
+          "21. Georgiy Harutyunyan",
+          "71. Nair Tiknizyan",
+          "13. Kamo Hovhannisyan",
+          "6. Ugochukwu Iwu",
+          "19. Karen Muradyan",
+          "22. Grant-Leon Ranos",
+          "9. Artur Miranyan",
+          "11. Tigran Barseghyan"
+        ],
+        "count": 11,
+        "players_by_pos": {
+          "门将": [
+            "16. Henri Avagyan"
+          ],
+          "后卫": [
+            "3. Sergey Muradyan",
+            "5. Styopa Mkrtchyan",
+            "21. Georgiy Harutyunyan",
+            "71. Nair Tiknizyan",
+            "13. Kamo Hovhannisyan"
+          ],
+          "中场": [
+            "6. Ugochukwu Iwu",
+            "19. Karen Muradyan",
+            "11. Tigran Barseghyan"
+          ],
+          "前锋": [
+            "22. Grant-Leon Ranos",
+            "9. Artur Miranyan"
+          ]
+        }
+      },
+      "away": {
+        "formation": "5-4-1",
+        "players": [
+          "1. Krišjānis Zviedris",
+          "34. Antonijs Černomordijs",
+          "Daniels Balodis",
+          "4. Roberts Veips",
+          "14. Andrejs Cigaņiks",
+          "13. Raivis Jurkovskis",
+          "16. Lūkass Vapne",
+          "18. Dmitrijs Zelenkovs",
+          "14. Renārs Varslavāns",
+          "66. Alvis Jaunzems",
+          "19. Vladislavs Gutkovskis"
+        ],
+        "count": 11,
+        "players_by_pos": {
+          "门将": [
+            "1. Krišjānis Zviedris"
+          ],
+          "后卫": [
+            "34. Antonijs Černomordijs",
+            "Daniels Balodis",
+            "4. Roberts Veips",
+            "14. Andrejs Cigaņiks",
+            "13. Raivis Jurkovskis",
+            "66. Alvis Jaunzems"
+          ],
+          "中场": [
+            "16. Lūkass Vapne",
+            "18. Dmitrijs Zelenkovs",
+            "14. Renārs Varslavāns"
+          ],
+          "前锋": [
+            "19. Vladislavs Gutkovskis"
+          ]
+        }
+      }
+    },
+    "injuries": [
+      {
+        "team": "主队",
+        "player_name": "Edgar Sevikyan",
+        "position": "",
+        "impact": "rotation",
+        "reason": "national_team"
+      },
+      {
+        "team": "主队",
+        "player_name": "Vahan Bichakhchyan",
+        "position": "",
+        "impact": "rotation",
+        "reason": "Muscle Injury"
+      }
+    ],
+    "stats": [
+      {
+        "team": "客队",
+        "possession": null,
+        "shots": 0,
+        "shots_on_target": 0,
+        "xg": 1.295,
+        "xg_is_estimate": true,
+        "xg_note": "系统估算值(队均收缩+主场修正),非真实比赛xG,仅供参考",
+        "passes": 0,
+        "corners": 0,
+        "fouls": 0,
+        "yellow": 0,
+        "red": 0,
+        "xg_h1": null,
+        "xg_h2": null
+      },
+      {
+        "team": "主队",
+        "possession": null,
+        "shots": 0,
+        "shots_on_target": 0,
+        "xg": 1.552,
+        "xg_is_estimate": true,
+        "xg_note": "系统估算值(队均收缩+主场修正),非真实比赛xG,仅供参考",
+        "passes": 0,
+        "corners": 0,
+        "fouls": 0,
+        "yellow": 0,
+        "red": 0,
+        "xg_h1": null,
+        "xg_h2": null
+      }
+    ],
+    "events": [
+      {
+        "minute": 31,
+        "type": "goal",
+        "team": "亚美尼亚",
+        "player": "G. Harutyunyan",
+        "detail": ""
+      },
+      {
+        "minute": 45,
+        "type": "injuryTime",
+        "team": "",
+        "player": "",
+        "detail": ""
+      },
+      {
+        "minute": 45,
+        "type": "period",
+        "team": "",
+        "player": "",
+        "detail": ""
+      },
+      {
+        "minute": 46,
+        "type": "substitution",
+        "team": "亚美尼亚",
+        "player": "A. Petrosyan 替下 J. J. Bueno",
+        "detail": ""
+      },
+      {
+        "minute": 58,
+        "type": "substitution",
+        "team": "拉脱维亚",
+        "player": "M. Tonisevs 替下 R. Jurkovskis",
+        "detail": ""
+      },
+      {
+        "minute": 60,
+        "type": "substitution",
+        "team": "亚美尼亚",
+        "player": "Z. Shaghoyan 替下 K. Hovhannisyan",
+        "detail": ""
+      },
+      {
+        "minute": 62,
+        "type": "card",
+        "team": "亚美尼亚",
+        "player": "A. Serobyan",
+        "detail": "yellow"
+      },
+      {
+        "minute": 68,
+        "type": "substitution",
+        "team": "拉脱维亚",
+        "player": "O. Vientiess 替下 E. Daskevics",
+        "detail": ""
+      },
+      {
+        "minute": 68,
+        "type": "substitution",
+        "team": "拉脱维亚",
+        "player": "R. Uldriķis 替下 M. Strods",
+        "detail": ""
+      },
+      {
+        "minute": 69,
+        "type": "substitution",
+        "team": "亚美尼亚",
+        "player": "A. Gharibyan 替下 A. Miranyan",
+        "detail": ""
+      },
+      {
+        "minute": 75,
+        "type": "goal",
+        "team": "亚美尼亚",
+        "player": "A. Gharibyan",
+        "detail": ""
+      },
+      {
+        "minute": 82,
+        "type": "substitution",
+        "team": "亚美尼亚",
+        "player": "E. Sevikyan 替下 A. Serobyan",
+        "detail": ""
+      },
+      {
+        "minute": 82,
+        "type": "substitution",
+        "team": "亚美尼亚",
+        "player": "E. Simonyan 替下 G. Harutyunyan",
+        "detail": ""
+      },
+      {
+        "minute": 87,
+        "type": "substitution",
+        "team": "拉脱维亚",
+        "player": "A. Aleksanjans 替下 V. Gutkovskis",
+        "detail": ""
+      },
+      {
+        "minute": 87,
+        "type": "substitution",
+        "team": "拉脱维亚",
+        "player": "D. Patijčuks 替下 A. Černomordijs",
+        "detail": ""
+      },
+      {
+        "minute": 90,
+        "type": "injuryTime",
+        "team": "",
+        "player": "",
+        "detail": ""
+      },
+      {
+        "minute": 90,
+        "type": "period",
+        "team": "",
+        "player": "",
+        "detail": ""
+      }
+    ],
+    "h2h": {
+      "w": 2,
+      "d": 1,
+      "l": 1,
+      "total": 4,
+      "last_meetings": [
+        {
+          "away": "Armenia",
+          "date": "2024-11-17T14:00:00+00:00",
+          "home": "Latvia",
+          "score": "1-2",
+          "event_id": 209023,
+          "away_score": 2,
+          "home_score": 1,
+          "away_team_id": 717,
+          "home_team_id": 2262,
+          "home_team": "Latvia",
+          "away_team": "Armenia",
+          "home_team_zh": "拉脱维亚",
+          "away_team_zh": "亚美尼亚"
+        },
+        {
+          "away": "Latvia",
+          "date": "2024-09-07T16:00:00+00:00",
+          "home": "Armenia",
+          "score": "4-1",
+          "event_id": 208913,
+          "away_score": 1,
+          "home_score": 4,
+          "away_team_id": 2262,
+          "home_team_id": 717,
+          "home_team": "Armenia",
+          "away_team": "Latvia",
+          "home_team_zh": "亚美尼亚",
+          "away_team_zh": "拉脱维亚"
+        },
+        {
+          "away": "Armenia",
+          "date": "2014-09-03T17:45:00+00:00",
+          "home": "Latvia",
+          "score": "2-0",
+          "event_id": 395394,
+          "away_score": 0,
+          "home_score": 2,
+          "away_team_id": 717,
+          "home_team_id": 2262,
+          "home_team": "Latvia",
+          "away_team": "Armenia",
+          "home_team_zh": "拉脱维亚",
+          "away_team_zh": "亚美尼亚"
+        },
+        {
+          "away": "Armenia",
+          "date": "2009-02-11T13:00:00+00:00",
+          "home": "Latvia",
+          "score": "0-0",
+          "event_id": 465747,
+          "away_score": 0,
+          "home_score": 0,
+          "away_team_id": 717,
+          "home_team_id": 2262,
+          "home_team": "Latvia",
+          "away_team": "Armenia",
+          "home_team_zh": "拉脱维亚",
+          "away_team_zh": "亚美尼亚"
+        }
+      ]
+    },
+    "money": {},
+    "broadcasts": [
+      {
+        "channel": "Disney+ Premium Argentina",
+        "country": "AR"
+      },
+      {
+        "channel": "Betano",
+        "country": "BR"
+      },
+      {
+        "channel": "Sportv 2",
+        "country": "BR"
+      },
+      {
+        "channel": "Disney+ Premium Chile",
+        "country": "CL"
+      },
+      {
+        "channel": "DAZN",
+        "country": "ES"
+      },
+      {
+        "channel": "DStv Now",
+        "country": "ET"
+      },
+      {
+        "channel": "TV2 Play Denmark",
+        "country": "FO"
+      },
+      {
+        "channel": "TV2 Sport",
+        "country": "FO"
+      },
+      {
+        "channel": "L'Équipe Live Foot",
+        "country": "FR"
+      }
+    ],
+    "team_home": {
+      "name": "亚美尼亚",
+      "country": "亚美尼亚",
+      "logo": "",
+      "venue": "Vazgen Sargsyan Republican Stadium",
+      "coach": ""
+    },
+    "team_away": {
+      "name": "拉脱维亚",
+      "country": "拉脱维亚",
+      "logo": "",
+      "venue": "Vazgen Sargsyan Republican Stadium",
+      "coach": ""
+    },
+    "players": [],
+    "updated_at": 1790374330.2606268,
+    "odds_by_bookmaker": {
+      "bet365": {
+        "胜平负": {
+          "主队": 1.8,
+          "平局": 3.4,
+          "客队": 4.5
+        },
+        "亚盘": {
+          "主队-1.75": 4.15,
+          "客队-1.75": 1.22,
+          "主队-1.25": 2.85,
+          "客队-1.25": 1.4,
+          "主队-0.75": 2.08,
+          "客队-0.75": 1.73,
+          "主队0.25": 1.26,
+          "客队0.25": 3.7,
+          "主队0.75": 1.14,
+          "客队0.75": 5.75,
+          "主队-2.25": 6.6,
+          "客队-2.25": 1.11,
+          "主队-1.5": 3.3,
+          "客队-1.5": 1.32,
+          "主队-2.5": 7,
+          "客队-2.5": 1.1,
+          "主队-0.5": 1.82,
+          "客队-0.5": 1.98,
+          "主队0.0": 1.3,
+          "客队0.0": 3.45,
+          "主队0.5": 1.21,
+          "客队0.5": 4.25,
+          "主队-2.0": 6,
+          "客队-2.0": 1.12,
+          "主队-1.0": 2.42,
+          "客队-1.0": 1.52,
+          "主队-0.25": 1.57,
+          "客队-0.25": 2.35
+        },
+        "双方进球": {
+          "是": 1.9,
+          "否": 1.8
+        },
+        "平局退款": {
+          "主队": 1.33,
+          "客队": 3.25
+        },
+        "大小球(2.5)": {
+          "大2.5": 2,
+          "小2.5": 1.8
+        }
+      },
+      "betfair": {
+        "胜平负": {
+          "主队": 1.75,
+          "平局": 3.5,
+          "客队": 4.5
+        },
+        "双方进球": {
+          "是": 1.87,
+          "否": 1.9
+        },
+        "双重机会": {
+          "主队不败": 1.17,
+          "客队不败": 2,
+          "分胜负": 1.29
+        },
+        "大小球(0.5)": {
+          "大0.5": 1.04,
+          "小0.5": 10
+        },
+        "大小球(1.5)": {
+          "大1.5": 1.3,
+          "小1.5": 3.4
+        },
+        "大小球(2.5)": {
+          "大2.5": 2,
+          "小2.5": 1.8
+        },
+        "大小球(3.5)": {
+          "大3.5": 3.4,
+          "小3.5": 1.3
+        }
+      },
+      "bwin": {
+        "胜平负": {
+          "主队": 1.82,
+          "平局": 3.4,
+          "客队": 4.1
+        },
+        "亚盘": {
+          "主队-0.5": 1.8,
+          "客队-0.5": 1.87
+        },
+        "双方进球": {
+          "是": 1.9,
+          "否": 1.78
+        },
+        "平局退款": {
+          "主队": 1.35,
+          "客队": 2.95
+        }
+      },
+      "macauslot": {
+        "胜平负": {
+          "主队": 1.85,
+          "平局": 3.5,
+          "客队": 3.68
+        }
+      },
+      "pinnacle": {
+        "胜平负": {
+          "主队": 1.83,
+          "平局": 3.66,
+          "客队": 4.54
+        },
+        "大小球(1.5)": {
+          "大1.5": 1.36,
+          "小1.5": 3.22
+        },
+        "大小球(2.5)": {
+          "大2.5": 2.07,
+          "小2.5": 1.79
+        },
+        "大小球(3.5)": {
+          "大3.5": 3.66,
+          "小3.5": 1.29
+        },
+        "总角球": {
+          "大8.5": 1.62,
+          "小8.5": 2.22,
+          "大9.5": 2.04,
+          "小9.5": 1.75
+        }
+      },
+      "unibet": {
+        "胜平负": {
+          "主队": 1.73,
+          "平局": 3.7,
+          "客队": 4.6
+        },
+        "亚盘": {
+          "主队-2.25": 6.5,
+          "客队-2.25": 1.1,
+          "主队-1.75": 4.5,
+          "客队-1.75": 1.17,
+          "主队-1.25": 3.1,
+          "客队-1.25": 1.33,
+          "主队-0.75": 2.15,
+          "客队-0.75": 1.65,
+          "主队0.25": 1.29,
+          "客队0.25": 3.4,
+          "主队0.75": 1.14,
+          "客队0.75": 5,
+          "主队-1.5": 3.5,
+          "客队-1.5": 1.27,
+          "主队-0.5": 1.85,
+          "客队-0.5": 1.88,
+          "主队0.0": 1.33,
+          "客队0.0": 3.2,
+          "主队0.5": 1.23,
+          "客队0.5": 3.8,
+          "主队-2.0": 7,
+          "客队-2.0": 1.08,
+          "主队-1.0": 2.55,
+          "客队-1.0": 1.48,
+          "主队1.0": 1.05,
+          "客队1.0": 8.5,
+          "主队-0.25": 1.62,
+          "客队-0.25": 2.2
+        },
+        "双方进球": {
+          "是": 1.9,
+          "否": 1.84
+        },
+        "平局退款": {
+          "主队": 1.37,
+          "客队": 2.9
+        }
+      },
+      "william-hill": {
+        "胜平负": {
+          "主队": 1.8,
+          "平局": 3.3,
+          "客队": 4.2
+        },
+        "亚盘": {
+          "主队-0.5": 1.8,
+          "客队-0.5": 1.91
+        },
+        "双方进球": {
+          "是": 1.91,
+          "否": 1.8
+        },
+        "双重机会": {
+          "主队不败": 1.2,
+          "客队不败": 1.95,
+          "分胜负": 1.3
+        },
+        "平局退款": {
+          "主队": 1.36,
+          "客队": 2.9
+        }
+      }
+    },
+    "match_stats": [
+      {
+        "id": 226998,
+        "event_id": 212592,
+        "team": "away",
+        "possession": null,
+        "shots": 0,
+        "shots_on_target": 0,
+        "xg": null,
+        "passes": 0,
+        "corners": 0,
+        "fouls": 0,
+        "offsides": 0,
+        "yellow": 0,
+        "red": 0,
+        "updated_at": 1790357280.6193879,
+        "xg_h1": null,
+        "xg_h2": null,
+        "xg_est": 1.295,
+        "xg_est_src": "v1_home",
+        "team_zh": "客队"
+      },
+      {
+        "id": 226997,
+        "event_id": 212592,
+        "team": "home",
+        "possession": null,
+        "shots": 0,
+        "shots_on_target": 0,
+        "xg": null,
+        "passes": 0,
+        "corners": 0,
+        "fouls": 0,
+        "offsides": 0,
+        "yellow": 0,
+        "red": 0,
+        "updated_at": 1790357280.6193879,
+        "xg_h1": null,
+        "xg_h2": null,
+        "xg_est": 1.552,
+        "xg_est_src": "v1_home",
+        "team_zh": "主队"
+      }
+    ],
+    "expected_xg": {
+      "found": true,
+      "event_id": 212592,
+      "home_team": "亚美尼亚",
+      "away_team": "拉脱维亚",
+      "expected_xg": {
+        "home": null,
+        "away": null,
+        "home_h1": null,
+        "away_h1": null,
+        "home_h2": null,
+        "away_h2": null
+      },
+      "home_form": {
+        "n": 0
+      },
+      "away_form": {
+        "n": 0
+      },
+      "note": "基于双方近10场赛后xG形态(攻击/防守)算术均值估算的赛前预期值, 仅描述历史表现, 非比赛结果预测"
+    },
+    "historical_xg": {
+      "found": false,
+      "event_id": 212592
+    },
+    "historical_odds": {
+      "found": false,
+      "event_id": 212592
+    },
+    "odds_available": true,
+    "_fetchTime": "2026-09-25T22:12:10.418Z",
+    "_eventId": 212592,
+    "_source": "self_api_raw",
+    "_sources": [
+      "db1_cloud_api"
+    ],
+    "team_ability": {
+      "home": {
+        "overall": 65,
+        "attacking": 65,
+        "defending": 65,
+        "depth": 0
+      },
+      "away": {
+        "overall": 65,
+        "attacking": 65,
+        "defending": 65,
+        "depth": 0
+      },
+      "diff": 0
+    }
+  }
+}
