@@ -1,8 +1,13 @@
 {
-  "updateTime": "2026-09-25T15:54:18.723Z",
+  "updateTime": "2026-09-25T16:13:39.503Z",
   "source": "self_api_raw",
   "total": 0,
   "withOdds": 0,
+  "odds_coverage": {
+    "total": 181,
+    "with_odds": 140,
+    "odds_horizon": "28/09/2026"
+  },
   "matches": [],
   "sources": [
     "db1_cloud_api"

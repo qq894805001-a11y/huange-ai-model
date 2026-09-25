@@ -1,7 +1,12 @@
 {
-  "updateTime": "",
+  "updateTime": "2026-09-25T16:13:39.431Z",
   "source": "self_api_raw",
   "total": 0,
   "withOdds": 0,
+  "odds_coverage": {
+    "total": 181,
+    "with_odds": 140,
+    "odds_horizon": "28/09/2026"
+  },
   "matches": []
 }
