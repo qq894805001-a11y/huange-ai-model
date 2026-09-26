@@ -1844,7 +1844,7 @@
       "coach": ""
     },
     "players": [],
-    "updated_at": 1790403407.622657,
+    "updated_at": 1790407025.0892909,
     "odds_by_bookmaker": {
       "bet365": {
         "胜平负": {
@@ -2076,7 +2076,7 @@
       "event_id": 207826
     },
     "odds_available": true,
-    "_fetchTime": "2026-09-26T06:16:47.785Z",
+    "_fetchTime": "2026-09-26T07:17:05.225Z",
     "_eventId": 207826,
     "_source": "self_api_raw",
     "_sources": [
@@ -2673,6 +2673,1556 @@
     "odds_available": true,
     "_fetchTime": "2026-09-26T06:44:58.486Z",
     "_eventId": 207827,
+    "_source": "self_api_raw",
+    "_sources": [
+      "db1_cloud_api"
+    ],
+    "team_ability": {
+      "home": {
+        "overall": 65,
+        "attacking": 65,
+        "defending": 65,
+        "depth": 0
+      },
+      "away": {
+        "overall": 65,
+        "attacking": 65,
+        "defending": 65,
+        "depth": 0
+      },
+      "diff": 0
+    }
+  },
+  "207828": {
+    "event_id": 207828,
+    "league": "美国冠军联赛",
+    "league_zh": "美国冠军联赛",
+    "priority": 9,
+    "is_major": false,
+    "home_team": "埃尔帕索机车",
+    "away_team": "塔尔萨FC",
+    "home_team_zh": "埃尔帕索机车",
+    "away_team_zh": "塔尔萨FC",
+    "date": "26/09/2026",
+    "time": "09:00",
+    "status": "ft",
+    "status_zh": "全场结束",
+    "score": "1-1",
+    "home_score": 1,
+    "away_score": 1,
+    "minute": 0,
+    "venue": "",
+    "referee": "",
+    "odds": {
+      "home_win": 1.92,
+      "draw": 3.76,
+      "away_win": 3.85,
+      "asian_handicap": -0.5,
+      "asian_home": 1.95,
+      "asian_away": 1.833,
+      "over_25": 1.78,
+      "under_25": 2.07,
+      "btts_yes": 1.66,
+      "btts_no": 2.08
+    },
+    "odds_multi": {
+      "胜平负": {
+        "主队": 1.9,
+        "平局": 3.76,
+        "客队": 3.85
+      },
+      "亚盘": {
+        "主队-0.5": 1.93,
+        "客队-0.5": 1.83,
+        "主队-1.75": 4.29,
+        "客队-1.75": 1.15,
+        "主队-1.25": 3,
+        "客队-1.25": 1.31,
+        "主队-0.75": 2.1,
+        "客队-0.75": 1.59,
+        "主队0.25": 1.28,
+        "客队0.25": 3.08,
+        "主队0.75": 1.13,
+        "客队0.75": 4.59,
+        "主队1.25": 1.02,
+        "客队1.25": 7.8,
+        "主队-2.25": 6.74,
+        "客队-2.25": 1.04,
+        "主队-1.5": 3.5,
+        "客队-1.5": 1.27,
+        "主队-2.5": 7.2,
+        "客队-2.5": 1.03,
+        "主队1.5": 1.01,
+        "客队1.5": 8.3,
+        "主队0.0": 1.38,
+        "客队0.0": 2.62,
+        "主队-2.0": 6.25,
+        "客队-2.0": 1.06,
+        "主队-1.0": 2.62,
+        "客队-1.0": 1.4,
+        "主队1.0": 1.03,
+        "客队1.0": 7.2,
+        "主队-0.25": 1.61,
+        "客队-0.25": 2.07,
+        "主队0.5": 1.3,
+        "客队0.5": 3.3
+      },
+      "双方进球": {
+        "是": 1.67,
+        "否": 2.15
+      },
+      "双重机会": {
+        "主队不败": 1.25,
+        "客队不败": 1.85,
+        "分胜负": 1.29
+      },
+      "平局退款": {
+        "主队": 1.45,
+        "客队": 2.75
+      },
+      "大小球(0.5)": {
+        "小0.5": 10.5
+      },
+      "大小球(1.5)": {
+        "大1.5": 1.25,
+        "小1.5": 3.94
+      },
+      "大小球(2.5)": {
+        "大2.5": 1.78,
+        "小2.5": 2.07
+      },
+      "大小球(3.5)": {
+        "大3.5": 2.92,
+        "小3.5": 1.4
+      },
+      "总角球": {
+        "大7.5": 1.42,
+        "小7.5": 2.56,
+        "大8.5": 1.77,
+        "小8.5": 2,
+        "大9.5": 2.24,
+        "小9.5": 1.61,
+        "大10.5": 3.02,
+        "小10.5": 1.3,
+        "大11.5": 4.38,
+        "小11.5": 1.13
+      }
+    },
+    "polymarket": {},
+    "lineups": {
+      "home": {
+        "formation": "3-4-3",
+        "players": [
+          "99. Abraham Romero",
+          "29. Kenneth Hoban",
+          "25. Arturo Ortiz",
+          "93. Tony Alfaro",
+          "12. Ricky Ruiz",
+          "30. Robert Coronado",
+          "6. Eric Calvillo (C)",
+          "16. Gabriel Torres",
+          "19. Alex Méndez",
+          "13. Roberto Avila",
+          "10. Amando Moreno"
+        ],
+        "count": 11,
+        "players_by_pos": {
+          "门将": [
+            "99. Abraham Romero"
+          ],
+          "后卫": [
+            "29. Kenneth Hoban",
+            "25. Arturo Ortiz",
+            "93. Tony Alfaro"
+          ],
+          "中场": [
+            "12. Ricky Ruiz",
+            "30. Robert Coronado",
+            "6. Eric Calvillo (C)",
+            "16. Gabriel Torres"
+          ],
+          "前锋": [
+            "19. Alex Méndez",
+            "13. Roberto Avila",
+            "10. Amando Moreno"
+          ]
+        }
+      },
+      "away": {
+        "formation": "3-4-2-1",
+        "players": [
+          "28. Dane Jacomen",
+          "98. Ian Carlo",
+          "91. Abdoulaye Cissoko (C)",
+          "4. Delentz Pierre",
+          "23. Wilson Eisner",
+          "8. Jamie Craig Webber",
+          "13. Jeorgio Kocevski",
+          "12. Lucas Stauffer",
+          "66. William Wilson",
+          "11. Dylan Borczak",
+          "14. Logan Dorsey"
+        ],
+        "count": 11,
+        "players_by_pos": {
+          "门将": [
+            "28. Dane Jacomen"
+          ],
+          "后卫": [
+            "98. Ian Carlo",
+            "91. Abdoulaye Cissoko (C)",
+            "4. Delentz Pierre"
+          ],
+          "中场": [
+            "23. Wilson Eisner",
+            "8. Jamie Craig Webber",
+            "13. Jeorgio Kocevski",
+            "12. Lucas Stauffer"
+          ],
+          "前锋": [
+            "66. William Wilson",
+            "11. Dylan Borczak",
+            "14. Logan Dorsey"
+          ]
+        }
+      }
+    },
+    "injuries": [],
+    "stats": [
+      {
+        "team": "客队",
+        "possession": 34,
+        "shots": 12,
+        "shots_on_target": 3,
+        "xg": 1.6,
+        "xg_is_estimate": false,
+        "xg_note": null,
+        "passes": 210,
+        "corners": 3,
+        "fouls": 18,
+        "yellow": 6,
+        "red": 0,
+        "xg_h1": 1.133,
+        "xg_h2": 0.467
+      },
+      {
+        "team": "主队",
+        "possession": 66,
+        "shots": 9,
+        "shots_on_target": 5,
+        "xg": 0.52,
+        "xg_is_estimate": false,
+        "xg_note": null,
+        "passes": 428,
+        "corners": 4,
+        "fouls": 16,
+        "yellow": 2,
+        "red": 0,
+        "xg_h1": 0.347,
+        "xg_h2": 0.173
+      }
+    ],
+    "events": [
+      {
+        "minute": 8,
+        "type": "goal",
+        "team": "塔尔萨FC",
+        "player": "L. Dorsey",
+        "detail": ""
+      },
+      {
+        "minute": 12,
+        "type": "card",
+        "team": "塔尔萨FC",
+        "player": "J. Kocevski",
+        "detail": "yellow"
+      },
+      {
+        "minute": 14,
+        "type": "card",
+        "team": "塔尔萨FC",
+        "player": "W. Eisner",
+        "detail": "yellow"
+      },
+      {
+        "minute": 17,
+        "type": "goal",
+        "team": "埃尔帕索机车",
+        "player": "R. Avila",
+        "detail": ""
+      },
+      {
+        "minute": 36,
+        "type": "card",
+        "team": "塔尔萨FC",
+        "player": "Ian",
+        "detail": "yellow"
+      },
+      {
+        "minute": 45,
+        "type": "injuryTime",
+        "team": "",
+        "player": "",
+        "detail": ""
+      },
+      {
+        "minute": 45,
+        "type": "period",
+        "team": "",
+        "player": "",
+        "detail": ""
+      },
+      {
+        "minute": 49,
+        "type": "card",
+        "team": "塔尔萨FC",
+        "player": "D. Pierre",
+        "detail": "yellow"
+      },
+      {
+        "minute": 61,
+        "type": "substitution",
+        "team": "塔尔萨FC",
+        "player": "O. Damm 替下 D. Borczak",
+        "detail": ""
+      },
+      {
+        "minute": 61,
+        "type": "substitution",
+        "team": "塔尔萨FC",
+        "player": "R. Cabral 替下 W. Wilson",
+        "detail": ""
+      },
+      {
+        "minute": 62,
+        "type": "substitution",
+        "team": "塔尔萨FC",
+        "player": "J. Sangwa 替下 Ian",
+        "detail": ""
+      },
+      {
+        "minute": 64,
+        "type": "substitution",
+        "team": "埃尔帕索机车",
+        "player": "D. Gomez 替下 R. Ruiz",
+        "detail": ""
+      },
+      {
+        "minute": 66,
+        "type": "card",
+        "team": "塔尔萨FC",
+        "player": "O. Damm",
+        "detail": "yellow"
+      },
+      {
+        "minute": 69,
+        "type": "card",
+        "team": "埃尔帕索机车",
+        "player": "G. Torres",
+        "detail": "yellow"
+      },
+      {
+        "minute": 72,
+        "type": "substitution",
+        "team": "埃尔帕索机车",
+        "player": "O. Mora 替下 R. Coronado",
+        "detail": ""
+      },
+      {
+        "minute": 72,
+        "type": "substitution",
+        "team": "埃尔帕索机车",
+        "player": "Á. Quezada 替下 A. Moreno",
+        "detail": ""
+      },
+      {
+        "minute": 75,
+        "type": "card",
+        "team": "埃尔帕索机车",
+        "player": "T. Alfaro",
+        "detail": "yellow"
+      },
+      {
+        "minute": 83,
+        "type": "substitution",
+        "team": "埃尔帕索机车",
+        "player": "G. Diaz 替下 R. Avila",
+        "detail": ""
+      },
+      {
+        "minute": 86,
+        "type": "substitution",
+        "team": "塔尔萨FC",
+        "player": "S. Lukic 替下 L. Dorsey",
+        "detail": ""
+      },
+      {
+        "minute": 90,
+        "type": "injuryTime",
+        "team": "",
+        "player": "",
+        "detail": ""
+      },
+      {
+        "minute": 90,
+        "type": "period",
+        "team": "",
+        "player": "",
+        "detail": ""
+      },
+      {
+        "minute": 90,
+        "type": "card",
+        "team": "塔尔萨FC",
+        "player": "L. Stauffer",
+        "detail": "yellow"
+      }
+    ],
+    "h2h": {
+      "w": 4,
+      "d": 5,
+      "l": 3,
+      "total": 12,
+      "last_meetings": [
+        {
+          "away": "El Paso Locomotive FC",
+          "date": "2026-07-19T00:30:00+00:00",
+          "home": "FC Tulsa",
+          "score": "1-0",
+          "event_id": 207704,
+          "away_score": 0,
+          "home_score": 1,
+          "away_team_id": 2233,
+          "home_team_id": 2240,
+          "home_team": "FC Tulsa",
+          "away_team": "El Paso Locomotive FC",
+          "home_team_zh": "塔尔萨FC",
+          "away_team_zh": "埃尔帕索机车"
+        },
+        {
+          "away": "FC Tulsa",
+          "date": "2026-04-30T01:00:00+00:00",
+          "home": "El Paso Locomotive FC",
+          "score": "1-4",
+          "event_id": 207599,
+          "away_score": 4,
+          "home_score": 1,
+          "away_team_id": 2240,
+          "home_team_id": 2233,
+          "home_team": "El Paso Locomotive FC",
+          "away_team": "FC Tulsa",
+          "home_team_zh": "埃尔帕索机车",
+          "away_team_zh": "塔尔萨FC"
+        },
+        {
+          "away": "FC Tulsa",
+          "date": "2025-10-19T01:00:00+00:00",
+          "home": "El Paso Locomotive FC",
+          "score": "1-1",
+          "event_id": 229806,
+          "away_score": 1,
+          "home_score": 1,
+          "away_team_id": 2240,
+          "home_team_id": 2233,
+          "home_team": "El Paso Locomotive FC",
+          "away_team": "FC Tulsa",
+          "home_team_zh": "埃尔帕索机车",
+          "away_team_zh": "塔尔萨FC"
+        },
+        {
+          "away": "El Paso Locomotive FC",
+          "date": "2025-05-11T00:00:00+00:00",
+          "home": "FC Tulsa",
+          "score": "1-1",
+          "event_id": 229559,
+          "away_score": 1,
+          "home_score": 1,
+          "away_team_id": 2233,
+          "home_team_id": 2240,
+          "home_team": "FC Tulsa",
+          "away_team": "El Paso Locomotive FC",
+          "home_team_zh": "塔尔萨FC",
+          "away_team_zh": "埃尔帕索机车"
+        },
+        {
+          "away": "El Paso Locomotive FC",
+          "date": "2024-10-06T00:30:00+00:00",
+          "home": "FC Tulsa",
+          "score": "0-1",
+          "event_id": 239356,
+          "away_score": 1,
+          "home_score": 0,
+          "away_team_id": 2233,
+          "home_team_id": 2240,
+          "home_team": "FC Tulsa",
+          "away_team": "El Paso Locomotive FC",
+          "home_team_zh": "塔尔萨FC",
+          "away_team_zh": "埃尔帕索机车"
+        }
+      ]
+    },
+    "money": {},
+    "broadcasts": [
+      {
+        "channel": "Betano",
+        "country": "BR"
+      }
+    ],
+    "team_home": {
+      "name": "埃尔帕索机车",
+      "country": "美国",
+      "logo": "",
+      "venue": "",
+      "coach": ""
+    },
+    "team_away": {
+      "name": "塔尔萨FC",
+      "country": "美国",
+      "logo": "",
+      "venue": "",
+      "coach": ""
+    },
+    "players": [],
+    "updated_at": 1790407030.8267949,
+    "odds_by_bookmaker": {
+      "bet365": {
+        "胜平负": {
+          "主队": 1.85,
+          "平局": 3.5,
+          "客队": 3.6
+        },
+        "双方进球": {
+          "是": 1.66,
+          "否": 2.1
+        },
+        "大小球(2.5)": {
+          "大2.5": 1.75,
+          "小2.5": 2.05
+        }
+      },
+      "betfair": {
+        "胜平负": {
+          "主队": 1.8,
+          "平局": 3.6,
+          "客队": 3.75
+        },
+        "双重机会": {
+          "主队不败": 1.2,
+          "客队不败": 1.83,
+          "分胜负": 1.22
+        }
+      },
+      "bwin": {
+        "胜平负": {
+          "主队": 1.82,
+          "平局": 3.5,
+          "客队": 3.5
+        },
+        "双方进球": {
+          "是": 1.66,
+          "否": 2.05
+        }
+      },
+      "macauslot": {
+        "胜平负": {
+          "主队": 1.8,
+          "平局": 3.28,
+          "客队": 3.74
+        }
+      },
+      "pinnacle": {
+        "胜平负": {
+          "主队": 1.9,
+          "平局": 3.76,
+          "客队": 3.85
+        },
+        "大小球(1.5)": {
+          "大1.5": 1.25,
+          "小1.5": 3.94
+        },
+        "大小球(2.5)": {
+          "大2.5": 1.78,
+          "小2.5": 2.07
+        },
+        "大小球(3.5)": {
+          "大3.5": 2.92,
+          "小3.5": 1.4
+        },
+        "总角球": {
+          "大8.5": 1.76,
+          "小8.5": 2,
+          "大9.5": 2.23,
+          "小9.5": 1.61
+        }
+      },
+      "unibet": {
+        "胜平负": {
+          "主队": 1.85,
+          "平局": 3.35,
+          "客队": 3.5
+        },
+        "亚盘": {
+          "主队-1.5": 3.5,
+          "客队-1.5": 1.27,
+          "主队-0.5": 1.93,
+          "客队-0.5": 1.8,
+          "主队0.5": 1.3,
+          "客队0.5": 3.3
+        },
+        "双方进球": {
+          "是": 1.65,
+          "否": 2.15
+        },
+        "平局退款": {
+          "主队": 1.45,
+          "客队": 2.55
+        }
+      },
+      "william-hill": {
+        "胜平负": {
+          "主队": 1.85,
+          "平局": 3.4,
+          "客队": 3.6
+        },
+        "亚盘": {
+          "主队-0.5": 1.91,
+          "客队-0.5": 1.8
+        },
+        "双方进球": {
+          "是": 1.67,
+          "否": 2.1
+        },
+        "双重机会": {
+          "主队不败": 1.25,
+          "客队不败": 1.85,
+          "分胜负": 1.29
+        },
+        "平局退款": {
+          "主队": 1.4,
+          "客队": 2.75
+        }
+      }
+    },
+    "match_stats": [
+      {
+        "id": 233068,
+        "event_id": 207828,
+        "team": "away",
+        "possession": 34,
+        "shots": 12,
+        "shots_on_target": 3,
+        "xg": 1.6,
+        "passes": 210,
+        "corners": 3,
+        "fouls": 18,
+        "offsides": 2,
+        "yellow": 6,
+        "red": 0,
+        "updated_at": 1790392566.764628,
+        "xg_h1": 1.133,
+        "xg_h2": 0.467,
+        "xg_est": null,
+        "xg_est_src": null,
+        "team_zh": "客队"
+      },
+      {
+        "id": 233067,
+        "event_id": 207828,
+        "team": "home",
+        "possession": 66,
+        "shots": 9,
+        "shots_on_target": 5,
+        "xg": 0.52,
+        "passes": 428,
+        "corners": 4,
+        "fouls": 16,
+        "offsides": 1,
+        "yellow": 2,
+        "red": 0,
+        "updated_at": 1790392566.764628,
+        "xg_h1": 0.347,
+        "xg_h2": 0.173,
+        "xg_est": null,
+        "xg_est_src": null,
+        "team_zh": "主队"
+      }
+    ],
+    "expected_xg": {
+      "found": true,
+      "event_id": 207828,
+      "home_team": "埃尔帕索机车",
+      "away_team": "塔尔萨FC",
+      "expected_xg": {
+        "home": 1.32,
+        "away": 1.23,
+        "home_h1": 0.6,
+        "away_h1": 0.61,
+        "home_h2": 0.6,
+        "away_h2": 0.66
+      },
+      "home_form": {
+        "n": 8,
+        "xg_for_avg": 1.616,
+        "xg_against_avg": 1.144,
+        "xg_for_h1_avg": 0.857,
+        "xg_against_h1_avg": 0.544,
+        "xg_for_h2_avg": 0.481,
+        "xg_against_h2_avg": 0.574,
+        "home_xg_for_avg": 1.88,
+        "away_xg_for_avg": 1.353
+      },
+      "away_form": {
+        "n": 8,
+        "xg_for_avg": 1.312,
+        "xg_against_avg": 1.018,
+        "xg_for_h1_avg": 0.672,
+        "xg_against_h1_avg": 0.341,
+        "xg_for_h2_avg": 0.752,
+        "xg_against_h2_avg": 0.716,
+        "home_xg_for_avg": 0.765,
+        "away_xg_for_avg": 1.495
+      },
+      "note": "基于双方近10场赛后xG形态(攻击/防守)算术均值估算的赛前预期值, 仅描述历史表现, 非比赛结果预测"
+    },
+    "historical_xg": {
+      "found": false,
+      "event_id": 207828
+    },
+    "historical_odds": {
+      "found": false,
+      "event_id": 207828
+    },
+    "odds_available": true,
+    "_fetchTime": "2026-09-26T07:17:10.964Z",
+    "_eventId": 207828,
+    "_source": "self_api_raw",
+    "_sources": [
+      "db1_cloud_api"
+    ],
+    "team_ability": {
+      "home": {
+        "overall": 65,
+        "attacking": 65,
+        "defending": 65,
+        "depth": 0
+      },
+      "away": {
+        "overall": 65,
+        "attacking": 65,
+        "defending": 65,
+        "depth": 0
+      },
+      "diff": 0
+    }
+  },
+  "211579": {
+    "event_id": 211579,
+    "league": "墨超",
+    "league_zh": "墨超",
+    "priority": 9,
+    "is_major": false,
+    "home_team": "阿特兰特",
+    "away_team": "蒙特雷",
+    "home_team_zh": "阿特兰特",
+    "away_team_zh": "蒙特雷",
+    "date": "26/09/2026",
+    "time": "09:00",
+    "status": "ft",
+    "status_zh": "全场结束",
+    "score": "4-2",
+    "home_score": 4,
+    "away_score": 2,
+    "minute": 0,
+    "venue": "",
+    "referee": "",
+    "odds": {
+      "home_win": 3.35,
+      "draw": 3.7,
+      "away_win": 2.19,
+      "asian_handicap": 0.25,
+      "asian_home": 1.95,
+      "asian_away": 1.86,
+      "over_25": 1.79,
+      "under_25": 2.15,
+      "btts_yes": 1.6,
+      "btts_no": 2.2
+    },
+    "odds_multi": {
+      "胜平负": {
+        "主队": 3.35,
+        "平局": 3.7,
+        "客队": 2.17
+      },
+      "亚盘": {
+        "主队0.75": 1.57,
+        "客队0.75": 2.5,
+        "主队0.25": 1.95,
+        "客队0.25": 1.85,
+        "主队0.0": 2.3,
+        "客队0.0": 1.62,
+        "主队0.5": 1.7,
+        "客队0.5": 2.15,
+        "主队-0.25": 2.67,
+        "客队-0.25": 1.48,
+        "主队-1.25": 6.05,
+        "客队-1.25": 1.12,
+        "主队-0.75": 3.9,
+        "客队-0.75": 1.25,
+        "主队1.25": 1.27,
+        "客队1.25": 3.7,
+        "主队1.75": 1.16,
+        "客队1.75": 5.25,
+        "主队2.25": 1.11,
+        "客队2.25": 7.3,
+        "主队-1.5": 6.6,
+        "客队-1.5": 1.1,
+        "主队2.5": 1.02,
+        "客队2.5": 7.7,
+        "主队1.5": 1.27,
+        "客队1.5": 3.9,
+        "主队2.0": 1.12,
+        "客队2.0": 6.9,
+        "主队-1.0": 5.75,
+        "客队-1.0": 1.14,
+        "主队1.0": 1.35,
+        "客队1.0": 3.25,
+        "主队-0.5": 3.1,
+        "客队-0.5": 1.37
+      },
+      "双方进球": {
+        "是": 1.61,
+        "否": 2.3
+      },
+      "双重机会": {
+        "主队不败": 1.75,
+        "客队不败": 1.33,
+        "分胜负": 1.26
+      },
+      "平局退款": {
+        "主队": 2.38,
+        "客队": 1.58
+      },
+      "大小球(0.5)": {
+        "大0.5": 1.03,
+        "小0.5": 13
+      },
+      "大小球(1.5)": {
+        "大1.5": 1.24,
+        "小1.5": 4.33
+      },
+      "大小球(2.5)": {
+        "大2.5": 1.79,
+        "小2.5": 2.15
+      },
+      "大小球(3.5)": {
+        "大3.5": 2.9,
+        "小3.5": 1.44
+      },
+      "总角球": {
+        "大7.5": 1.27,
+        "小7.5": 2.88,
+        "大8.5": 1.58,
+        "小8.5": 2.28,
+        "大9.5": 1.98,
+        "小9.5": 1.82,
+        "大10.5": 2.47,
+        "小10.5": 1.49,
+        "大11.5": 2.97,
+        "小11.5": 1.25
+      }
+    },
+    "polymarket": {},
+    "lineups": {
+      "home": {
+        "formation": "5-3-2",
+        "players": [
+          "1. Óscar Jiménez (C)",
+          "29. Walter Portales",
+          "6. Nicolas Carrera",
+          "4. Eduardo Tercero",
+          "44. Aarón Quirós",
+          "37. Walter Clar",
+          "8. Eugenio Pizzuto",
+          "30. Martín Sarrafiore",
+          "19. Luis Calzadilla",
+          "9. Luis Puente",
+          "7. Jhojan Julio"
+        ],
+        "count": 11,
+        "players_by_pos": {
+          "门将": [
+            "1. Óscar Jiménez (C)"
+          ],
+          "后卫": [
+            "29. Walter Portales",
+            "6. Nicolas Carrera",
+            "4. Eduardo Tercero",
+            "44. Aarón Quirós",
+            "37. Walter Clar"
+          ],
+          "中场": [
+            "8. Eugenio Pizzuto",
+            "30. Martín Sarrafiore",
+            "19. Luis Calzadilla"
+          ],
+          "前锋": [
+            "9. Luis Puente",
+            "7. Jhojan Julio"
+          ]
+        }
+      },
+      "away": {
+        "formation": "4-2-3-1",
+        "players": [
+          "1. Esteban Andrada",
+          "2. Ricardo Chávez",
+          "13. Carlos Salcedo",
+          "19. Alonso Aceves",
+          "3. Gerardo Arteaga",
+          "8. Óliver Torres",
+          "5. Fidel Ambríz",
+          "10. Luca Orellano",
+          "18. Cesar Garza",
+          "17. Jesús Corona (C)",
+          "99. Hugo Cuypers"
+        ],
+        "count": 11,
+        "players_by_pos": {
+          "门将": [
+            "1. Esteban Andrada"
+          ],
+          "后卫": [
+            "2. Ricardo Chávez",
+            "13. Carlos Salcedo",
+            "19. Alonso Aceves",
+            "3. Gerardo Arteaga"
+          ],
+          "中场": [
+            "8. Óliver Torres",
+            "5. Fidel Ambríz",
+            "10. Luca Orellano",
+            "18. Cesar Garza",
+            "17. Jesús Corona (C)"
+          ],
+          "前锋": [
+            "99. Hugo Cuypers"
+          ]
+        }
+      }
+    },
+    "injuries": [
+      {
+        "team": "主队",
+        "player_name": "Hardy Meza",
+        "position": "",
+        "impact": "rotation",
+        "reason": "Broken Knee Cap"
+      }
+    ],
+    "stats": [
+      {
+        "team": "客队",
+        "possession": 59,
+        "shots": 16,
+        "shots_on_target": 7,
+        "xg": 1.06,
+        "xg_is_estimate": false,
+        "xg_note": null,
+        "passes": 544,
+        "corners": 6,
+        "fouls": 10,
+        "yellow": 2,
+        "red": 0,
+        "xg_h1": 0.401,
+        "xg_h2": 0.659
+      },
+      {
+        "team": "主队",
+        "possession": 41,
+        "shots": 14,
+        "shots_on_target": 7,
+        "xg": 1.87,
+        "xg_is_estimate": false,
+        "xg_note": null,
+        "passes": 373,
+        "corners": 2,
+        "fouls": 8,
+        "yellow": 1,
+        "red": 0,
+        "xg_h1": 1.079,
+        "xg_h2": 0.791
+      }
+    ],
+    "events": [
+      {
+        "minute": 11,
+        "type": "goal",
+        "team": "阿特兰特",
+        "player": "L. Puente",
+        "detail": ""
+      },
+      {
+        "minute": 16,
+        "type": "card",
+        "team": "阿特兰特",
+        "player": "N. Carrera",
+        "detail": "yellow"
+      },
+      {
+        "minute": 18,
+        "type": "goal",
+        "team": "蒙特雷",
+        "player": "H. Cuypers",
+        "detail": ""
+      },
+      {
+        "minute": 45,
+        "type": "injuryTime",
+        "team": "",
+        "player": "",
+        "detail": ""
+      },
+      {
+        "minute": 45,
+        "type": "period",
+        "team": "",
+        "player": "",
+        "detail": ""
+      },
+      {
+        "minute": 53,
+        "type": "goal",
+        "team": "阿特兰特",
+        "player": "L. Calzadilla",
+        "detail": ""
+      },
+      {
+        "minute": 58,
+        "type": "card",
+        "team": "蒙特雷",
+        "player": "J. Corona",
+        "detail": "yellow"
+      },
+      {
+        "minute": 59,
+        "type": "substitution",
+        "team": "蒙特雷",
+        "player": "D. Rossi 替下 J. Corona",
+        "detail": ""
+      },
+      {
+        "minute": 59,
+        "type": "substitution",
+        "team": "蒙特雷",
+        "player": "R. de la Rosa 替下 D. Aceves",
+        "detail": ""
+      },
+      {
+        "minute": 64,
+        "type": "goal",
+        "team": "阿特兰特",
+        "player": "E. Tercero",
+        "detail": ""
+      },
+      {
+        "minute": 69,
+        "type": "substitution",
+        "team": "蒙特雷",
+        "player": "O. Gálvez 替下 L. Orellano",
+        "detail": ""
+      },
+      {
+        "minute": 69,
+        "type": "substitution",
+        "team": "蒙特雷",
+        "player": "Uroš Đurđević 替下 C. Garza",
+        "detail": ""
+      },
+      {
+        "minute": 73,
+        "type": "substitution",
+        "team": "阿特兰特",
+        "player": "C. Bermúdez 替下 M. Sarrafiore",
+        "detail": ""
+      },
+      {
+        "minute": 73,
+        "type": "substitution",
+        "team": "阿特兰特",
+        "player": "J. Moxica 替下 L. Puente",
+        "detail": ""
+      },
+      {
+        "minute": 82,
+        "type": "goal",
+        "team": "蒙特雷",
+        "player": "R. de la Rosa",
+        "detail": ""
+      },
+      {
+        "minute": 82,
+        "type": "substitution",
+        "team": "阿特兰特",
+        "player": "A. Escobar 替下 W. Clar",
+        "detail": ""
+      },
+      {
+        "minute": 88,
+        "type": "substitution",
+        "team": "阿特兰特",
+        "player": "C. Alfaro 替下 W. Portales",
+        "detail": ""
+      },
+      {
+        "minute": 88,
+        "type": "substitution",
+        "team": "阿特兰特",
+        "player": "M. Fernández 替下 L. Calzadilla",
+        "detail": ""
+      },
+      {
+        "minute": 90,
+        "type": "injuryTime",
+        "team": "",
+        "player": "",
+        "detail": ""
+      },
+      {
+        "minute": 90,
+        "type": "period",
+        "team": "",
+        "player": "",
+        "detail": ""
+      },
+      {
+        "minute": 90,
+        "type": "card",
+        "team": "蒙特雷",
+        "player": "Ó. Torres",
+        "detail": "yellow"
+      },
+      {
+        "minute": 90,
+        "type": "goal",
+        "team": "阿特兰特",
+        "player": "J. Julio",
+        "detail": ""
+      },
+      {
+        "minute": 90,
+        "type": "card",
+        "team": "阿特兰特",
+        "player": "J. Julio",
+        "detail": "yellow"
+      }
+    ],
+    "h2h": {
+      "w": 2,
+      "d": 2,
+      "l": 9,
+      "total": 13,
+      "last_meetings": [
+        {
+          "away": "CF Monterrey",
+          "date": "2026-07-04T15:00:00+00:00",
+          "home": "Atlante FC",
+          "score": "1-1",
+          "event_id": 217118,
+          "away_score": 1,
+          "home_score": 1,
+          "away_team_id": 317,
+          "home_team_id": 3840,
+          "home_team": "Atlante FC",
+          "away_team": "CF Monterrey",
+          "home_team_zh": "阿特兰特",
+          "away_team_zh": "蒙特雷"
+        },
+        {
+          "away": "Atlante FC",
+          "date": "2014-03-30T01:00:00+00:00",
+          "home": "CF Monterrey",
+          "score": "3-2",
+          "event_id": 413555,
+          "away_score": 2,
+          "home_score": 3,
+          "away_team_id": 3840,
+          "home_team_id": 317,
+          "home_team": "CF Monterrey",
+          "away_team": "Atlante FC",
+          "home_team_zh": "蒙特雷",
+          "away_team_zh": "阿特兰特"
+        },
+        {
+          "away": "CF Monterrey",
+          "date": "2013-10-06T00:00:00+00:00",
+          "home": "Atlante FC",
+          "score": "2-1",
+          "event_id": 413386,
+          "away_score": 1,
+          "home_score": 2,
+          "away_team_id": 317,
+          "home_team_id": 3840,
+          "home_team": "Atlante FC",
+          "away_team": "CF Monterrey",
+          "home_team_zh": "阿特兰特",
+          "away_team_zh": "蒙特雷"
+        },
+        {
+          "away": "CF Monterrey",
+          "date": "2013-02-04T00:00:00+00:00",
+          "home": "Atlante FC",
+          "score": "3-1",
+          "event_id": 427857,
+          "away_score": 1,
+          "home_score": 3,
+          "away_team_id": 317,
+          "home_team_id": 3840,
+          "home_team": "Atlante FC",
+          "away_team": "CF Monterrey",
+          "home_team_zh": "阿特兰特",
+          "away_team_zh": "蒙特雷"
+        },
+        {
+          "away": "Atlante FC",
+          "date": "2012-08-19T00:00:00+00:00",
+          "home": "CF Monterrey",
+          "score": "1-1",
+          "event_id": 427683,
+          "away_score": 1,
+          "home_score": 1,
+          "away_team_id": 3840,
+          "home_team_id": 317,
+          "home_team": "CF Monterrey",
+          "away_team": "Atlante FC",
+          "home_team_zh": "蒙特雷",
+          "away_team_zh": "阿特兰特"
+        }
+      ]
+    },
+    "money": {},
+    "broadcasts": [
+      {
+        "channel": "Betano",
+        "country": "BR"
+      },
+      {
+        "channel": "ESPN 1 Norte",
+        "country": "HN"
+      },
+      {
+        "channel": "TUDN USA",
+        "country": "US"
+      }
+    ],
+    "team_home": {
+      "name": "阿特兰特",
+      "country": "墨西哥",
+      "logo": "",
+      "venue": "",
+      "coach": ""
+    },
+    "team_away": {
+      "name": "蒙特雷",
+      "country": "墨西哥",
+      "logo": "",
+      "venue": "",
+      "coach": ""
+    },
+    "players": [],
+    "updated_at": 1790407031.6829648,
+    "odds_by_bookmaker": {
+      "bet365": {
+        "胜平负": {
+          "主队": 3.25,
+          "平局": 3.6,
+          "客队": 2.15
+        },
+        "亚盘": {
+          "主队2.25": 1.11,
+          "客队2.25": 6.8,
+          "主队2.0": 1.12,
+          "客队2.0": 6.4,
+          "主队-1.25": 6,
+          "客队-1.25": 1.12,
+          "主队-0.75": 3.9,
+          "客队-0.75": 1.24,
+          "主队0.25": 1.95,
+          "客队0.25": 1.85,
+          "主队0.75": 1.52,
+          "客队0.75": 2.42,
+          "主队1.25": 1.27,
+          "客队1.25": 3.55,
+          "主队1.75": 1.16,
+          "客队1.75": 5.25,
+          "主队-1.5": 6.6,
+          "客队-1.5": 1.1,
+          "主队1.5": 1.24,
+          "客队1.5": 3.9,
+          "主队-0.5": 3.1,
+          "客队-0.5": 1.35,
+          "主队0.0": 2.3,
+          "客队0.0": 1.6,
+          "主队0.5": 1.68,
+          "客队0.5": 2.15,
+          "主队-1.0": 5.75,
+          "客队-1.0": 1.14,
+          "主队1.0": 1.35,
+          "客队1.0": 3.1,
+          "主队-0.25": 2.67,
+          "客队-0.25": 1.45
+        },
+        "双方进球": {
+          "是": 1.61,
+          "否": 2.2
+        },
+        "平局退款": {
+          "主队": 2.25,
+          "客队": 1.57
+        },
+        "大小球(2.5)": {
+          "大2.5": 1.72,
+          "小2.5": 2.07
+        }
+      },
+      "betfair": {
+        "胜平负": {
+          "主队": 3.25,
+          "平局": 3.7,
+          "客队": 2
+        },
+        "双方进球": {
+          "是": 1.6,
+          "否": 2.3
+        },
+        "双重机会": {
+          "主队不败": 1.73,
+          "客队不败": 1.33,
+          "分胜负": 1.25
+        },
+        "大小球(0.5)": {
+          "大0.5": 1.02,
+          "小0.5": 13
+        },
+        "大小球(1.5)": {
+          "大1.5": 1.2,
+          "小1.5": 4.33
+        },
+        "大小球(2.5)": {
+          "大2.5": 1.67,
+          "小2.5": 2.15
+        },
+        "大小球(3.5)": {
+          "大3.5": 2.88,
+          "小3.5": 1.4
+        }
+      },
+      "bwin": {
+        "胜平负": {
+          "主队": 3.25,
+          "平局": 3.5,
+          "客队": 2.05
+        },
+        "亚盘": {
+          "主队0.5": 1.66,
+          "客队0.5": 2.05
+        },
+        "双方进球": {
+          "是": 1.58,
+          "否": 2.2
+        },
+        "平局退款": {
+          "主队": 2.35,
+          "客队": 1.51
+        }
+      },
+      "macauslot": {
+        "胜平负": {
+          "主队": 3.22,
+          "平局": 3.52,
+          "客队": 2.07
+        }
+      },
+      "pinnacle": {
+        "胜平负": {
+          "主队": 3.3,
+          "平局": 3.7,
+          "客队": 2.17
+        },
+        "大小球(1.5)": {
+          "大1.5": 1.24,
+          "小1.5": 4.23
+        },
+        "大小球(2.5)": {
+          "大2.5": 1.79,
+          "小2.5": 2.11
+        },
+        "大小球(3.5)": {
+          "大3.5": 2.9,
+          "小3.5": 1.44
+        },
+        "总角球": {
+          "大8.5": 1.58,
+          "小8.5": 2.28,
+          "大9.5": 1.98,
+          "小9.5": 1.81,
+          "大10.5": 2.47,
+          "小10.5": 1.49
+        }
+      },
+      "unibet": {
+        "胜平负": {
+          "主队": 3.35,
+          "平局": 3.55,
+          "客队": 1.97
+        },
+        "亚盘": {
+          "主队1.5": 1.27,
+          "客队1.5": 3.75,
+          "主队-0.75": 3.9,
+          "客队-0.75": 1.25,
+          "主队0.25": 1.91,
+          "客队0.25": 1.85,
+          "主队0.75": 1.52,
+          "客队0.75": 2.5,
+          "主队1.25": 1.27,
+          "客队1.25": 3.7,
+          "主队-0.5": 3.1,
+          "客队-0.5": 1.37,
+          "主队0.0": 2.25,
+          "客队0.0": 1.62,
+          "主队0.5": 1.67,
+          "客队0.5": 2.15,
+          "主队1.0": 1.33,
+          "客队1.0": 3.25,
+          "主队-0.25": 2.65,
+          "客队-0.25": 1.48
+        },
+        "双方进球": {
+          "是": 1.58,
+          "否": 2.25
+        },
+        "平局退款": {
+          "主队": 2.3,
+          "客队": 1.58
+        }
+      },
+      "william-hill": {
+        "胜平负": {
+          "主队": 3.25,
+          "平局": 3.3,
+          "客队": 1.95
+        },
+        "亚盘": {
+          "主队0.5": 1.67,
+          "客队0.5": 2.05
+        },
+        "双方进球": {
+          "是": 1.6,
+          "否": 2.15
+        },
+        "双重机会": {
+          "主队不败": 1.75,
+          "客队不败": 1.29,
+          "分胜负": 1.25
+        },
+        "平局退款": {
+          "主队": 2.38,
+          "客队": 1.5
+        }
+      }
+    },
+    "match_stats": [
+      {
+        "id": 233066,
+        "event_id": 211579,
+        "team": "away",
+        "possession": 59,
+        "shots": 16,
+        "shots_on_target": 7,
+        "xg": 1.06,
+        "passes": 544,
+        "corners": 6,
+        "fouls": 10,
+        "offsides": 4,
+        "yellow": 2,
+        "red": 0,
+        "updated_at": 1790392565.264317,
+        "xg_h1": 0.401,
+        "xg_h2": 0.659,
+        "xg_est": null,
+        "xg_est_src": null,
+        "team_zh": "客队"
+      },
+      {
+        "id": 233065,
+        "event_id": 211579,
+        "team": "home",
+        "possession": 41,
+        "shots": 14,
+        "shots_on_target": 7,
+        "xg": 1.87,
+        "passes": 373,
+        "corners": 2,
+        "fouls": 8,
+        "offsides": 0,
+        "yellow": 1,
+        "red": 0,
+        "updated_at": 1790392565.264317,
+        "xg_h1": 1.079,
+        "xg_h2": 0.791,
+        "xg_est": null,
+        "xg_est_src": null,
+        "team_zh": "主队"
+      }
+    ],
+    "expected_xg": {
+      "found": true,
+      "event_id": 211579,
+      "home_team": "阿特兰特",
+      "away_team": "蒙特雷",
+      "expected_xg": {
+        "home": 1.3,
+        "away": 1.17,
+        "home_h1": 0.71,
+        "away_h1": 0.47,
+        "home_h2": 0.65,
+        "away_h2": 0.67
+      },
+      "home_form": {
+        "n": 5,
+        "xg_for_avg": 1.452,
+        "xg_against_avg": 1.016,
+        "xg_for_h1_avg": 0.733,
+        "xg_against_h1_avg": 0.537,
+        "xg_for_h2_avg": 0.819,
+        "xg_against_h2_avg": 0.426,
+        "home_xg_for_avg": 1.383,
+        "away_xg_for_avg": 1.555
+      },
+      "away_form": {
+        "n": 4,
+        "xg_for_avg": 1.317,
+        "xg_against_avg": 1.15,
+        "xg_for_h1_avg": 0.412,
+        "xg_against_h1_avg": 0.678,
+        "xg_for_h2_avg": 0.905,
+        "xg_against_h2_avg": 0.472,
+        "home_xg_for_avg": 1.403,
+        "away_xg_for_avg": 1.06
+      },
+      "note": "基于双方近10场赛后xG形态(攻击/防守)算术均值估算的赛前预期值, 仅描述历史表现, 非比赛结果预测"
+    },
+    "historical_xg": {
+      "found": false,
+      "event_id": 211579
+    },
+    "historical_odds": {
+      "found": false,
+      "event_id": 211579
+    },
+    "odds_available": true,
+    "_fetchTime": "2026-09-26T07:17:11.841Z",
+    "_eventId": 211579,
     "_source": "self_api_raw",
     "_sources": [
       "db1_cloud_api"
@@ -11484,7 +13034,7 @@
       "coach": ""
     },
     "players": [],
-    "updated_at": 1790403410.1867144,
+    "updated_at": 1790407027.5469482,
     "odds_by_bookmaker": {
       "betfair": {
         "胜平负": {
@@ -11664,7 +13214,7 @@
       "event_id": 216460
     },
     "odds_available": true,
-    "_fetchTime": "2026-09-26T06:16:50.353Z",
+    "_fetchTime": "2026-09-26T07:17:07.683Z",
     "_eventId": 216460,
     "_source": "self_api_raw",
     "_sources": [
@@ -12649,7 +14199,7 @@
       "coach": ""
     },
     "players": [],
-    "updated_at": 1790403409.3316042,
+    "updated_at": 1790407026.7254705,
     "odds_by_bookmaker": {
       "bet365": {
         "胜平负": {
@@ -12926,8 +14476,710 @@
       "event_id": 220185
     },
     "odds_available": true,
-    "_fetchTime": "2026-09-26T06:16:49.492Z",
+    "_fetchTime": "2026-09-26T07:17:06.864Z",
     "_eventId": 220185,
+    "_source": "self_api_raw",
+    "_sources": [
+      "db1_cloud_api"
+    ],
+    "team_ability": {
+      "home": {
+        "overall": 65,
+        "attacking": 65,
+        "defending": 65,
+        "depth": 0
+      },
+      "away": {
+        "overall": 65,
+        "attacking": 65,
+        "defending": 65,
+        "depth": 0
+      },
+      "diff": 0
+    }
+  },
+  "223077": {
+    "event_id": 223077,
+    "league": "中北美国家联赛",
+    "league_zh": "中北美国家联赛",
+    "priority": 9,
+    "is_major": false,
+    "home_team": "洪都拉斯",
+    "away_team": "苏里南",
+    "home_team_zh": "洪都拉斯",
+    "away_team_zh": "苏里南",
+    "date": "26/09/2026",
+    "time": "09:00",
+    "status": "ft",
+    "status_zh": "全场结束",
+    "score": "2-3",
+    "home_score": 2,
+    "away_score": 3,
+    "minute": 0,
+    "venue": "",
+    "referee": "",
+    "odds": {
+      "home_win": 1.7,
+      "draw": 3.8,
+      "away_win": 5.78,
+      "asian_handicap": -0.75,
+      "asian_home": 1.825,
+      "asian_away": 1.975,
+      "over_25": 2.19,
+      "under_25": 1.69,
+      "btts_yes": 2.1,
+      "btts_no": 1.66
+    },
+    "odds_multi": {
+      "胜平负": {
+        "主队": 1.7,
+        "平局": 3.74,
+        "客队": 5.78
+      },
+      "亚盘": {
+        "主队-1.75": 3.55,
+        "客队-1.75": 1.27,
+        "主队-1.25": 2.5,
+        "客队-1.25": 1.5,
+        "主队-0.75": 1.82,
+        "客队-0.75": 1.98,
+        "主队0.25": 1.21,
+        "客队0.25": 4.25,
+        "主队0.75": 1.11,
+        "客队0.75": 7.22,
+        "主队-2.75": 7.4,
+        "客队-2.75": 1.03,
+        "主队-2.25": 5.75,
+        "客队-2.25": 1.14,
+        "主队-1.5": 2.85,
+        "客队-1.5": 1.4,
+        "主队-2.5": 6,
+        "客队-2.5": 1.12,
+        "客队1.5": 11.5,
+        "主队0.0": 1.26,
+        "客队0.0": 3.7,
+        "主队-2.0": 5.25,
+        "客队-2.0": 1.16,
+        "主队-1.0": 2.21,
+        "客队-1.0": 1.68,
+        "主队-3.0": 11,
+        "主队1.0": 1.02,
+        "客队1.0": 10,
+        "主队-0.25": 1.45,
+        "客队-0.25": 2.67,
+        "主队-0.5": 1.65,
+        "客队-0.5": 2.25,
+        "主队0.5": 1.18,
+        "客队0.5": 4.8
+      },
+      "双方进球": {
+        "是": 2.15,
+        "否": 1.75
+      },
+      "双重机会": {
+        "主队不败": 1.15,
+        "客队不败": 2.2,
+        "分胜负": 1.3
+      },
+      "平局退款": {
+        "主队": 1.25,
+        "客队": 3.9
+      },
+      "大小球(0.5)": {
+        "大0.5": 1.06,
+        "小0.5": 8.5
+      },
+      "大小球(1.5)": {
+        "大1.5": 1.38,
+        "小1.5": 3.1
+      },
+      "大小球(2.5)": {
+        "大2.5": 2.19,
+        "小2.5": 1.69
+      },
+      "大小球(3.5)": {
+        "大3.5": 4.1,
+        "小3.5": 1.24
+      },
+      "总角球": {
+        "大7.5": 1.25,
+        "小7.5": 2.98,
+        "大8.5": 1.55,
+        "小8.5": 2.35,
+        "大9.5": 1.89,
+        "小9.5": 1.88,
+        "大10.5": 2.39,
+        "小10.5": 1.53,
+        "大11.5": 2.87,
+        "小11.5": 1.27
+      }
+    },
+    "polymarket": {},
+    "lineups": {
+      "home": {
+        "formation": "4-2-3-1",
+        "players": [
+          "1. Edrick Menjívar",
+          "30. Joseph Rosales",
+          "3. Julián Jose Martinez",
+          "3. Denil Maldonado",
+          "31. Andy Najar",
+          "16. Kervin Arriaga",
+          "Deybi Flores",
+          "77. Luis Palma",
+          "23. Jorge Álvarez",
+          "30. Dereck Moncada",
+          "67. Romell Quioto"
+        ],
+        "count": 11,
+        "players_by_pos": {
+          "门将": [
+            "1. Edrick Menjívar"
+          ],
+          "后卫": [
+            "3. Julián Jose Martinez",
+            "3. Denil Maldonado",
+            "31. Andy Najar"
+          ],
+          "中场": [
+            "30. Joseph Rosales",
+            "16. Kervin Arriaga",
+            "Deybi Flores",
+            "77. Luis Palma",
+            "23. Jorge Álvarez",
+            "30. Dereck Moncada",
+            "67. Romell Quioto"
+          ]
+        }
+      },
+      "away": {
+        "formation": "4-2-3-1",
+        "players": [
+          "1. Etienne Vaessen",
+          "38. Shaquille Riley Pinas",
+          "14. Myenty Abena",
+          "4. Liam Van Gelderen",
+          "22. Djavan Anderson",
+          "26. Dhoraso Moreo Klas",
+          "12. Radinio Balker",
+          "18. Richonell Margaret",
+          "9. Tjaronn Chery",
+          "9. Gyrano Kerk",
+          "3. Kenneth Paal"
+        ],
+        "count": 11,
+        "players_by_pos": {
+          "门将": [
+            "1. Etienne Vaessen"
+          ],
+          "后卫": [
+            "38. Shaquille Riley Pinas",
+            "14. Myenty Abena",
+            "4. Liam Van Gelderen",
+            "22. Djavan Anderson",
+            "12. Radinio Balker",
+            "3. Kenneth Paal"
+          ],
+          "中场": [
+            "26. Dhoraso Moreo Klas"
+          ],
+          "前锋": [
+            "18. Richonell Margaret",
+            "9. Tjaronn Chery",
+            "9. Gyrano Kerk"
+          ]
+        }
+      }
+    },
+    "injuries": [
+      {
+        "team": "主队",
+        "player_name": "Rigoberto Rivas",
+        "position": "",
+        "impact": "rotation",
+        "reason": "Thigh Injury"
+      },
+      {
+        "team": "客队",
+        "player_name": "Ridgeciano Haps",
+        "position": "",
+        "impact": "rotation",
+        "reason": "Physical Discomfort"
+      }
+    ],
+    "stats": [
+      {
+        "team": "客队",
+        "possession": 36,
+        "shots": 11,
+        "shots_on_target": 5,
+        "xg": 0.55,
+        "xg_is_estimate": false,
+        "xg_note": null,
+        "passes": 309,
+        "corners": 2,
+        "fouls": 16,
+        "yellow": 2,
+        "red": 0,
+        "xg_h1": 0.36,
+        "xg_h2": 0.19
+      },
+      {
+        "team": "主队",
+        "possession": 64,
+        "shots": 13,
+        "shots_on_target": 4,
+        "xg": 0.94,
+        "xg_is_estimate": false,
+        "xg_note": null,
+        "passes": 570,
+        "corners": 3,
+        "fouls": 10,
+        "yellow": 0,
+        "red": 0,
+        "xg_h1": 0.639,
+        "xg_h2": 0.301
+      }
+    ],
+    "events": [
+      {
+        "minute": 18,
+        "type": "goal",
+        "team": "苏里南",
+        "player": "J. Lonwijk",
+        "detail": ""
+      },
+      {
+        "minute": 20,
+        "type": "goal",
+        "team": "洪都拉斯",
+        "player": "D. Moncada",
+        "detail": ""
+      },
+      {
+        "minute": 23,
+        "type": "goal",
+        "team": "洪都拉斯",
+        "player": "B. Róchez",
+        "detail": ""
+      },
+      {
+        "minute": 39,
+        "type": "goal",
+        "team": "苏里南",
+        "player": "D. Jubitana",
+        "detail": ""
+      },
+      {
+        "minute": 45,
+        "type": "injuryTime",
+        "team": "",
+        "player": "",
+        "detail": ""
+      },
+      {
+        "minute": 45,
+        "type": "period",
+        "team": "",
+        "player": "",
+        "detail": ""
+      },
+      {
+        "minute": 46,
+        "type": "substitution",
+        "team": "洪都拉斯",
+        "player": "D. Flores 替下 J. Reyes",
+        "detail": ""
+      },
+      {
+        "minute": 50,
+        "type": "substitution",
+        "team": "洪都拉斯",
+        "player": "A. Vargas 替下 D. Moncada",
+        "detail": ""
+      },
+      {
+        "minute": 66,
+        "type": "goal",
+        "team": "苏里南",
+        "player": "L. Palma",
+        "detail": ""
+      },
+      {
+        "minute": 68,
+        "type": "card",
+        "team": "苏里南",
+        "player": "J. Lonwijk",
+        "detail": "yellow"
+      },
+      {
+        "minute": 70,
+        "type": "substitution",
+        "team": "苏里南",
+        "player": "D. Cleonise 替下 J. Lonwijk",
+        "detail": ""
+      },
+      {
+        "minute": 70,
+        "type": "substitution",
+        "team": "洪都拉斯",
+        "player": "J. Álvarez 替下 B. Róchez",
+        "detail": ""
+      },
+      {
+        "minute": 70,
+        "type": "substitution",
+        "team": "洪都拉斯",
+        "player": "K. Figueroa 替下 J. Toro",
+        "detail": ""
+      },
+      {
+        "minute": 72,
+        "type": "substitution",
+        "team": "苏里南",
+        "player": "S. Denswil 替下 R. Balker",
+        "detail": ""
+      },
+      {
+        "minute": 83,
+        "type": "substitution",
+        "team": "苏里南",
+        "player": "D. M. Klas 替下 G. Kerk",
+        "detail": ""
+      },
+      {
+        "minute": 83,
+        "type": "substitution",
+        "team": "苏里南",
+        "player": "Gleofilo Vlijter 替下 K. Paal",
+        "detail": ""
+      },
+      {
+        "minute": 83,
+        "type": "substitution",
+        "team": "苏里南",
+        "player": "I. Pherai 替下 D. Jubitana",
+        "detail": ""
+      },
+      {
+        "minute": 84,
+        "type": "card",
+        "team": "苏里南",
+        "player": "M. Abena",
+        "detail": "yellow"
+      },
+      {
+        "minute": 85,
+        "type": "substitution",
+        "team": "洪都拉斯",
+        "player": "M. Arana 替下 K. Arriaga",
+        "detail": ""
+      },
+      {
+        "minute": 90,
+        "type": "injuryTime",
+        "team": "",
+        "player": "",
+        "detail": ""
+      },
+      {
+        "minute": 90,
+        "type": "period",
+        "team": "",
+        "player": "",
+        "detail": ""
+      }
+    ],
+    "h2h": {
+      "w": 0,
+      "d": 0,
+      "l": 0,
+      "total": 0,
+      "last_meetings": []
+    },
+    "money": {},
+    "broadcasts": [
+      {
+        "channel": "Betano",
+        "country": "BR"
+      },
+      {
+        "channel": "ViX",
+        "country": "EC"
+      }
+    ],
+    "team_home": {
+      "name": "洪都拉斯",
+      "country": "洪都拉斯",
+      "logo": "",
+      "venue": "",
+      "coach": ""
+    },
+    "team_away": {
+      "name": "苏里南",
+      "country": "苏里南",
+      "logo": "",
+      "venue": "",
+      "coach": ""
+    },
+    "players": [],
+    "updated_at": 1790407032.5300148,
+    "odds_by_bookmaker": {
+      "bet365": {
+        "胜平负": {
+          "主队": 1.61,
+          "平局": 3.6,
+          "客队": 4.75
+        },
+        "亚盘": {
+          "主队-1.75": 3.55,
+          "客队-1.75": 1.27,
+          "主队-1.25": 2.5,
+          "客队-1.25": 1.5,
+          "主队-0.75": 1.82,
+          "客队-0.75": 1.98,
+          "主队0.25": 1.21,
+          "客队0.25": 4.25,
+          "主队0.75": 1.11,
+          "客队0.75": 6.8,
+          "主队-2.25": 5.75,
+          "客队-2.25": 1.14,
+          "主队-1.5": 2.85,
+          "客队-1.5": 1.4,
+          "主队-2.5": 6,
+          "客队-2.5": 1.12,
+          "主队-0.5": 1.62,
+          "客队-0.5": 2.25,
+          "主队0.0": 1.26,
+          "客队0.0": 3.7,
+          "主队0.5": 1.18,
+          "客队0.5": 4.8,
+          "主队-2.0": 5.25,
+          "客队-2.0": 1.16,
+          "主队-1.0": 2.15,
+          "客队-1.0": 1.68,
+          "主队-0.25": 1.45,
+          "客队-0.25": 2.67
+        },
+        "双方进球": {
+          "是": 2.1,
+          "否": 1.66
+        },
+        "平局退款": {
+          "主队": 1.25,
+          "客队": 3.75
+        },
+        "大小球(2.5)": {
+          "大2.5": 2.15,
+          "小2.5": 1.66
+        }
+      },
+      "betfair": {
+        "胜平负": {
+          "主队": 1.67,
+          "平局": 3.6,
+          "客队": 5
+        },
+        "双方进球": {
+          "是": 2.1,
+          "否": 1.73
+        },
+        "双重机会": {
+          "主队不败": 1.14,
+          "客队不败": 2.2,
+          "分胜负": 1.25
+        },
+        "大小球(0.5)": {
+          "大0.5": 1.06,
+          "小0.5": 8.5
+        },
+        "大小球(1.5)": {
+          "大1.5": 1.36,
+          "小1.5": 3.1
+        },
+        "大小球(2.5)": {
+          "大2.5": 2.15,
+          "小2.5": 1.67
+        },
+        "大小球(3.5)": {
+          "大3.5": 4.1,
+          "小3.5": 1.22
+        }
+      },
+      "bwin": {
+        "胜平负": {
+          "主队": 1.61,
+          "平局": 3.4,
+          "客队": 4.8
+        },
+        "平局退款": {
+          "主队": 1.25,
+          "客队": 3.6
+        }
+      },
+      "pinnacle": {
+        "胜平负": {
+          "主队": 1.62,
+          "平局": 3.74,
+          "客队": 5.78
+        },
+        "大小球(1.5)": {
+          "大1.5": 1.38,
+          "小1.5": 3.01
+        },
+        "大小球(2.5)": {
+          "大2.5": 2.19,
+          "小2.5": 1.69
+        },
+        "大小球(3.5)": {
+          "大3.5": 4,
+          "小3.5": 1.24
+        },
+        "总角球": {
+          "大8.5": 1.55,
+          "小8.5": 2.35,
+          "大9.5": 1.89,
+          "小9.5": 1.88,
+          "大10.5": 2.39,
+          "小10.5": 1.53
+        }
+      },
+      "unibet": {
+        "胜平负": {
+          "主队": 1.65,
+          "平局": 3.45,
+          "客队": 4.5
+        },
+        "亚盘": {
+          "主队-0.5": 1.62,
+          "客队-0.5": 2.15
+        },
+        "双方进球": {
+          "是": 2.15,
+          "否": 1.62
+        },
+        "平局退款": {
+          "主队": 1.23,
+          "客队": 3.6
+        }
+      },
+      "william-hill": {
+        "胜平负": {
+          "主队": 1.7,
+          "平局": 3.3,
+          "客队": 5
+        },
+        "亚盘": {
+          "主队-0.5": 1.65,
+          "客队-0.5": 2.15
+        },
+        "双方进球": {
+          "是": 1.95,
+          "否": 1.75
+        },
+        "双重机会": {
+          "主队不败": 1.15,
+          "客队不败": 2.1,
+          "分胜负": 1.3
+        },
+        "平局退款": {
+          "主队": 1.22,
+          "客队": 3.9
+        }
+      }
+    },
+    "match_stats": [
+      {
+        "id": 232960,
+        "event_id": 223077,
+        "team": "away",
+        "possession": 36,
+        "shots": 11,
+        "shots_on_target": 5,
+        "xg": 0.55,
+        "passes": 309,
+        "corners": 2,
+        "fouls": 16,
+        "offsides": 1,
+        "yellow": 2,
+        "red": 0,
+        "updated_at": 1790391505.6289308,
+        "xg_h1": 0.36,
+        "xg_h2": 0.19,
+        "xg_est": null,
+        "xg_est_src": null,
+        "team_zh": "客队"
+      },
+      {
+        "id": 232959,
+        "event_id": 223077,
+        "team": "home",
+        "possession": 64,
+        "shots": 13,
+        "shots_on_target": 4,
+        "xg": 0.94,
+        "passes": 570,
+        "corners": 3,
+        "fouls": 10,
+        "offsides": 0,
+        "yellow": 0,
+        "red": 0,
+        "updated_at": 1790391505.6289308,
+        "xg_h1": 0.639,
+        "xg_h2": 0.301,
+        "xg_est": null,
+        "xg_est_src": null,
+        "team_zh": "主队"
+      }
+    ],
+    "expected_xg": {
+      "found": true,
+      "event_id": 223077,
+      "home_team": "洪都拉斯",
+      "away_team": "苏里南",
+      "expected_xg": {
+        "home": 0.94,
+        "away": 0.55,
+        "home_h1": 0.64,
+        "away_h1": 0.36,
+        "home_h2": 0.3,
+        "away_h2": 0.19
+      },
+      "home_form": {
+        "n": 1,
+        "xg_for_avg": 0.94,
+        "xg_against_avg": 0.55,
+        "xg_for_h1_avg": 0.639,
+        "xg_against_h1_avg": 0.36,
+        "xg_for_h2_avg": 0.301,
+        "xg_against_h2_avg": 0.19,
+        "home_xg_for_avg": 0.94,
+        "away_xg_for_avg": null
+      },
+      "away_form": {
+        "n": 1,
+        "xg_for_avg": 0.55,
+        "xg_against_avg": 0.94,
+        "xg_for_h1_avg": 0.36,
+        "xg_against_h1_avg": 0.639,
+        "xg_for_h2_avg": 0.19,
+        "xg_against_h2_avg": 0.301,
+        "home_xg_for_avg": null,
+        "away_xg_for_avg": 0.55
+      },
+      "note": "基于双方近10场赛后xG形态(攻击/防守)算术均值估算的赛前预期值, 仅描述历史表现, 非比赛结果预测"
+    },
+    "historical_xg": {
+      "found": false,
+      "event_id": 223077
+    },
+    "historical_odds": {
+      "found": false,
+      "event_id": 223077
+    },
+    "odds_available": true,
+    "_fetchTime": "2026-09-26T07:17:12.669Z",
+    "_eventId": 223077,
     "_source": "self_api_raw",
     "_sources": [
       "db1_cloud_api"
@@ -13489,7 +15741,7 @@
       "coach": ""
     },
     "players": [],
-    "updated_at": 1790403411.0466268,
+    "updated_at": 1790407028.369063,
     "odds_by_bookmaker": {
       "bet365": {
         "胜平负": {
@@ -13753,7 +16005,7 @@
       "event_id": 223078
     },
     "odds_available": true,
-    "_fetchTime": "2026-09-26T06:16:51.229Z",
+    "_fetchTime": "2026-09-26T07:17:08.505Z",
     "_eventId": 223078,
     "_source": "self_api_raw",
     "_sources": [
@@ -14215,7 +16467,7 @@
       "coach": ""
     },
     "players": [],
-    "updated_at": 1790403411.9228199,
+    "updated_at": 1790407029.1858373,
     "odds_by_bookmaker": {
       "betfair": {
         "胜平负": {
@@ -14445,7 +16697,7 @@
       "event_id": 223079
     },
     "odds_available": true,
-    "_fetchTime": "2026-09-26T06:16:52.092Z",
+    "_fetchTime": "2026-09-26T07:17:09.321Z",
     "_eventId": 223079,
     "_source": "self_api_raw",
     "_sources": [
@@ -15479,7 +17731,7 @@
       "coach": ""
     },
     "players": [],
-    "updated_at": 1790403412.7879481,
+    "updated_at": 1790407030.005703,
     "match_stats": [
       {
         "id": 232752,
@@ -15570,7 +17822,7 @@
       "event_id": 223081
     },
     "odds_available": false,
-    "_fetchTime": "2026-09-26T06:16:52.957Z",
+    "_fetchTime": "2026-09-26T07:17:10.141Z",
     "_eventId": 223081,
     "_source": "self_api_raw",
     "_sources": [
@@ -16639,7 +18891,7 @@
       "coach": ""
     },
     "players": [],
-    "updated_at": 1790403408.480722,
+    "updated_at": 1790407025.90591,
     "odds_by_bookmaker": {
       "bet365": {
         "胜平负": {
@@ -16828,7 +19080,7 @@
       "event_id": 603734
     },
     "odds_available": true,
-    "_fetchTime": "2026-09-26T06:16:48.638Z",
+    "_fetchTime": "2026-09-26T07:17:06.043Z",
     "_eventId": 603734,
     "_source": "self_api_raw",
     "_sources": [
