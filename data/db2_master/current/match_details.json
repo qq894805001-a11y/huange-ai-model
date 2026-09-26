@@ -578,6 +578,767 @@
       "diff": 0
     }
   },
+  "10153": {
+    "event_id": 10153,
+    "league": "巴乙",
+    "league_zh": "巴乙",
+    "priority": 9,
+    "is_major": false,
+    "home_team": "维拉诺瓦",
+    "away_team": "隆德里纳",
+    "home_team_zh": "维拉诺瓦",
+    "away_team_zh": "隆德里纳",
+    "date": "26/09/2026",
+    "time": "07:30",
+    "status": "ft",
+    "status_zh": "全场结束",
+    "score": "2-0",
+    "home_score": 2,
+    "away_score": 0,
+    "minute": 0,
+    "venue": "Estádio Onésio Brasileiro Alvarenga",
+    "referee": "Afro Rocha De Carvalho Filho",
+    "odds": {
+      "home_win": 1.77,
+      "draw": 3.6,
+      "away_win": 5.8,
+      "asian_handicap": -0.75,
+      "asian_home": 1.96,
+      "asian_away": 1.87,
+      "over_25": 2.12,
+      "under_25": 1.8,
+      "btts_yes": 2.07,
+      "btts_no": 1.68
+    },
+    "odds_multi": {
+      "胜平负": {
+        "主队": 1.61,
+        "平局": 3.8,
+        "客队": 6.19
+      },
+      "亚盘": {
+        "主队-1.0": 2.04,
+        "客队-1.0": 1.77,
+        "主队-0.75": 1.75,
+        "客队-0.75": 2.08,
+        "主队-0.5": 1.61,
+        "客队-0.5": 2.35,
+        "主队-1.75": 3.3,
+        "客队-1.75": 1.32,
+        "主队-1.25": 2.37,
+        "客队-1.25": 1.57,
+        "主队0.25": 1.15,
+        "客队0.25": 5.5,
+        "主队0.75": 1.03,
+        "客队0.75": 7.6,
+        "主队-2.75": 7.29,
+        "客队-2.75": 1.03,
+        "主队-2.25": 5.05,
+        "客队-2.25": 1.17,
+        "主队-1.5": 2.8,
+        "客队-1.5": 1.45,
+        "主队-2.5": 5.5,
+        "客队-2.5": 1.15,
+        "主队0.0": 1.19,
+        "客队0.0": 4.5,
+        "主队-2.0": 4.6,
+        "客队-2.0": 1.2,
+        "主队-3.0": 10,
+        "主队-0.25": 1.38,
+        "客队-0.25": 3,
+        "主队0.5": 1.15,
+        "客队0.5": 5.9
+      },
+      "双方进球": {
+        "是": 2.1,
+        "否": 1.73
+      },
+      "双重机会": {
+        "主队不败": 1.13,
+        "客队不败": 2.38,
+        "分胜负": 1.29
+      },
+      "平局退款": {
+        "主队": 1.22,
+        "客队": 4.5
+      },
+      "大小球(0.5)": {
+        "小0.5": 9,
+        "大0.5": 1.05
+      },
+      "大小球(1.5)": {
+        "大1.5": 1.37,
+        "小1.5": 3.25
+      },
+      "大小球(2.5)": {
+        "大2.5": 2.15,
+        "小2.5": 1.74
+      },
+      "大小球(3.5)": {
+        "大3.5": 3.91,
+        "小3.5": 1.26
+      },
+      "总角球": {
+        "大7.5": 1.1,
+        "小7.5": 4.78,
+        "大8.5": 1.27,
+        "小8.5": 3.16,
+        "大9.5": 1.54,
+        "小9.5": 2.39,
+        "大10.5": 1.9,
+        "小10.5": 1.89,
+        "大11.5": 2.39,
+        "小11.5": 1.54
+      }
+    },
+    "polymarket": {},
+    "lineups": {
+      "home": {
+        "formation": "4-2-3-1",
+        "players": [
+          "1. Helton Leite",
+          "22. Hayner",
+          "4. Douglas Mendes",
+          "23. Jonathan Costa",
+          "6. Higor",
+          "5. João Vieira",
+          "15. Dudu Dos Santos",
+          "17. Everton Galdino",
+          "10. Marquinhos Gabriel (C)",
+          "99. Janderson",
+          "7. André Luís"
+        ],
+        "count": 11,
+        "players_by_pos": {
+          "门将": [
+            "1. Helton Leite"
+          ],
+          "后卫": [
+            "22. Hayner",
+            "4. Douglas Mendes",
+            "23. Jonathan Costa",
+            "6. Higor"
+          ],
+          "中场": [
+            "5. João Vieira",
+            "15. Dudu Dos Santos",
+            "17. Everton Galdino",
+            "10. Marquinhos Gabriel (C)",
+            "99. Janderson"
+          ],
+          "前锋": [
+            "7. André Luís"
+          ]
+        }
+      },
+      "away": {
+        "formation": "4-1-4-1",
+        "players": [
+          "1. Luan",
+          "75. Kauê Leonardo",
+          "44. Caio Rodrigues",
+          "4. Wallace Reis (C)",
+          "34. Heron",
+          "5. Tarik",
+          "17. João Andrade",
+          "77. Guilherme Portuga",
+          "20. João Vitor",
+          "28. Herbert",
+          "99. Igor Bahia"
+        ],
+        "count": 11,
+        "players_by_pos": {
+          "门将": [
+            "1. Luan"
+          ],
+          "后卫": [
+            "75. Kauê Leonardo",
+            "44. Caio Rodrigues",
+            "4. Wallace Reis (C)",
+            "34. Heron"
+          ],
+          "中场": [
+            "5. Tarik",
+            "17. João Andrade",
+            "77. Guilherme Portuga",
+            "20. João Vitor",
+            "28. Herbert"
+          ],
+          "前锋": [
+            "99. Igor Bahia"
+          ]
+        }
+      }
+    },
+    "injuries": [],
+    "stats": [
+      {
+        "team": "客队",
+        "possession": 42,
+        "shots": 6,
+        "shots_on_target": 2,
+        "xg": 0.32,
+        "xg_is_estimate": false,
+        "xg_note": null,
+        "passes": 232,
+        "corners": 3,
+        "fouls": 8,
+        "yellow": 2,
+        "red": 0,
+        "xg_h1": 0.243,
+        "xg_h2": null
+      },
+      {
+        "team": "主队",
+        "possession": 58,
+        "shots": 16,
+        "shots_on_target": 8,
+        "xg": 0.98,
+        "xg_is_estimate": false,
+        "xg_note": null,
+        "passes": 319,
+        "corners": 8,
+        "fouls": 14,
+        "yellow": 0,
+        "red": 0,
+        "xg_h1": 0.728,
+        "xg_h2": null
+      }
+    ],
+    "events": [
+      {
+        "minute": 29,
+        "type": "card",
+        "team": "隆德里纳",
+        "player": "K. Leonardo",
+        "detail": "yellow"
+      },
+      {
+        "minute": 33,
+        "type": "card",
+        "team": "隆德里纳",
+        "player": "C. Rodrigues",
+        "detail": "yellow"
+      },
+      {
+        "minute": 45,
+        "type": "injuryTime",
+        "team": "",
+        "player": "",
+        "detail": ""
+      },
+      {
+        "minute": 45,
+        "type": "period",
+        "team": "",
+        "player": "",
+        "detail": ""
+      },
+      {
+        "minute": 45,
+        "type": "goal",
+        "team": "维拉诺瓦",
+        "player": "Everton Galdino",
+        "detail": ""
+      },
+      {
+        "minute": 50,
+        "type": "goal",
+        "team": "维拉诺瓦",
+        "player": "J. Costa",
+        "detail": ""
+      },
+      {
+        "minute": 54,
+        "type": "substitution",
+        "team": "隆德里纳",
+        "player": "G. Cachoeira 替下 Tarik",
+        "detail": ""
+      },
+      {
+        "minute": 54,
+        "type": "substitution",
+        "team": "隆德里纳",
+        "player": "L. Marques 替下 J. Coni",
+        "detail": ""
+      },
+      {
+        "minute": 54,
+        "type": "substitution",
+        "team": "隆德里纳",
+        "player": "N. Paraíba 替下 K. Leonardo",
+        "detail": ""
+      },
+      {
+        "minute": 60,
+        "type": "substitution",
+        "team": "隆德里纳",
+        "player": "Juninho 替下 G. Portuga",
+        "detail": ""
+      },
+      {
+        "minute": 61,
+        "type": "substitution",
+        "team": "维拉诺瓦",
+        "player": "Nathan Camargo 替下 Hayner",
+        "detail": ""
+      },
+      {
+        "minute": 66,
+        "type": "substitution",
+        "team": "隆德里纳",
+        "player": "J. Tavares 替下 N. Paraíba",
+        "detail": ""
+      },
+      {
+        "minute": 68,
+        "type": "card",
+        "team": "隆德里纳",
+        "player": "J. Vitor",
+        "detail": "yellow"
+      },
+      {
+        "minute": 72,
+        "type": "substitution",
+        "team": "维拉诺瓦",
+        "player": "B. Xavier 替下 Everton Galdino",
+        "detail": ""
+      },
+      {
+        "minute": 72,
+        "type": "substitution",
+        "team": "维拉诺瓦",
+        "player": "Lincoln 替下 A. Luís",
+        "detail": ""
+      },
+      {
+        "minute": 83,
+        "type": "substitution",
+        "team": "维拉诺瓦",
+        "player": "Emerson Urso 替下 Janderson",
+        "detail": ""
+      },
+      {
+        "minute": 83,
+        "type": "substitution",
+        "team": "维拉诺瓦",
+        "player": "Willian Maranhão 替下 D. D. Santos",
+        "detail": ""
+      },
+      {
+        "minute": 90,
+        "type": "injuryTime",
+        "team": "",
+        "player": "",
+        "detail": ""
+      },
+      {
+        "minute": 90,
+        "type": "period",
+        "team": "",
+        "player": "",
+        "detail": ""
+      }
+    ],
+    "h2h": {
+      "w": 5,
+      "d": 3,
+      "l": 7,
+      "total": 15,
+      "last_meetings": [
+        {
+          "away": "Vila Nova FC",
+          "date": "2026-05-31T14:00:00+00:00",
+          "home": "Londrina",
+          "score": "0-1",
+          "event_id": 9960,
+          "away_score": 1,
+          "home_score": 0,
+          "away_team_id": 826,
+          "home_team_id": 821,
+          "home_team": "Londrina",
+          "away_team": "Vila Nova FC",
+          "home_team_zh": "隆德里纳",
+          "away_team_zh": "维拉诺瓦"
+        },
+        {
+          "away": "Londrina",
+          "date": "2023-11-10T22:00:00+00:00",
+          "home": "Vila Nova FC",
+          "score": "4-1",
+          "event_id": 240200,
+          "away_score": 1,
+          "home_score": 4,
+          "away_team_id": 821,
+          "home_team_id": 826,
+          "home_team": "Vila Nova FC",
+          "away_team": "Londrina",
+          "home_team_zh": "维拉诺瓦",
+          "away_team_zh": "隆德里纳"
+        },
+        {
+          "away": "Vila Nova FC",
+          "date": "2023-07-15T20:00:00+00:00",
+          "home": "Londrina",
+          "score": "1-0",
+          "event_id": 240009,
+          "away_score": 0,
+          "home_score": 1,
+          "away_team_id": 826,
+          "home_team_id": 821,
+          "home_team": "Londrina",
+          "away_team": "Vila Nova FC",
+          "home_team_zh": "隆德里纳",
+          "away_team_zh": "维拉诺瓦"
+        },
+        {
+          "away": "Londrina",
+          "date": "2022-08-12T22:00:00+00:00",
+          "home": "Vila Nova FC",
+          "score": "0-0",
+          "event_id": 250581,
+          "away_score": 0,
+          "home_score": 0,
+          "away_team_id": 821,
+          "home_team_id": 826,
+          "home_team": "Vila Nova FC",
+          "away_team": "Londrina",
+          "home_team_zh": "维拉诺瓦",
+          "away_team_zh": "隆德里纳"
+        },
+        {
+          "away": "Vila Nova FC",
+          "date": "2022-04-29T22:00:00+00:00",
+          "home": "Londrina",
+          "score": "2-2",
+          "event_id": 250391,
+          "away_score": 2,
+          "home_score": 2,
+          "away_team_id": 826,
+          "home_team_id": 821,
+          "home_team": "Londrina",
+          "away_team": "Vila Nova FC",
+          "home_team_zh": "隆德里纳",
+          "away_team_zh": "维拉诺瓦"
+        }
+      ]
+    },
+    "money": {},
+    "broadcasts": [
+      {
+        "channel": "Betano",
+        "country": "BR"
+      }
+    ],
+    "team_home": {
+      "name": "维拉诺瓦",
+      "country": "巴西",
+      "logo": "",
+      "venue": "Estádio Onésio Brasileiro Alvarenga",
+      "coach": ""
+    },
+    "team_away": {
+      "name": "隆德里纳",
+      "country": "巴西",
+      "logo": "",
+      "venue": "Estádio Onésio Brasileiro Alvarenga",
+      "coach": ""
+    },
+    "players": [],
+    "updated_at": 1790401446.079913,
+    "odds_by_bookmaker": {
+      "bet365": {
+        "胜平负": {
+          "主队": 1.61,
+          "平局": 3.6,
+          "客队": 6
+        },
+        "亚盘": {
+          "主队-1.75": 3.3,
+          "客队-1.75": 1.32,
+          "主队-1.25": 2.35,
+          "客队-1.25": 1.57,
+          "主队-0.75": 1.73,
+          "客队-0.75": 2.08,
+          "主队0.25": 1.15,
+          "客队0.25": 5.5,
+          "主队-2.25": 5,
+          "客队-2.25": 1.17,
+          "主队-1.5": 2.67,
+          "客队-1.5": 1.45,
+          "主队-2.5": 5.5,
+          "客队-2.5": 1.15,
+          "主队-0.5": 1.57,
+          "客队-0.5": 2.35,
+          "主队0.0": 1.19,
+          "客队0.0": 4.5,
+          "主队0.5": 1.13,
+          "客队0.5": 5.9,
+          "主队-2.0": 4.4,
+          "客队-2.0": 1.2,
+          "主队-1.0": 2.02,
+          "客队-1.0": 1.77,
+          "主队-0.25": 1.38,
+          "客队-0.25": 3
+        },
+        "双方进球": {
+          "是": 2.1,
+          "否": 1.66
+        },
+        "平局退款": {
+          "主队": 1.18,
+          "客队": 4.5
+        },
+        "大小球(2.5)": {
+          "大2.5": 2.1,
+          "小2.5": 1.7
+        }
+      },
+      "betfair": {
+        "胜平负": {
+          "主队": 1.57,
+          "平局": 3.7,
+          "客队": 5.5
+        },
+        "双方进球": {
+          "是": 2.1,
+          "否": 1.73
+        },
+        "双重机会": {
+          "主队不败": 1.13,
+          "客队不败": 2.38,
+          "分胜负": 1.25
+        },
+        "大小球(0.5)": {
+          "大0.5": 1.05,
+          "小0.5": 9
+        },
+        "大小球(1.5)": {
+          "大1.5": 1.33,
+          "小1.5": 3.25
+        },
+        "大小球(2.5)": {
+          "大2.5": 2.1,
+          "小2.5": 1.73
+        },
+        "大小球(3.5)": {
+          "大3.5": 3.8,
+          "小3.5": 1.25
+        }
+      },
+      "bwin": {
+        "胜平负": {
+          "主队": 1.6,
+          "平局": 3.6,
+          "客队": 5.25
+        },
+        "亚盘": {
+          "主队-0.5": 1.57,
+          "客队-0.5": 2.2
+        },
+        "双方进球": {
+          "是": 2.1,
+          "否": 1.65
+        },
+        "平局退款": {
+          "主队": 1.21,
+          "客队": 4
+        }
+      },
+      "macauslot": {
+        "胜平负": {
+          "主队": 1.56,
+          "平局": 3.74,
+          "客队": 5.84
+        }
+      },
+      "pinnacle": {
+        "胜平负": {
+          "主队": 1.61,
+          "平局": 3.73,
+          "客队": 6.19
+        },
+        "大小球(1.5)": {
+          "大1.5": 1.37,
+          "小1.5": 3.13
+        },
+        "大小球(2.5)": {
+          "大2.5": 2.15,
+          "小2.5": 1.74
+        },
+        "大小球(3.5)": {
+          "大3.5": 3.91,
+          "小3.5": 1.26
+        },
+        "总角球": {
+          "大9.5": 1.54,
+          "小9.5": 2.39,
+          "大10.5": 1.9,
+          "小10.5": 1.89,
+          "大11.5": 2.39,
+          "小11.5": 1.54
+        }
+      },
+      "unibet": {
+        "胜平负": {
+          "主队": 1.58,
+          "平局": 3.8,
+          "客队": 5.75
+        },
+        "亚盘": {
+          "主队-1.5": 2.8,
+          "客队-1.5": 1.4,
+          "主队-0.5": 1.6,
+          "客队-0.5": 2.25,
+          "主队0.5": 1.15,
+          "客队0.5": 5
+        },
+        "双方进球": {
+          "是": 2.05,
+          "否": 1.7
+        },
+        "平局退款": {
+          "主队": 1.22,
+          "客队": 3.9
+        }
+      },
+      "william-hill": {
+        "胜平负": {
+          "主队": 1.6,
+          "平局": 3.4,
+          "客队": 5.8
+        },
+        "亚盘": {
+          "主队-0.5": 1.61,
+          "客队-0.5": 2.2
+        },
+        "双方进球": {
+          "是": 2.05,
+          "否": 1.73
+        },
+        "双重机会": {
+          "主队不败": 1.12,
+          "客队不败": 2.25,
+          "分胜负": 1.29
+        },
+        "平局退款": {
+          "主队": 1.18,
+          "客队": 4.33
+        }
+      }
+    },
+    "match_stats": [
+      {
+        "id": 226964,
+        "event_id": 10153,
+        "team": "away",
+        "possession": 42,
+        "shots": 6,
+        "shots_on_target": 2,
+        "xg": 0.32,
+        "passes": 232,
+        "corners": 3,
+        "fouls": 8,
+        "offsides": 2,
+        "yellow": 2,
+        "red": 0,
+        "updated_at": 1790384261.0555437,
+        "xg_h1": 0.243,
+        "xg_h2": null,
+        "xg_est": null,
+        "xg_est_src": null,
+        "team_zh": "客队"
+      },
+      {
+        "id": 226963,
+        "event_id": 10153,
+        "team": "home",
+        "possession": 58,
+        "shots": 16,
+        "shots_on_target": 8,
+        "xg": 0.98,
+        "passes": 319,
+        "corners": 8,
+        "fouls": 14,
+        "offsides": 0,
+        "yellow": 0,
+        "red": 0,
+        "updated_at": 1790384261.0555437,
+        "xg_h1": 0.728,
+        "xg_h2": null,
+        "xg_est": null,
+        "xg_est_src": null,
+        "team_zh": "主队"
+      }
+    ],
+    "expected_xg": {
+      "found": true,
+      "event_id": 10153,
+      "home_team": "维拉诺瓦",
+      "away_team": "隆德里纳",
+      "expected_xg": {
+        "home": 1.24,
+        "away": 1.21,
+        "home_h1": 0.79,
+        "away_h1": 0.68,
+        "home_h2": 0.47,
+        "away_h2": 0.59
+      },
+      "home_form": {
+        "n": 8,
+        "xg_for_avg": 1.373,
+        "xg_against_avg": 0.948,
+        "xg_for_h1_avg": 0.873,
+        "xg_against_h1_avg": 0.512,
+        "xg_for_h2_avg": 0.535,
+        "xg_against_h2_avg": 0.487,
+        "home_xg_for_avg": 1.828,
+        "away_xg_for_avg": 0.613
+      },
+      "away_form": {
+        "n": 8,
+        "xg_for_avg": 1.466,
+        "xg_against_avg": 1.11,
+        "xg_for_h1_avg": 0.851,
+        "xg_against_h1_avg": 0.717,
+        "xg_for_h2_avg": 0.692,
+        "xg_against_h2_avg": 0.413,
+        "home_xg_for_avg": 1.604,
+        "away_xg_for_avg": 1.237
+      },
+      "note": "基于双方近10场赛后xG形态(攻击/防守)算术均值估算的赛前预期值, 仅描述历史表现, 非比赛结果预测"
+    },
+    "historical_xg": {
+      "found": false,
+      "event_id": 10153
+    },
+    "historical_odds": {
+      "found": false,
+      "event_id": 10153
+    },
+    "odds_available": true,
+    "_fetchTime": "2026-09-26T05:44:06.249Z",
+    "_eventId": 10153,
+    "_source": "self_api_raw",
+    "_sources": [
+      "db1_cloud_api"
+    ],
+    "team_ability": {
+      "home": {
+        "overall": 65,
+        "attacking": 65,
+        "defending": 65,
+        "depth": 0
+      },
+      "away": {
+        "overall": 65,
+        "attacking": 65,
+        "defending": 65,
+        "depth": 0
+      },
+      "diff": 0
+    }
+  },
   "207826": {
     "event_id": 207826,
     "league": "美国冠军联赛",
@@ -1317,6 +2078,601 @@
     "odds_available": true,
     "_fetchTime": "2026-09-26T05:14:00.875Z",
     "_eventId": 207826,
+    "_source": "self_api_raw",
+    "_sources": [
+      "db1_cloud_api"
+    ],
+    "team_ability": {
+      "home": {
+        "overall": 65,
+        "attacking": 65,
+        "defending": 65,
+        "depth": 0
+      },
+      "away": {
+        "overall": 65,
+        "attacking": 65,
+        "defending": 65,
+        "depth": 0
+      },
+      "diff": 0
+    }
+  },
+  "207827": {
+    "event_id": 207827,
+    "league": "美国冠军联赛",
+    "league_zh": "美国冠军联赛",
+    "priority": 9,
+    "is_major": false,
+    "home_team": "杰克逊维尔SC",
+    "away_team": "劳登联",
+    "home_team_zh": "杰克逊维尔SC",
+    "away_team_zh": "劳登联",
+    "date": "26/09/2026",
+    "time": "07:30",
+    "status": "ft",
+    "status_zh": "全场结束",
+    "score": "1-4",
+    "home_score": 1,
+    "away_score": 4,
+    "minute": 0,
+    "venue": "",
+    "referee": "",
+    "odds": {
+      "home_win": 3.5,
+      "draw": 4.25,
+      "away_win": 2.1,
+      "asian_handicap": null,
+      "asian_home": null,
+      "asian_away": null,
+      "over_25": 1.49,
+      "under_25": 2.63,
+      "btts_yes": 1.42,
+      "btts_no": 2.62
+    },
+    "odds_multi": {
+      "胜平负": {
+        "主队": 2.93,
+        "平局": 4.15,
+        "客队": 2.11
+      },
+      "双方进球": {
+        "是": 1.44,
+        "否": 2.66
+      },
+      "双重机会": {
+        "主队不败": 1.73,
+        "客队不败": 1.35,
+        "分胜负": 1.25
+      },
+      "大小球(0.5)": {
+        "大0.5": 1.02,
+        "小0.5": 14.9
+      },
+      "大小球(1.5)": {
+        "大1.5": 1.16,
+        "小1.5": 5.05
+      },
+      "大小球(2.5)": {
+        "大2.5": 1.53,
+        "小2.5": 2.5
+      },
+      "大小球(3.5)": {
+        "大3.5": 2.24,
+        "小3.5": 1.64
+      },
+      "总角球": {
+        "大7.5": 1.29,
+        "小7.5": 3.06,
+        "大8.5": 1.61,
+        "小8.5": 2.23,
+        "大9.5": 2,
+        "小9.5": 1.77,
+        "大10.5": 2.51,
+        "小10.5": 1.44,
+        "大11.5": 3.45,
+        "小11.5": 1.22
+      }
+    },
+    "polymarket": {},
+    "lineups": {
+      "home": {
+        "formation": "4-2-3-1",
+        "players": [
+          "1. Jake McGuire",
+          "13. Ventura Alvarado",
+          "18. Wahab Ackwei",
+          "15. Ryan Edwards (C)",
+          "21. Marcus Godinho",
+          "8. Wan Kuzain",
+          "6. Jordan Rossiter",
+          "12. Edgardo Rito",
+          "14. Jean Mota",
+          "10. Kieran Sadlier",
+          "16. Emil Jaaskelainen"
+        ],
+        "count": 11,
+        "players_by_pos": {
+          "门将": [
+            "1. Jake McGuire"
+          ],
+          "后卫": [
+            "13. Ventura Alvarado",
+            "18. Wahab Ackwei",
+            "15. Ryan Edwards (C)",
+            "21. Marcus Godinho"
+          ],
+          "中场": [
+            "8. Wan Kuzain",
+            "6. Jordan Rossiter",
+            "12. Edgardo Rito",
+            "14. Jean Mota",
+            "10. Kieran Sadlier"
+          ],
+          "前锋": [
+            "16. Emil Jaaskelainen"
+          ]
+        }
+      },
+      "away": {
+        "formation": "4-2-3-1",
+        "players": [
+          "13. Jordan Farr",
+          "7. Pacifique Niyongabire",
+          "2. Noah Adnan",
+          "21. Bolu Akinyode",
+          "6. Kwame Awuah",
+          "8. James Murphy (C)",
+          "28. Rida Zouhir",
+          "22. Christian Torres",
+          "23. Akil Watts",
+          "11. Abdellatif Aboukoura",
+          "9. Edward Davis"
+        ],
+        "count": 11,
+        "players_by_pos": {
+          "门将": [
+            "13. Jordan Farr"
+          ],
+          "后卫": [
+            "7. Pacifique Niyongabire",
+            "2. Noah Adnan",
+            "21. Bolu Akinyode",
+            "6. Kwame Awuah"
+          ],
+          "中场": [
+            "8. James Murphy (C)",
+            "28. Rida Zouhir",
+            "22. Christian Torres",
+            "23. Akil Watts",
+            "11. Abdellatif Aboukoura"
+          ],
+          "前锋": [
+            "9. Edward Davis"
+          ]
+        }
+      }
+    },
+    "injuries": [],
+    "stats": [
+      {
+        "team": "客队",
+        "possession": 43,
+        "shots": 16,
+        "shots_on_target": 7,
+        "xg": 2.28,
+        "xg_is_estimate": false,
+        "xg_note": null,
+        "passes": 401,
+        "corners": 3,
+        "fouls": 13,
+        "yellow": 2,
+        "red": 0,
+        "xg_h1": 0.811,
+        "xg_h2": null
+      },
+      {
+        "team": "主队",
+        "possession": 57,
+        "shots": 16,
+        "shots_on_target": 5,
+        "xg": 2.21,
+        "xg_is_estimate": false,
+        "xg_note": null,
+        "passes": 516,
+        "corners": 6,
+        "fouls": 9,
+        "yellow": 0,
+        "red": 0,
+        "xg_h1": 1.799,
+        "xg_h2": null
+      }
+    ],
+    "events": [
+      {
+        "minute": 4,
+        "type": "goal",
+        "team": "劳登联",
+        "player": "E. Davis",
+        "detail": ""
+      },
+      {
+        "minute": 30,
+        "type": "goal",
+        "team": "杰克逊维尔SC",
+        "player": "W. Kuzain",
+        "detail": ""
+      },
+      {
+        "minute": 45,
+        "type": "injuryTime",
+        "team": "",
+        "player": "",
+        "detail": ""
+      },
+      {
+        "minute": 45,
+        "type": "period",
+        "team": "",
+        "player": "",
+        "detail": ""
+      },
+      {
+        "minute": 46,
+        "type": "substitution",
+        "team": "劳登联",
+        "player": "G. Lomtadze 替下 R. Zouhir",
+        "detail": ""
+      },
+      {
+        "minute": 50,
+        "type": "card",
+        "team": "劳登联",
+        "player": "A. Watts",
+        "detail": "yellow"
+      },
+      {
+        "minute": 56,
+        "type": "goal",
+        "team": "劳登联",
+        "player": "C. Torres",
+        "detail": ""
+      },
+      {
+        "minute": 58,
+        "type": "goal",
+        "team": "劳登联",
+        "player": "C. Torres",
+        "detail": ""
+      },
+      {
+        "minute": 62,
+        "type": "substitution",
+        "team": "杰克逊维尔SC",
+        "player": "H. Neville 替下 M. Godinho",
+        "detail": ""
+      },
+      {
+        "minute": 62,
+        "type": "substitution",
+        "team": "杰克逊维尔SC",
+        "player": "T. Roberts 替下 V. Alvarado",
+        "detail": ""
+      },
+      {
+        "minute": 66,
+        "type": "card",
+        "team": "劳登联",
+        "player": "N. Adnan",
+        "detail": "yellow"
+      },
+      {
+        "minute": 72,
+        "type": "substitution",
+        "team": "杰克逊维尔SC",
+        "player": "A. Luckhurst 替下 E. Jääskeläinen",
+        "detail": ""
+      },
+      {
+        "minute": 73,
+        "type": "goal",
+        "team": "劳登联",
+        "player": "E. Davis",
+        "detail": ""
+      },
+      {
+        "minute": 75,
+        "type": "substitution",
+        "team": "劳登联",
+        "player": "R. Aman 替下 C. Torres",
+        "detail": ""
+      },
+      {
+        "minute": 75,
+        "type": "substitution",
+        "team": "劳登联",
+        "player": "S. Young 替下 A. Watts",
+        "detail": ""
+      },
+      {
+        "minute": 77,
+        "type": "substitution",
+        "team": "杰克逊维尔SC",
+        "player": "R. Pedder 替下 K. Sadlier",
+        "detail": ""
+      },
+      {
+        "minute": 77,
+        "type": "substitution",
+        "team": "杰克逊维尔SC",
+        "player": "R. Somersall 替下 W. Kuzain",
+        "detail": ""
+      },
+      {
+        "minute": 82,
+        "type": "substitution",
+        "team": "劳登联",
+        "player": "L. Butts 替下 E. Davis",
+        "detail": ""
+      },
+      {
+        "minute": 82,
+        "type": "substitution",
+        "team": "劳登联",
+        "player": "S. Mazzaferro 替下 K. Awuah",
+        "detail": ""
+      },
+      {
+        "minute": 85,
+        "type": "substitution",
+        "team": "劳登联",
+        "player": "M. Dias 替下 P. Niyongabire",
+        "detail": ""
+      },
+      {
+        "minute": 90,
+        "type": "injuryTime",
+        "team": "",
+        "player": "",
+        "detail": ""
+      },
+      {
+        "minute": 90,
+        "type": "period",
+        "team": "",
+        "player": "",
+        "detail": ""
+      },
+      {
+        "minute": 90,
+        "type": "card",
+        "team": "杰克逊维尔SC",
+        "player": "R. Pedder",
+        "detail": "yellow"
+      }
+    ],
+    "h2h": {
+      "w": 0,
+      "d": 1,
+      "l": 0,
+      "total": 1,
+      "last_meetings": [
+        {
+          "away": "SC Jacksonville",
+          "date": "2026-07-03T23:30:00+00:00",
+          "home": "Loudoun United FC",
+          "score": "2-2",
+          "event_id": 207681,
+          "away_score": 2,
+          "home_score": 2,
+          "away_team_id": 2227,
+          "home_team_id": 2224,
+          "home_team": "Loudoun United FC",
+          "away_team": "SC Jacksonville",
+          "home_team_zh": "劳登联",
+          "away_team_zh": "杰克逊维尔SC"
+        }
+      ]
+    },
+    "money": {},
+    "broadcasts": [
+      {
+        "channel": "Betano",
+        "country": "BR"
+      }
+    ],
+    "team_home": {
+      "name": "杰克逊维尔SC",
+      "country": "美国",
+      "logo": "",
+      "venue": "",
+      "coach": ""
+    },
+    "team_away": {
+      "name": "劳登联",
+      "country": "美国",
+      "logo": "",
+      "venue": "",
+      "coach": ""
+    },
+    "players": [],
+    "updated_at": 1790401446.9511864,
+    "odds_by_bookmaker": {
+      "bet365": {
+        "胜平负": {
+          "主队": 2.8,
+          "平局": 3.7,
+          "客队": 2.05
+        },
+        "双方进球": {
+          "是": 1.44,
+          "否": 2.62
+        },
+        "大小球(2.5)": {
+          "大2.5": 1.5,
+          "小2.5": 2.5
+        }
+      },
+      "betfair": {
+        "胜平负": {
+          "主队": 2.88,
+          "平局": 3.8,
+          "客队": 2
+        },
+        "双重机会": {
+          "主队不败": 1.67,
+          "客队不败": 1.33,
+          "分胜负": 1.2
+        }
+      },
+      "bwin": {
+        "胜平负": {
+          "主队": 2.87,
+          "平局": 3.6,
+          "客队": 2
+        }
+      },
+      "pinnacle": {
+        "胜平负": {
+          "主队": 2.93,
+          "平局": 4.15,
+          "客队": 2.11
+        },
+        "大小球(1.5)": {
+          "大1.5": 1.16,
+          "小1.5": 4.96
+        },
+        "大小球(2.5)": {
+          "大2.5": 1.53,
+          "小2.5": 2.46
+        },
+        "大小球(3.5)": {
+          "大3.5": 2.24,
+          "小3.5": 1.64
+        },
+        "总角球": {
+          "大8.5": 1.61,
+          "小8.5": 2.23,
+          "大9.5": 2,
+          "小9.5": 1.77
+        }
+      },
+      "unibet": {
+        "胜平负": {
+          "主队": 2.8,
+          "平局": 3.5,
+          "客队": 2.08
+        }
+      },
+      "william-hill": {
+        "胜平负": {
+          "主队": 2.88,
+          "平局": 3.7,
+          "客队": 2.05
+        },
+        "双方进球": {
+          "是": 1.44,
+          "否": 2.5
+        },
+        "双重机会": {
+          "主队不败": 1.73,
+          "客队不败": 1.35,
+          "分胜负": 1.25
+        }
+      }
+    },
+    "match_stats": [
+      {
+        "id": 226962,
+        "event_id": 207827,
+        "team": "away",
+        "possession": 43,
+        "shots": 16,
+        "shots_on_target": 7,
+        "xg": 2.28,
+        "passes": 401,
+        "corners": 3,
+        "fouls": 13,
+        "offsides": 2,
+        "yellow": 2,
+        "red": 0,
+        "updated_at": 1790386065.707391,
+        "xg_h1": 0.811,
+        "xg_h2": null,
+        "xg_est": null,
+        "xg_est_src": null,
+        "team_zh": "客队"
+      },
+      {
+        "id": 226961,
+        "event_id": 207827,
+        "team": "home",
+        "possession": 57,
+        "shots": 16,
+        "shots_on_target": 5,
+        "xg": 2.21,
+        "passes": 516,
+        "corners": 6,
+        "fouls": 9,
+        "offsides": 0,
+        "yellow": 0,
+        "red": 0,
+        "updated_at": 1790386065.707391,
+        "xg_h1": 1.799,
+        "xg_h2": null,
+        "xg_est": null,
+        "xg_est_src": null,
+        "team_zh": "主队"
+      }
+    ],
+    "expected_xg": {
+      "found": true,
+      "event_id": 207827,
+      "home_team": "杰克逊维尔SC",
+      "away_team": "劳登联",
+      "expected_xg": {
+        "home": 1.55,
+        "away": 1.98,
+        "home_h1": 0.65,
+        "away_h1": 0.85,
+        "home_h2": 0.84,
+        "away_h2": 1.11
+      },
+      "home_form": {
+        "n": 7,
+        "xg_for_avg": 1.226,
+        "xg_against_avg": 2.284,
+        "xg_for_h1_avg": 0.591,
+        "xg_against_h1_avg": 0.969,
+        "xg_for_h2_avg": 0.687,
+        "xg_against_h2_avg": 1.322,
+        "home_xg_for_avg": 1.125,
+        "away_xg_for_avg": 1.36
+      },
+      "away_form": {
+        "n": 7,
+        "xg_for_avg": 1.669,
+        "xg_against_avg": 1.873,
+        "xg_for_h1_avg": 0.736,
+        "xg_against_h1_avg": 0.7,
+        "xg_for_h2_avg": 0.895,
+        "xg_against_h2_avg": 0.986,
+        "home_xg_for_avg": 2.083,
+        "away_xg_for_avg": 1.357
+      },
+      "note": "基于双方近10场赛后xG形态(攻击/防守)算术均值估算的赛前预期值, 仅描述历史表现, 非比赛结果预测"
+    },
+    "historical_xg": {
+      "found": false,
+      "event_id": 207827
+    },
+    "historical_odds": {
+      "found": false,
+      "event_id": 207827
+    },
+    "odds_available": true,
+    "_fetchTime": "2026-09-26T05:44:07.118Z",
+    "_eventId": 207827,
     "_source": "self_api_raw",
     "_sources": [
       "db1_cloud_api"
