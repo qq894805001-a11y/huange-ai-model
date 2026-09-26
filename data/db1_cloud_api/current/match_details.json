@@ -560,6 +560,747 @@
     "_eventId": 10150,
     "_source": "self_api_raw"
   },
+  "207826": {
+    "event_id": 207826,
+    "league": "美国冠军联赛",
+    "league_zh": "美国冠军联赛",
+    "priority": 9,
+    "is_major": false,
+    "home_team": "哈特福德竞技",
+    "away_team": "路易斯维尔城",
+    "home_team_zh": "哈特福德竞技",
+    "away_team_zh": "路易斯维尔城",
+    "date": "26/09/2026",
+    "time": "07:00",
+    "status": "ft",
+    "status_zh": "全场结束",
+    "score": "2-2",
+    "home_score": 2,
+    "away_score": 2,
+    "minute": 0,
+    "venue": "Dillon Stadium",
+    "referee": "",
+    "odds": {
+      "home_win": 2.65,
+      "draw": 3.8,
+      "away_win": 2.49,
+      "asian_handicap": 0,
+      "asian_home": 1.95,
+      "asian_away": 1.83,
+      "over_25": 1.79,
+      "under_25": 2.15,
+      "btts_yes": 1.56,
+      "btts_no": 2.25
+    },
+    "odds_multi": {
+      "胜平负": {
+        "主队": 3.12,
+        "平局": 3.86,
+        "客队": 2.36
+      },
+      "亚盘": {
+        "主队0.25": 1.75,
+        "客队0.25": 1.95,
+        "主队0.0": 1.96,
+        "客队0.0": 1.75,
+        "主队-1.75": 7.29,
+        "客队-1.75": 1.03,
+        "主队-1.25": 4.96,
+        "客队-1.25": 1.11,
+        "主队-0.75": 3.14,
+        "客队-0.75": 1.27,
+        "主队0.75": 1.37,
+        "客队0.75": 2.66,
+        "主队1.25": 1.17,
+        "客队1.25": 4.05,
+        "主队1.75": 1.07,
+        "客队1.75": 5.84,
+        "主队-1.5": 5.45,
+        "客队-1.5": 1.08,
+        "主队2.5": 1.03,
+        "客队2.5": 8.2,
+        "主队1.5": 1.19,
+        "客队1.5": 4.5,
+        "客队2.0": 9,
+        "主队-2.0": 9.7,
+        "主队-1.0": 4.5,
+        "客队-1.0": 1.13,
+        "主队1.0": 1.21,
+        "客队1.0": 3.58,
+        "主队-0.25": 2.28,
+        "客队-0.25": 1.52,
+        "主队-0.5": 2.65,
+        "客队-0.5": 1.45,
+        "主队0.5": 1.6,
+        "客队0.5": 2.3
+      },
+      "双方进球": {
+        "是": 1.61,
+        "否": 2.38
+      },
+      "双重机会": {
+        "主队不败": 1.57,
+        "客队不败": 1.44,
+        "分胜负": 1.25
+      },
+      "平局退款": {
+        "主队": 2,
+        "客队": 1.77
+      },
+      "大小球(0.5)": {
+        "大0.5": 1.02,
+        "小0.5": 13
+      },
+      "大小球(1.5)": {
+        "大1.5": 1.22,
+        "小1.5": 4.5
+      },
+      "大小球(2.5)": {
+        "大2.5": 1.7,
+        "小2.5": 2.16
+      },
+      "大小球(3.5)": {
+        "大3.5": 2.73,
+        "小3.5": 1.44
+      },
+      "总角球": {
+        "大7.5": 1.25,
+        "小7.5": 3.28,
+        "大8.5": 1.51,
+        "小8.5": 2.42,
+        "大9.5": 1.89,
+        "小9.5": 1.88,
+        "大10.5": 2.37,
+        "小10.5": 1.55,
+        "大11.5": 3.2,
+        "小11.5": 1.26
+      }
+    },
+    "polymarket": {},
+    "lineups": {
+      "home": {
+        "formation": "3-1-4-2",
+        "players": [
+          "77. Antony Siaha",
+          "15. Adrian Diz Pe",
+          "4. Jordan Scarlett (C)",
+          "25. Britton Fischer",
+          "6. Beverly Makangila",
+          "2. Sebastian Anderson",
+          "8. Junior Moreira",
+          "16. Barry Coffey",
+          "19. Emmanuel Samadiya",
+          "17. Sadat Anaku",
+          "9. Augustine Williams"
+        ],
+        "count": 11,
+        "players_by_pos": {
+          "门将": [
+            "77. Antony Siaha"
+          ],
+          "后卫": [
+            "15. Adrian Diz Pe",
+            "4. Jordan Scarlett (C)",
+            "25. Britton Fischer"
+          ],
+          "中场": [
+            "6. Beverly Makangila",
+            "2. Sebastian Anderson",
+            "8. Junior Moreira",
+            "16. Barry Coffey",
+            "19. Emmanuel Samadiya"
+          ],
+          "前锋": [
+            "17. Sadat Anaku",
+            "9. Augustine Williams"
+          ]
+        }
+      },
+      "away": {
+        "formation": "3-4-3",
+        "players": [
+          "29. Ryan Schewe",
+          "2. Aiden McFadden",
+          "31. Kevon Lambert",
+          "32. Kyle Adams (C)",
+          "15. Manny Perez",
+          "8. Taylor Davila",
+          "19. Babacar Niang",
+          "13. Amadou Dia",
+          "21. Quenzi Huerman",
+          "9. Chris Donovan",
+          "7. Ray Serrano"
+        ],
+        "count": 11,
+        "players_by_pos": {
+          "门将": [
+            "29. Ryan Schewe"
+          ],
+          "后卫": [
+            "2. Aiden McFadden",
+            "31. Kevon Lambert",
+            "32. Kyle Adams (C)"
+          ],
+          "中场": [
+            "15. Manny Perez",
+            "8. Taylor Davila",
+            "19. Babacar Niang",
+            "13. Amadou Dia"
+          ],
+          "前锋": [
+            "21. Quenzi Huerman",
+            "9. Chris Donovan",
+            "7. Ray Serrano"
+          ]
+        }
+      }
+    },
+    "injuries": [],
+    "stats": [
+      {
+        "team": "客队",
+        "possession": 61,
+        "shots": 11,
+        "shots_on_target": 5,
+        "xg": 1.89,
+        "xg_is_estimate": false,
+        "xg_note": null,
+        "passes": 419,
+        "corners": 7,
+        "fouls": 15,
+        "yellow": 3,
+        "red": 1,
+        "xg_h1": 0.213,
+        "xg_h2": null
+      },
+      {
+        "team": "主队",
+        "possession": 39,
+        "shots": 13,
+        "shots_on_target": 4,
+        "xg": 2.2,
+        "xg_is_estimate": false,
+        "xg_note": null,
+        "passes": 251,
+        "corners": 8,
+        "fouls": 11,
+        "yellow": 3,
+        "red": 1,
+        "xg_h1": 1.163,
+        "xg_h2": null
+      }
+    ],
+    "events": [
+      {
+        "minute": 11,
+        "type": "goal",
+        "team": "哈特福德竞技",
+        "player": "A. Williams",
+        "detail": ""
+      },
+      {
+        "minute": 37,
+        "type": "card",
+        "team": "路易斯维尔城",
+        "player": "A. Dia",
+        "detail": "yellow"
+      },
+      {
+        "minute": 42,
+        "type": "card",
+        "team": "路易斯维尔城",
+        "player": "B. Niang",
+        "detail": "yellow"
+      },
+      {
+        "minute": 45,
+        "type": "card",
+        "team": "路易斯维尔城",
+        "player": "S. Bird",
+        "detail": "yellow"
+      },
+      {
+        "minute": 45,
+        "type": "injuryTime",
+        "team": "",
+        "player": "",
+        "detail": ""
+      },
+      {
+        "minute": 45,
+        "type": "period",
+        "team": "",
+        "player": "",
+        "detail": ""
+      },
+      {
+        "minute": 46,
+        "type": "substitution",
+        "team": "路易斯维尔城",
+        "player": "J. Morris 替下 A. Dia",
+        "detail": ""
+      },
+      {
+        "minute": 46,
+        "type": "substitution",
+        "team": "路易斯维尔城",
+        "player": "Z. Duncan 替下 B. Niang",
+        "detail": ""
+      },
+      {
+        "minute": 48,
+        "type": "goal",
+        "team": "路易斯维尔城",
+        "player": "J. Morris",
+        "detail": ""
+      },
+      {
+        "minute": 50,
+        "type": "card",
+        "team": "哈特福德竞技",
+        "player": "B. Fischer",
+        "detail": "yellow"
+      },
+      {
+        "minute": 51,
+        "type": "card",
+        "team": "哈特福德竞技",
+        "player": "B. Fischer",
+        "detail": "yellowRed"
+      },
+      {
+        "minute": 53,
+        "type": "goal",
+        "team": "路易斯维尔城",
+        "player": "Q. Huerman",
+        "detail": ""
+      },
+      {
+        "minute": 56,
+        "type": "substitution",
+        "team": "哈特福德竞技",
+        "player": "B. Njie 替下 B. Coffey",
+        "detail": ""
+      },
+      {
+        "minute": 59,
+        "type": "card",
+        "team": "哈特福德竞技",
+        "player": "B. Njie",
+        "detail": "yellow"
+      },
+      {
+        "minute": 70,
+        "type": "substitution",
+        "team": "哈特福德竞技",
+        "player": "A. A. Obalola 替下 S. Anaku",
+        "detail": ""
+      },
+      {
+        "minute": 70,
+        "type": "substitution",
+        "team": "哈特福德竞技",
+        "player": "M. Adedokun 替下 B. Makangila",
+        "detail": ""
+      },
+      {
+        "minute": 70,
+        "type": "substitution",
+        "team": "哈特福德竞技",
+        "player": "M. Ngalina 替下 A. Williams",
+        "detail": ""
+      },
+      {
+        "minute": 73,
+        "type": "card",
+        "team": "路易斯维尔城",
+        "player": "B. Niang",
+        "detail": "yellowRed"
+      },
+      {
+        "minute": 73,
+        "type": "goal",
+        "team": "哈特福德竞技",
+        "player": "M. Ngalina",
+        "detail": ""
+      },
+      {
+        "minute": 74,
+        "type": "substitution",
+        "team": "路易斯维尔城",
+        "player": "J. Wilson 替下 Q. Huerman",
+        "detail": ""
+      },
+      {
+        "minute": 79,
+        "type": "card",
+        "team": "路易斯维尔城",
+        "player": "K. Adams",
+        "detail": "yellow"
+      },
+      {
+        "minute": 90,
+        "type": "injuryTime",
+        "team": "",
+        "player": "",
+        "detail": ""
+      },
+      {
+        "minute": 90,
+        "type": "period",
+        "team": "",
+        "player": "",
+        "detail": ""
+      },
+      {
+        "minute": 90,
+        "type": "card",
+        "team": "哈特福德竞技",
+        "player": "J. Moreira",
+        "detail": "yellow"
+      }
+    ],
+    "h2h": {
+      "w": 1,
+      "d": 3,
+      "l": 8,
+      "total": 12,
+      "last_meetings": [
+        {
+          "away": "Hartford Athletic",
+          "date": "2026-07-05T00:00:00+00:00",
+          "home": "Louisville City FC",
+          "score": "1-0",
+          "event_id": 207686,
+          "away_score": 0,
+          "home_score": 1,
+          "away_team_id": 2228,
+          "home_team_id": 2222,
+          "home_team": "Louisville City FC",
+          "away_team": "Hartford Athletic",
+          "home_team_zh": "路易斯维尔城",
+          "away_team_zh": "哈特福德竞技"
+        },
+        {
+          "away": "Hartford Athletic",
+          "date": "2025-10-25T23:30:00+00:00",
+          "home": "Louisville City FC",
+          "score": "1-0",
+          "event_id": 229819,
+          "away_score": 0,
+          "home_score": 1,
+          "away_team_id": 2228,
+          "home_team_id": 2222,
+          "home_team": "Louisville City FC",
+          "away_team": "Hartford Athletic",
+          "home_team_zh": "路易斯维尔城",
+          "away_team_zh": "哈特福德竞技"
+        },
+        {
+          "away": "Louisville City FC",
+          "date": "2025-05-17T23:00:00+00:00",
+          "home": "Hartford Athletic",
+          "score": "1-1",
+          "event_id": 229567,
+          "away_score": 1,
+          "home_score": 1,
+          "away_team_id": 2222,
+          "home_team_id": 2228,
+          "home_team": "Hartford Athletic",
+          "away_team": "Louisville City FC",
+          "home_team_zh": "哈特福德竞技",
+          "away_team_zh": "路易斯维尔城"
+        },
+        {
+          "away": "Louisville City FC",
+          "date": "2024-08-24T23:00:00+00:00",
+          "home": "Hartford Athletic",
+          "score": "2-1",
+          "event_id": 239278,
+          "away_score": 1,
+          "home_score": 2,
+          "away_team_id": 2222,
+          "home_team_id": 2228,
+          "home_team": "Hartford Athletic",
+          "away_team": "Louisville City FC",
+          "home_team_zh": "哈特福德竞技",
+          "away_team_zh": "路易斯维尔城"
+        },
+        {
+          "away": "Hartford Athletic",
+          "date": "2024-04-27T23:30:00+00:00",
+          "home": "Louisville City FC",
+          "score": "6-0",
+          "event_id": 239077,
+          "away_score": 0,
+          "home_score": 6,
+          "away_team_id": 2228,
+          "home_team_id": 2222,
+          "home_team": "Louisville City FC",
+          "away_team": "Hartford Athletic",
+          "home_team_zh": "路易斯维尔城",
+          "away_team_zh": "哈特福德竞技"
+        }
+      ]
+    },
+    "money": {},
+    "broadcasts": [
+      {
+        "channel": "Betano",
+        "country": "BR"
+      }
+    ],
+    "team_home": {
+      "name": "哈特福德竞技",
+      "country": "美国",
+      "logo": "",
+      "venue": "Dillon Stadium",
+      "coach": ""
+    },
+    "team_away": {
+      "name": "路易斯维尔城",
+      "country": "美国",
+      "logo": "",
+      "venue": "Dillon Stadium",
+      "coach": ""
+    },
+    "players": [],
+    "updated_at": 1790399640.796542,
+    "odds_by_bookmaker": {
+      "bet365": {
+        "胜平负": {
+          "主队": 2.7,
+          "平局": 3.4,
+          "客队": 2.2
+        },
+        "双方进球": {
+          "是": 1.61,
+          "否": 2.2
+        },
+        "大小球(2.5)": {
+          "大2.5": 1.7,
+          "小2.5": 2.1
+        }
+      },
+      "betfair": {
+        "胜平负": {
+          "主队": 2.63,
+          "平局": 3.5,
+          "客队": 2.3
+        },
+        "双方进球": {
+          "是": 1.53,
+          "否": 2.38
+        },
+        "双重机会": {
+          "主队不败": 1.53,
+          "客队不败": 1.4,
+          "分胜负": 1.25
+        },
+        "大小球(0.5)": {
+          "大0.5": 1.02,
+          "小0.5": 13
+        },
+        "大小球(1.5)": {
+          "大1.5": 1.2,
+          "小1.5": 4.5
+        },
+        "大小球(2.5)": {
+          "大2.5": 1.65,
+          "小2.5": 2.1
+        },
+        "大小球(3.5)": {
+          "大3.5": 2.7,
+          "小3.5": 1.44
+        }
+      },
+      "bwin": {
+        "胜平负": {
+          "主队": 2.6,
+          "平局": 3.4,
+          "客队": 2.25
+        },
+        "双方进球": {
+          "是": 1.55,
+          "否": 2.25
+        }
+      },
+      "macauslot": {
+        "胜平负": {
+          "主队": 3.12,
+          "平局": 3.56,
+          "客队": 1.98
+        }
+      },
+      "pinnacle": {
+        "胜平负": {
+          "主队": 2.68,
+          "平局": 3.86,
+          "客队": 2.36
+        },
+        "大小球(1.5)": {
+          "大1.5": 1.22,
+          "小1.5": 4.21
+        },
+        "大小球(2.5)": {
+          "大2.5": 1.7,
+          "小2.5": 2.16
+        },
+        "大小球(3.5)": {
+          "大3.5": 2.73,
+          "小3.5": 1.44
+        },
+        "总角球": {
+          "大8.5": 1.51,
+          "小8.5": 2.42,
+          "大9.5": 1.89,
+          "小9.5": 1.88,
+          "大10.5": 2.34,
+          "小10.5": 1.55
+        }
+      },
+      "unibet": {
+        "胜平负": {
+          "主队": 2.85,
+          "平局": 3.3,
+          "客队": 2.15
+        },
+        "亚盘": {
+          "主队1.5": 1.19,
+          "客队1.5": 4.35,
+          "主队-0.5": 2.65,
+          "客队-0.5": 1.45,
+          "主队0.5": 1.58,
+          "客队0.5": 2.3
+        },
+        "双方进球": {
+          "是": 1.55,
+          "否": 2.3
+        },
+        "平局退款": {
+          "主队": 2,
+          "客队": 1.73
+        }
+      },
+      "william-hill": {
+        "胜平负": {
+          "主队": 2.6,
+          "平局": 3.5,
+          "客队": 2.25
+        },
+        "亚盘": {
+          "主队0.5": 1.6,
+          "客队0.5": 2.2
+        },
+        "双方进球": {
+          "是": 1.57,
+          "否": 2.25
+        },
+        "双重机会": {
+          "主队不败": 1.57,
+          "客队不败": 1.44,
+          "分胜负": 1.25
+        },
+        "平局退款": {
+          "主队": 1.95,
+          "客队": 1.75
+        }
+      }
+    },
+    "match_stats": [
+      {
+        "id": 226970,
+        "event_id": 207826,
+        "team": "away",
+        "possession": 61,
+        "shots": 11,
+        "shots_on_target": 5,
+        "xg": 1.89,
+        "passes": 419,
+        "corners": 7,
+        "fouls": 15,
+        "offsides": 0,
+        "yellow": 3,
+        "red": 1,
+        "updated_at": 1790384263.4541404,
+        "xg_h1": 0.213,
+        "xg_h2": null,
+        "xg_est": null,
+        "xg_est_src": null,
+        "team_zh": "客队"
+      },
+      {
+        "id": 226969,
+        "event_id": 207826,
+        "team": "home",
+        "possession": 39,
+        "shots": 13,
+        "shots_on_target": 4,
+        "xg": 2.2,
+        "passes": 251,
+        "corners": 8,
+        "fouls": 11,
+        "offsides": 2,
+        "yellow": 3,
+        "red": 1,
+        "updated_at": 1790384263.4541404,
+        "xg_h1": 1.163,
+        "xg_h2": null,
+        "xg_est": null,
+        "xg_est_src": null,
+        "team_zh": "主队"
+      }
+    ],
+    "expected_xg": {
+      "found": true,
+      "event_id": 207826,
+      "home_team": "哈特福德竞技",
+      "away_team": "路易斯维尔城",
+      "expected_xg": {
+        "home": 1.74,
+        "away": 1.63,
+        "home_h1": 0.93,
+        "away_h1": 0.67,
+        "home_h2": 0.81,
+        "away_h2": 0.87
+      },
+      "home_form": {
+        "n": 9,
+        "xg_for_avg": 2.287,
+        "xg_against_avg": 1.816,
+        "xg_for_h1_avg": 1.095,
+        "xg_against_h1_avg": 0.792,
+        "xg_for_h2_avg": 1.217,
+        "xg_against_h2_avg": 0.95,
+        "home_xg_for_avg": 3.046,
+        "away_xg_for_avg": 1.337
+      },
+      "away_form": {
+        "n": 6,
+        "xg_for_avg": 1.44,
+        "xg_against_avg": 1.197,
+        "xg_for_h1_avg": 0.55,
+        "xg_against_h1_avg": 0.761,
+        "xg_for_h2_avg": 0.795,
+        "xg_against_h2_avg": 0.397,
+        "home_xg_for_avg": 1.18,
+        "away_xg_for_avg": 1.7
+      },
+      "note": "基于双方近10场赛后xG形态(攻击/防守)算术均值估算的赛前预期值, 仅描述历史表现, 非比赛结果预测"
+    },
+    "historical_xg": {
+      "found": false,
+      "event_id": 207826
+    },
+    "historical_odds": {
+      "found": false,
+      "event_id": 207826
+    },
+    "odds_available": true,
+    "_fetchTime": "2026-09-26T05:14:00.875Z",
+    "_eventId": 207826,
+    "_source": "self_api_raw"
+  },
   "212591": {
     "event_id": 212591,
     "league": "欧国联",
@@ -8674,6 +9415,739 @@
     "_eventId": 216459,
     "_source": "self_api_raw"
   },
+  "220185": {
+    "event_id": 220185,
+    "league": "哥甲",
+    "league_zh": "哥甲",
+    "priority": 9,
+    "is_major": false,
+    "home_team": "博亚卡奇科",
+    "away_team": "帕斯托",
+    "home_team_zh": "博亚卡奇科",
+    "away_team_zh": "帕斯托",
+    "date": "26/09/2026",
+    "time": "07:10",
+    "status": "ft",
+    "status_zh": "全场结束",
+    "score": "3-0",
+    "home_score": 3,
+    "away_score": 0,
+    "minute": 0,
+    "venue": "Estadio La Independencia",
+    "referee": "Javier Alonso Villa Zapata",
+    "odds": {
+      "home_win": 2.65,
+      "draw": 3.05,
+      "away_win": 3,
+      "asian_handicap": 0,
+      "asian_home": 1.8,
+      "asian_away": 2.025,
+      "over_25": 2.64,
+      "under_25": 1.53,
+      "btts_yes": 2.01,
+      "btts_no": 1.72
+    },
+    "odds_multi": {
+      "胜平负": {
+        "主队": 2.62,
+        "平局": 3.1,
+        "客队": 2.9
+      },
+      "亚盘": {
+        "主队0.25": 1.55,
+        "客队0.25": 2.42,
+        "主队-0.5": 2.5,
+        "客队-0.5": 1.52,
+        "主队0.0": 1.8,
+        "客队0.0": 2.02,
+        "主队-0.25": 2.15,
+        "客队-0.25": 1.68,
+        "主队-1.75": 7.75,
+        "客队-1.75": 1.02,
+        "主队-1.25": 5.25,
+        "客队-1.25": 1.16,
+        "主队-0.75": 3.1,
+        "客队-0.75": 1.35,
+        "主队0.75": 1.27,
+        "客队0.75": 3.6,
+        "主队1.25": 1.12,
+        "客队1.25": 6,
+        "客队1.75": 9,
+        "主队-1.5": 5.75,
+        "客队-1.5": 1.14,
+        "主队1.5": 1.11,
+        "客队1.5": 6.6,
+        "主队-2.0": 10,
+        "主队-1.0": 4.6,
+        "客队-1.0": 1.19,
+        "主队1.0": 1.15,
+        "客队1.0": 5.5,
+        "主队0.5": 1.42,
+        "客队0.5": 2.85
+      },
+      "双方进球": {
+        "是": 2.05,
+        "否": 1.8
+      },
+      "双重机会": {
+        "主队不败": 1.4,
+        "客队不败": 1.5,
+        "分胜负": 1.36
+      },
+      "平局退款": {
+        "主队": 1.77,
+        "客队": 2
+      },
+      "大小球(0.5)": {
+        "大0.5": 1.1,
+        "小0.5": 8
+      },
+      "大小球(1.5)": {
+        "大1.5": 1.48,
+        "小1.5": 2.7
+      },
+      "大小球(2.5)": {
+        "大2.5": 2.52,
+        "小2.5": 1.53
+      },
+      "大小球(3.5)": {
+        "大3.5": 4.91,
+        "小3.5": 1.2
+      },
+      "总角球": {
+        "大7.5": 1.46,
+        "小7.5": 2.45,
+        "大8.5": 1.83,
+        "小8.5": 1.88,
+        "大9.5": 2.35,
+        "小9.5": 1.51,
+        "大10.5": 3.2,
+        "小10.5": 1.26,
+        "大11.5": 4.72,
+        "小11.5": 1.1
+      }
+    },
+    "polymarket": {},
+    "lineups": {
+      "home": {
+        "formation": "4-3-3",
+        "players": [
+          "1. David Agudelo",
+          "15. Sander Navarro",
+          "5. Jhonier Alomía",
+          "4. Jefferson Mena (C)",
+          "14. Cristian Blanco",
+          "8. Sebastian Salazar",
+          "6. Juan Diaz",
+          "21. Jacobo Pimentel",
+          "17. Estiven Sarria",
+          "22. Alejandro Maya",
+          "16. Santiago Mera"
+        ],
+        "count": 11,
+        "players_by_pos": {
+          "门将": [
+            "1. David Agudelo"
+          ],
+          "后卫": [
+            "15. Sander Navarro",
+            "5. Jhonier Alomía",
+            "4. Jefferson Mena (C)",
+            "14. Cristian Blanco"
+          ],
+          "中场": [
+            "8. Sebastian Salazar",
+            "6. Juan Diaz",
+            "21. Jacobo Pimentel"
+          ],
+          "前锋": [
+            "17. Estiven Sarria",
+            "22. Alejandro Maya",
+            "16. Santiago Mera"
+          ]
+        }
+      },
+      "away": {
+        "formation": "4-4-2",
+        "players": [
+          "12. Geovanni Banguera",
+          "33. Mateo Garavito",
+          "21. Derik Osede",
+          "2. Fainer Torijano (C)",
+          "3. Joyce Ossa",
+          "18. Joider Micolta",
+          "25. Franco Leys",
+          "8. Enrique Serje",
+          "27. Hervin Goyes",
+          "10. Diego Chávez",
+          "29. Santiago Córdoba"
+        ],
+        "count": 11,
+        "players_by_pos": {
+          "门将": [
+            "12. Geovanni Banguera"
+          ],
+          "后卫": [
+            "33. Mateo Garavito",
+            "21. Derik Osede",
+            "2. Fainer Torijano (C)",
+            "3. Joyce Ossa"
+          ],
+          "中场": [
+            "18. Joider Micolta",
+            "25. Franco Leys",
+            "8. Enrique Serje",
+            "27. Hervin Goyes"
+          ],
+          "前锋": [
+            "10. Diego Chávez",
+            "29. Santiago Córdoba"
+          ]
+        }
+      }
+    },
+    "injuries": [],
+    "stats": [
+      {
+        "team": "客队",
+        "possession": 55,
+        "shots": 13,
+        "shots_on_target": 3,
+        "xg": 1.17,
+        "xg_is_estimate": false,
+        "xg_note": null,
+        "passes": 352,
+        "corners": 3,
+        "fouls": 7,
+        "yellow": 0,
+        "red": 0,
+        "xg_h1": 0.885,
+        "xg_h2": null
+      },
+      {
+        "team": "主队",
+        "possession": 45,
+        "shots": 7,
+        "shots_on_target": 5,
+        "xg": 0.73,
+        "xg_is_estimate": false,
+        "xg_note": null,
+        "passes": 290,
+        "corners": 0,
+        "fouls": 17,
+        "yellow": 1,
+        "red": 0,
+        "xg_h1": 0.069,
+        "xg_h2": null
+      }
+    ],
+    "events": [
+      {
+        "minute": 45,
+        "type": "injuryTime",
+        "team": "",
+        "player": "",
+        "detail": ""
+      },
+      {
+        "minute": 45,
+        "type": "period",
+        "team": "",
+        "player": "",
+        "detail": ""
+      },
+      {
+        "minute": 55,
+        "type": "substitution",
+        "team": "帕斯托",
+        "player": "J. Perlaza 替下 D. Osede",
+        "detail": ""
+      },
+      {
+        "minute": 59,
+        "type": "substitution",
+        "team": "博亚卡奇科",
+        "player": "Yesus Cabrera 替下 J. Pimentel",
+        "detail": ""
+      },
+      {
+        "minute": 68,
+        "type": "goal",
+        "team": "博亚卡奇科",
+        "player": "Yesus Cabrera",
+        "detail": ""
+      },
+      {
+        "minute": 70,
+        "type": "goal",
+        "team": "博亚卡奇科",
+        "player": "E. Sarria",
+        "detail": ""
+      },
+      {
+        "minute": 72,
+        "type": "substitution",
+        "team": "帕斯托",
+        "player": "M. Pisano 替下 F. Leys",
+        "detail": ""
+      },
+      {
+        "minute": 72,
+        "type": "substitution",
+        "team": "帕斯托",
+        "player": "Y. Góez 替下 D. Chávez",
+        "detail": ""
+      },
+      {
+        "minute": 73,
+        "type": "card",
+        "team": "博亚卡奇科",
+        "player": "E. Sarria",
+        "detail": "yellow"
+      },
+      {
+        "minute": 76,
+        "type": "substitution",
+        "team": "博亚卡奇科",
+        "player": "D. Ramírez 替下 E. Sarria",
+        "detail": ""
+      },
+      {
+        "minute": 84,
+        "type": "substitution",
+        "team": "帕斯托",
+        "player": "E. Gómez 替下 S. Córdoba",
+        "detail": ""
+      },
+      {
+        "minute": 84,
+        "type": "substitution",
+        "team": "帕斯托",
+        "player": "Y. Tolosa 替下 J. Micolta",
+        "detail": ""
+      },
+      {
+        "minute": 86,
+        "type": "goal",
+        "team": "博亚卡奇科",
+        "player": "A. Maya",
+        "detail": ""
+      },
+      {
+        "minute": 90,
+        "type": "injuryTime",
+        "team": "",
+        "player": "",
+        "detail": ""
+      },
+      {
+        "minute": 90,
+        "type": "period",
+        "team": "",
+        "player": "",
+        "detail": ""
+      },
+      {
+        "minute": 90,
+        "type": "substitution",
+        "team": "博亚卡奇科",
+        "player": "F. Cifuentes 替下 A. Maya",
+        "detail": ""
+      },
+      {
+        "minute": 90,
+        "type": "substitution",
+        "team": "博亚卡奇科",
+        "player": "J. Pimentel 替下 S. Mera",
+        "detail": ""
+      }
+    ],
+    "h2h": {
+      "w": 1,
+      "d": 5,
+      "l": 7,
+      "total": 13,
+      "last_meetings": [
+        {
+          "away": "Boyacá Chicó FC",
+          "date": "2026-03-18T21:10:00+00:00",
+          "home": "Deportivo Pasto",
+          "score": "2-0",
+          "event_id": 220174,
+          "away_score": 0,
+          "home_score": 2,
+          "away_team_id": 4784,
+          "home_team_id": 3419,
+          "home_team": "Deportivo Pasto",
+          "away_team": "Boyacá Chicó FC",
+          "home_team_zh": "帕斯托",
+          "away_team_zh": "博亚卡奇科"
+        },
+        {
+          "away": "Deportivo Pasto",
+          "date": "2025-03-22T19:00:00+00:00",
+          "home": "Boyacá Chicó FC",
+          "score": "0-0",
+          "event_id": 225413,
+          "away_score": 0,
+          "home_score": 0,
+          "away_team_id": 3419,
+          "home_team_id": 4784,
+          "home_team": "Boyacá Chicó FC",
+          "away_team": "Deportivo Pasto",
+          "home_team_zh": "博亚卡奇科",
+          "away_team_zh": "帕斯托"
+        },
+        {
+          "away": "Boyacá Chicó FC",
+          "date": "2025-02-12T21:30:00+00:00",
+          "home": "Deportivo Pasto",
+          "score": "3-0",
+          "event_id": 225337,
+          "away_score": 0,
+          "home_score": 3,
+          "away_team_id": 4784,
+          "home_team_id": 3419,
+          "home_team": "Deportivo Pasto",
+          "away_team": "Boyacá Chicó FC",
+          "home_team_zh": "帕斯托",
+          "away_team_zh": "博亚卡奇科"
+        },
+        {
+          "away": "Boyacá Chicó FC",
+          "date": "2024-03-09T19:00:00+00:00",
+          "home": "Deportivo Pasto",
+          "score": "2-1",
+          "event_id": 231038,
+          "away_score": 1,
+          "home_score": 2,
+          "away_team_id": 4784,
+          "home_team_id": 3419,
+          "home_team": "Deportivo Pasto",
+          "away_team": "Boyacá Chicó FC",
+          "home_team_zh": "帕斯托",
+          "away_team_zh": "博亚卡奇科"
+        },
+        {
+          "away": "Deportivo Pasto",
+          "date": "2023-02-27T23:00:00+00:00",
+          "home": "Boyacá Chicó FC",
+          "score": "1-1",
+          "event_id": 240551,
+          "away_score": 1,
+          "home_score": 1,
+          "away_team_id": 3419,
+          "home_team_id": 4784,
+          "home_team": "Boyacá Chicó FC",
+          "away_team": "Deportivo Pasto",
+          "home_team_zh": "博亚卡奇科",
+          "away_team_zh": "帕斯托"
+        }
+      ]
+    },
+    "money": {},
+    "broadcasts": [
+      {
+        "channel": "Betano",
+        "country": "BR"
+      }
+    ],
+    "team_home": {
+      "name": "博亚卡奇科",
+      "country": "哥伦比亚",
+      "logo": "",
+      "venue": "Estadio La Independencia",
+      "coach": ""
+    },
+    "team_away": {
+      "name": "帕斯托",
+      "country": "哥伦比亚",
+      "logo": "",
+      "venue": "Estadio La Independencia",
+      "coach": ""
+    },
+    "players": [],
+    "updated_at": 1790399642.2950408,
+    "odds_by_bookmaker": {
+      "bet365": {
+        "胜平负": {
+          "主队": 2.6,
+          "平局": 3,
+          "客队": 2.9
+        },
+        "亚盘": {
+          "主队-1.25": 5.25,
+          "客队-1.25": 1.16,
+          "主队-0.75": 3.1,
+          "客队-0.75": 1.35,
+          "主队0.25": 1.52,
+          "客队0.25": 2.42,
+          "主队0.75": 1.27,
+          "客队0.75": 3.55,
+          "主队1.25": 1.12,
+          "客队1.25": 6,
+          "主队-1.5": 5.75,
+          "客队-1.5": 1.14,
+          "主队1.5": 1.11,
+          "客队1.5": 6.6,
+          "主队-0.5": 2.5,
+          "客队-0.5": 1.5,
+          "主队0.0": 1.77,
+          "客队0.0": 2.02,
+          "主队0.5": 1.4,
+          "客队0.5": 2.85,
+          "主队-1.0": 4.5,
+          "客队-1.0": 1.19,
+          "主队1.0": 1.15,
+          "客队1.0": 5.5,
+          "主队-0.25": 2.15,
+          "客队-0.25": 1.68
+        },
+        "双方进球": {
+          "是": 2,
+          "否": 1.72
+        },
+        "平局退款": {
+          "主队": 1.73,
+          "客队": 2
+        },
+        "大小球(2.5)": {
+          "大2.5": 2.5,
+          "小2.5": 1.5
+        }
+      },
+      "betfair": {
+        "胜平负": {
+          "主队": 2.5,
+          "平局": 3,
+          "客队": 2.8
+        },
+        "双方进球": {
+          "是": 2,
+          "否": 1.8
+        },
+        "双重机会": {
+          "主队不败": 1.4,
+          "客队不败": 1.5,
+          "分胜负": 1.36
+        },
+        "大小球(0.5)": {
+          "大0.5": 1.07,
+          "小0.5": 8
+        },
+        "大小球(1.5)": {
+          "大1.5": 1.44,
+          "小1.5": 2.7
+        },
+        "大小球(2.5)": {
+          "大2.5": 2.45,
+          "小2.5": 1.53
+        },
+        "大小球(3.5)": {
+          "大3.5": 4.5,
+          "小3.5": 1.2
+        }
+      },
+      "bwin": {
+        "胜平负": {
+          "主队": 2.45,
+          "平局": 3.1,
+          "客队": 2.75
+        },
+        "亚盘": {
+          "主队-0.5": 2.4,
+          "客队-0.5": 1.5
+        },
+        "双方进球": {
+          "是": 2,
+          "否": 1.7
+        },
+        "平局退款": {
+          "主队": 1.75,
+          "客队": 1.95
+        }
+      },
+      "pinnacle": {
+        "胜平负": {
+          "主队": 2.62,
+          "平局": 3.08,
+          "客队": 2.89
+        },
+        "大小球(0.5)": {
+          "大0.5": 1.1,
+          "小0.5": 6.96
+        },
+        "大小球(1.5)": {
+          "大1.5": 1.48,
+          "小1.5": 2.66
+        },
+        "大小球(2.5)": {
+          "大2.5": 2.52,
+          "小2.5": 1.52
+        },
+        "大小球(3.5)": {
+          "大3.5": 4.91,
+          "小3.5": 1.17
+        },
+        "总角球": {
+          "大8.5": 1.83,
+          "小8.5": 1.88
+        }
+      },
+      "unibet": {
+        "胜平负": {
+          "主队": 2.5,
+          "平局": 3,
+          "客队": 2.8
+        },
+        "亚盘": {
+          "主队-0.75": 3.1,
+          "客队-0.75": 1.35,
+          "主队0.25": 1.55,
+          "客队0.25": 2.4,
+          "主队0.75": 1.27,
+          "客队0.75": 3.6,
+          "主队-0.5": 2.5,
+          "客队-0.5": 1.52,
+          "主队0.0": 1.78,
+          "客队0.0": 2,
+          "主队0.5": 1.42,
+          "客队0.5": 2.8,
+          "主队-1.0": 4.6,
+          "客队-1.0": 1.19,
+          "主队1.0": 1.14,
+          "客队1.0": 5.5,
+          "主队-0.25": 2.15,
+          "客队-0.25": 1.67
+        },
+        "双方进球": {
+          "是": 2.05,
+          "否": 1.7
+        },
+        "平局退款": {
+          "主队": 1.75,
+          "客队": 1.98
+        }
+      },
+      "william-hill": {
+        "胜平负": {
+          "主队": 2.5,
+          "平局": 2.9,
+          "客队": 2.8
+        },
+        "亚盘": {
+          "主队-0.5": 2.4,
+          "客队-0.5": 1.5
+        },
+        "双方进球": {
+          "是": 2,
+          "否": 1.75
+        },
+        "双重机会": {
+          "主队不败": 1.4,
+          "客队不败": 1.44,
+          "分胜负": 1.36
+        },
+        "平局退款": {
+          "主队": 1.75,
+          "客队": 1.95
+        }
+      }
+    },
+    "match_stats": [
+      {
+        "id": 226966,
+        "event_id": 220185,
+        "team": "away",
+        "possession": 55,
+        "shots": 13,
+        "shots_on_target": 3,
+        "xg": 1.17,
+        "passes": 352,
+        "corners": 3,
+        "fouls": 7,
+        "offsides": 1,
+        "yellow": 0,
+        "red": 0,
+        "updated_at": 1790384262.1038535,
+        "xg_h1": 0.885,
+        "xg_h2": null,
+        "xg_est": null,
+        "xg_est_src": null,
+        "team_zh": "客队"
+      },
+      {
+        "id": 226965,
+        "event_id": 220185,
+        "team": "home",
+        "possession": 45,
+        "shots": 7,
+        "shots_on_target": 5,
+        "xg": 0.73,
+        "passes": 290,
+        "corners": 0,
+        "fouls": 17,
+        "offsides": 2,
+        "yellow": 1,
+        "red": 0,
+        "updated_at": 1790384262.1038535,
+        "xg_h1": 0.069,
+        "xg_h2": null,
+        "xg_est": null,
+        "xg_est_src": null,
+        "team_zh": "主队"
+      }
+    ],
+    "expected_xg": {
+      "found": true,
+      "event_id": 220185,
+      "home_team": "博亚卡奇科",
+      "away_team": "帕斯托",
+      "expected_xg": {
+        "home": 0.85,
+        "away": 1.04,
+        "home_h1": 0.48,
+        "away_h1": 0.6,
+        "home_h2": 0.36,
+        "away_h2": 0.5
+      },
+      "home_form": {
+        "n": 8,
+        "xg_for_avg": 0.974,
+        "xg_against_avg": 1.062,
+        "xg_for_h1_avg": 0.551,
+        "xg_against_h1_avg": 0.592,
+        "xg_for_h2_avg": 0.389,
+        "xg_against_h2_avg": 0.497,
+        "home_xg_for_avg": 0.958,
+        "away_xg_for_avg": 1
+      },
+      "away_form": {
+        "n": 7,
+        "xg_for_avg": 1.023,
+        "xg_against_avg": 0.729,
+        "xg_for_h1_avg": 0.608,
+        "xg_against_h1_avg": 0.418,
+        "xg_for_h2_avg": 0.503,
+        "xg_against_h2_avg": 0.336,
+        "home_xg_for_avg": 1.213,
+        "away_xg_for_avg": 0.88
+      },
+      "note": "基于双方近10场赛后xG形态(攻击/防守)算术均值估算的赛前预期值, 仅描述历史表现, 非比赛结果预测"
+    },
+    "historical_xg": {
+      "found": false,
+      "event_id": 220185
+    },
+    "historical_odds": {
+      "found": false,
+      "event_id": 220185
+    },
+    "odds_available": true,
+    "_fetchTime": "2026-09-26T05:14:02.373Z",
+    "_eventId": 220185,
+    "_source": "self_api_raw"
+  },
   "223080": {
     "event_id": 223080,
     "league": "65",
@@ -9990,6 +11464,593 @@
     "odds_available": true,
     "_fetchTime": "2026-09-26T04:29:22.366Z",
     "_eventId": 223082,
+    "_source": "self_api_raw"
+  },
+  "603734": {
+    "event_id": 603734,
+    "league": "哥伦比亚杯",
+    "league_zh": "哥伦比亚杯",
+    "priority": 9,
+    "is_major": false,
+    "home_team": "马格达莱纳联",
+    "away_team": "圣菲独立",
+    "home_team_zh": "马格达莱纳联",
+    "away_team_zh": "圣菲独立",
+    "date": "26/09/2026",
+    "time": "07:00",
+    "status": "ft",
+    "status_zh": "全场结束",
+    "score": "1-1",
+    "home_score": 1,
+    "away_score": 1,
+    "minute": 0,
+    "venue": "",
+    "referee": "",
+    "odds": {
+      "home_win": 2.55,
+      "draw": 3.25,
+      "away_win": 2.45,
+      "asian_handicap": 0.25,
+      "asian_home": 1.775,
+      "asian_away": 2.025,
+      "over_25": 2.35,
+      "under_25": 1.571,
+      "btts_yes": 1.94,
+      "btts_no": 1.76
+    },
+    "odds_multi": {
+      "胜平负": {
+        "主队": 2.55,
+        "平局": 3.25,
+        "客队": 2.45
+      },
+      "亚盘": {
+        "主队0.25": 1.77,
+        "客队0.25": 2.05,
+        "主队0.0": 2.11,
+        "客队0.0": 1.73,
+        "主队-0.25": 2.5,
+        "客队-0.25": 1.53,
+        "主队-0.75": 3.74,
+        "客队-0.75": 1.27,
+        "主队0.75": 1.43,
+        "客队0.75": 2.75,
+        "主队1.25": 1.21,
+        "客队1.25": 4.3,
+        "主队1.75": 1.11,
+        "客队1.75": 6.4,
+        "主队-1.5": 6.75,
+        "客队-1.5": 1.12,
+        "主队2.5": 1.02,
+        "客队2.5": 10,
+        "主队1.5": 1.18,
+        "客队1.5": 4.8,
+        "主队2.0": 1.03,
+        "客队2.0": 8.8,
+        "主队-1.0": 5.75,
+        "客队-1.0": 1.15,
+        "主队1.0": 1.25,
+        "客队1.0": 3.82,
+        "主队-1.25": 5.9,
+        "客队-1.25": 1.13,
+        "主队-0.5": 2.85,
+        "客队-0.5": 1.4,
+        "主队0.5": 1.57,
+        "客队0.5": 2.35
+      },
+      "双方进球": {
+        "是": 2,
+        "否": 1.8
+      },
+      "双重机会": {
+        "主队不败": 1.5,
+        "客队不败": 1.44,
+        "分胜负": 1.3
+      },
+      "平局退款": {
+        "主队": 2.1,
+        "客队": 1.7
+      },
+      "大小球(0.5)": {
+        "大0.5": 1.08,
+        "小0.5": 7.5
+      },
+      "大小球(1.5)": {
+        "大1.5": 1.44,
+        "小1.5": 2.62
+      },
+      "大小球(2.5)": {
+        "大2.5": 2.35,
+        "小2.5": 1.57
+      },
+      "大小球(3.5)": {
+        "大3.5": 4.5,
+        "小3.5": 1.18
+      }
+    },
+    "polymarket": {},
+    "lineups": {
+      "home": {
+        "formation": "4-4-2",
+        "players": [
+          "1. Victor Cabezas",
+          "2. Manuel Ballesteros",
+          "18. Freddy Molina",
+          "4. Rodrigo Delvalle",
+          "20. Juan Vásquez",
+          "8. Vicente Prado",
+          "28. Kevin Salazar",
+          "22. Juan Diego Giraldo",
+          "9. Cristian Iguarán",
+          "14. Juan Farías",
+          "24. Miguel Ángel Cervantes"
+        ],
+        "count": 11,
+        "players_by_pos": {
+          "门将": [
+            "1. Victor Cabezas"
+          ],
+          "后卫": [
+            "2. Manuel Ballesteros",
+            "18. Freddy Molina",
+            "4. Rodrigo Delvalle",
+            "20. Juan Vásquez"
+          ],
+          "中场": [
+            "8. Vicente Prado",
+            "28. Kevin Salazar",
+            "22. Juan Diego Giraldo",
+            "9. Cristian Iguarán"
+          ],
+          "前锋": [
+            "14. Juan Farías",
+            "24. Miguel Ángel Cervantes"
+          ]
+        }
+      },
+      "away": {
+        "formation": "3-4-3",
+        "players": [
+          "12. Weimar Asprilla",
+          "43. Jean Carlos Caicedo",
+          "3. Victor Moreno",
+          "24. Jeison Angulo",
+          "39. Cristhian Portocarrero",
+          "16. Daniel Torres",
+          "21. Ewil Murillo Renteria",
+          "10. Alexis Zapata",
+          "14. Luis Angel Palacios",
+          "77. Jader Obrian",
+          "17. Maximiliano Lovera"
+        ],
+        "count": 11,
+        "players_by_pos": {
+          "门将": [
+            "12. Weimar Asprilla"
+          ],
+          "后卫": [
+            "43. Jean Carlos Caicedo",
+            "3. Victor Moreno",
+            "24. Jeison Angulo"
+          ],
+          "中场": [
+            "39. Cristhian Portocarrero",
+            "16. Daniel Torres",
+            "21. Ewil Murillo Renteria",
+            "10. Alexis Zapata"
+          ],
+          "前锋": [
+            "14. Luis Angel Palacios",
+            "77. Jader Obrian",
+            "17. Maximiliano Lovera"
+          ]
+        }
+      }
+    },
+    "injuries": [
+      {
+        "team": "客队",
+        "player_name": "Emerson Rodríguez",
+        "position": "",
+        "impact": "rotation",
+        "reason": "Muscle Injury"
+      },
+      {
+        "team": "客队",
+        "player_name": "Juan Quintero",
+        "position": "",
+        "impact": "rotation",
+        "reason": "Muscle Injury"
+      },
+      {
+        "team": "客队",
+        "player_name": "Kevin Balanta",
+        "position": "",
+        "impact": "rotation",
+        "reason": "Cruciate Ligament Injury"
+      },
+      {
+        "team": "客队",
+        "player_name": "Mateo Puerta",
+        "position": "",
+        "impact": "rotation",
+        "reason": "Muscle Injury"
+      },
+      {
+        "team": "客队",
+        "player_name": "Omar Fernández",
+        "position": "",
+        "impact": "rotation",
+        "reason": "Achilles Tendon Injury"
+      }
+    ],
+    "stats": [
+      {
+        "team": "客队",
+        "possession": null,
+        "shots": 0,
+        "shots_on_target": 0,
+        "xg": 1.024,
+        "xg_is_estimate": true,
+        "xg_note": "系统估算值(队均收缩+主场修正),非真实比赛xG,仅供参考",
+        "passes": 0,
+        "corners": 0,
+        "fouls": 0,
+        "yellow": 0,
+        "red": 0,
+        "xg_h1": null,
+        "xg_h2": null
+      },
+      {
+        "team": "主队",
+        "possession": null,
+        "shots": 0,
+        "shots_on_target": 0,
+        "xg": 1.552,
+        "xg_is_estimate": true,
+        "xg_note": "系统估算值(队均收缩+主场修正),非真实比赛xG,仅供参考",
+        "passes": 0,
+        "corners": 0,
+        "fouls": 0,
+        "yellow": 0,
+        "red": 0,
+        "xg_h1": null,
+        "xg_h2": null
+      }
+    ],
+    "events": [
+      {
+        "minute": 10,
+        "type": "goal",
+        "team": "马格达莱纳联",
+        "player": "F. Molina",
+        "detail": ""
+      },
+      {
+        "minute": 45,
+        "type": "period",
+        "team": "",
+        "player": "",
+        "detail": ""
+      },
+      {
+        "minute": 52,
+        "type": "goal",
+        "team": "圣菲独立",
+        "player": "C. Portocarrero",
+        "detail": ""
+      },
+      {
+        "minute": 52,
+        "type": "goal",
+        "team": "圣菲独立",
+        "player": "Unknown",
+        "detail": ""
+      },
+      {
+        "minute": 90,
+        "type": "period",
+        "team": "",
+        "player": "",
+        "detail": ""
+      }
+    ],
+    "h2h": {
+      "w": 1,
+      "d": 1,
+      "l": 3,
+      "total": 5,
+      "last_meetings": [
+        {
+          "away": "Unión Magdalena",
+          "date": "2026-08-06T00:00:00+00:00",
+          "home": "Independiente Santa Fe",
+          "score": "2-0",
+          "event_id": 223981,
+          "away_score": 0,
+          "home_score": 2,
+          "away_team_id": 4797,
+          "home_team_id": 797,
+          "home_team": "Independiente Santa Fe",
+          "away_team": "Unión Magdalena",
+          "home_team_zh": "圣菲独立",
+          "away_team_zh": "马格达莱纳联"
+        },
+        {
+          "away": "Independiente Santa Fe",
+          "date": "2025-03-30T22:45:00+00:00",
+          "home": "Unión Magdalena",
+          "score": "0-1",
+          "event_id": 225427,
+          "away_score": 1,
+          "home_score": 0,
+          "away_team_id": 797,
+          "home_team_id": 4797,
+          "home_team": "Unión Magdalena",
+          "away_team": "Independiente Santa Fe",
+          "home_team_zh": "马格达莱纳联",
+          "away_team_zh": "圣菲独立"
+        },
+        {
+          "away": "Unión Magdalena",
+          "date": "2023-02-26T19:00:00+00:00",
+          "home": "Independiente Santa Fe",
+          "score": "0-0",
+          "event_id": 240546,
+          "away_score": 0,
+          "home_score": 0,
+          "away_team_id": 4797,
+          "home_team_id": 797,
+          "home_team": "Independiente Santa Fe",
+          "away_team": "Unión Magdalena",
+          "home_team_zh": "圣菲独立",
+          "away_team_zh": "马格达莱纳联"
+        },
+        {
+          "away": "Unión Magdalena",
+          "date": "2022-04-04T00:35:00+00:00",
+          "home": "Independiente Santa Fe",
+          "score": "1-0",
+          "event_id": 251136,
+          "away_score": 0,
+          "home_score": 1,
+          "away_team_id": 4797,
+          "home_team_id": 797,
+          "home_team": "Independiente Santa Fe",
+          "away_team": "Unión Magdalena",
+          "home_team_zh": "圣菲独立",
+          "away_team_zh": "马格达莱纳联"
+        },
+        {
+          "away": "Independiente Santa Fe",
+          "date": "2019-04-27T21:00:00+00:00",
+          "home": "Unión Magdalena",
+          "score": "3-1",
+          "event_id": 286584,
+          "away_score": 1,
+          "home_score": 3,
+          "away_team_id": 797,
+          "home_team_id": 4797,
+          "home_team": "Unión Magdalena",
+          "away_team": "Independiente Santa Fe",
+          "home_team_zh": "马格达莱纳联",
+          "away_team_zh": "圣菲独立"
+        }
+      ]
+    },
+    "money": {},
+    "broadcasts": [
+      {
+        "channel": "Betano",
+        "country": "BR"
+      }
+    ],
+    "team_home": {
+      "name": "马格达莱纳联",
+      "country": "哥伦比亚",
+      "logo": "",
+      "venue": "",
+      "coach": ""
+    },
+    "team_away": {
+      "name": "圣菲独立",
+      "country": "哥伦比亚",
+      "logo": "",
+      "venue": "",
+      "coach": ""
+    },
+    "players": [],
+    "updated_at": 1790399641.5476549,
+    "odds_by_bookmaker": {
+      "bet365": {
+        "胜平负": {
+          "主队": 2.55,
+          "平局": 3.25,
+          "客队": 2.45
+        },
+        "亚盘": {
+          "主队-1.25": 5.9,
+          "客队-1.25": 1.13,
+          "主队-0.75": 3.55,
+          "客队-0.75": 1.27,
+          "主队0.25": 1.77,
+          "客队0.25": 2.02,
+          "主队0.75": 1.43,
+          "客队0.75": 2.75,
+          "主队1.25": 1.21,
+          "客队1.25": 4.25,
+          "主队1.75": 1.11,
+          "客队1.75": 6.4,
+          "主队-1.5": 6.4,
+          "客队-1.5": 1.12,
+          "主队1.5": 1.18,
+          "客队1.5": 4.8,
+          "主队-0.5": 2.85,
+          "客队-0.5": 1.4,
+          "主队0.0": 2.1,
+          "客队0.0": 1.7,
+          "主队0.5": 1.57,
+          "客队0.5": 2.35,
+          "主队-1.0": 5.5,
+          "客队-1.0": 1.15,
+          "主队1.0": 1.25,
+          "客队1.0": 3.8,
+          "主队-0.25": 2.5,
+          "客队-0.25": 1.5
+        },
+        "双方进球": {
+          "是": 2,
+          "否": 1.73
+        },
+        "双重机会": {
+          "主队不败": 1.5,
+          "客队不败": 1.44,
+          "分胜负": 1.3
+        },
+        "平局退款": {
+          "主队": 2.1,
+          "客队": 1.67
+        },
+        "大小球(0.5)": {
+          "大0.5": 1.08,
+          "小0.5": 7.5
+        },
+        "大小球(1.5)": {
+          "大1.5": 1.44,
+          "小1.5": 2.62
+        },
+        "大小球(2.5)": {
+          "大2.5": 2.35,
+          "小2.5": 1.57
+        },
+        "大小球(3.5)": {
+          "大3.5": 4.5,
+          "小3.5": 1.18
+        }
+      },
+      "unibet": {
+        "亚盘": {
+          "主队0.5": 1.54,
+          "客队0.5": 2.35
+        },
+        "双方进球": {
+          "是": 1.93,
+          "否": 1.78
+        },
+        "平局退款": {
+          "主队": 2.05,
+          "客队": 1.67
+        }
+      },
+      "william-hill": {
+        "亚盘": {
+          "主队0.5": 1.55,
+          "客队0.5": 2.3
+        },
+        "双方进球": {
+          "是": 1.91,
+          "否": 1.8
+        },
+        "平局退款": {
+          "主队": 2.05,
+          "客队": 1.67
+        }
+      },
+      "bwin": {
+        "双方进球": {
+          "是": 1.93,
+          "否": 1.77
+        },
+        "平局退款": {
+          "主队": 2.05,
+          "客队": 1.68
+        }
+      }
+    },
+    "match_stats": [
+      {
+        "id": 226968,
+        "event_id": 603734,
+        "team": "away",
+        "possession": null,
+        "shots": 0,
+        "shots_on_target": 0,
+        "xg": null,
+        "passes": 0,
+        "corners": 0,
+        "fouls": 0,
+        "offsides": 0,
+        "yellow": 0,
+        "red": 0,
+        "updated_at": 1790382469.6543531,
+        "xg_h1": null,
+        "xg_h2": null,
+        "xg_est": 1.024,
+        "xg_est_src": "v1_home",
+        "team_zh": "客队"
+      },
+      {
+        "id": 226967,
+        "event_id": 603734,
+        "team": "home",
+        "possession": null,
+        "shots": 0,
+        "shots_on_target": 0,
+        "xg": null,
+        "passes": 0,
+        "corners": 0,
+        "fouls": 0,
+        "offsides": 0,
+        "yellow": 0,
+        "red": 0,
+        "updated_at": 1790382469.6543531,
+        "xg_h1": null,
+        "xg_h2": null,
+        "xg_est": 1.552,
+        "xg_est_src": "v1_home",
+        "team_zh": "主队"
+      }
+    ],
+    "expected_xg": {
+      "found": true,
+      "event_id": 603734,
+      "home_team": "马格达莱纳联",
+      "away_team": "圣菲独立",
+      "expected_xg": {
+        "home": 1.02,
+        "away": 1.02,
+        "home_h1": 0.55,
+        "away_h1": 0.35,
+        "home_h2": 0.52,
+        "away_h2": 0.68
+      },
+      "home_form": {
+        "n": 0
+      },
+      "away_form": {
+        "n": 10,
+        "xg_for_avg": 1.017,
+        "xg_against_avg": 1.022,
+        "xg_for_h1_avg": 0.354,
+        "xg_against_h1_avg": 0.551,
+        "xg_for_h2_avg": 0.684,
+        "xg_against_h2_avg": 0.52,
+        "home_xg_for_avg": 1.012,
+        "away_xg_for_avg": 1.025
+      },
+      "note": "基于双方近10场赛后xG形态(攻击/防守)算术均值估算的赛前预期值, 仅描述历史表现, 非比赛结果预测"
+    },
+    "historical_xg": {
+      "found": false,
+      "event_id": 603734
+    },
+    "historical_odds": {
+      "found": false,
+      "event_id": 603734
+    },
+    "odds_available": true,
+    "_fetchTime": "2026-09-26T05:14:01.624Z",
+    "_eventId": 603734,
     "_source": "self_api_raw"
   },
   "604943": {
