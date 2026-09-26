@@ -481,7 +481,7 @@
       "coach": ""
     },
     "players": [],
-    "updated_at": 1790377206.1863027,
+    "updated_at": 1790381803.10219,
     "odds_by_bookmaker": {
       "bet365": {
         "胜平负": {
@@ -780,7 +780,7 @@
       "event_id": 212591
     },
     "odds_available": true,
-    "_fetchTime": "2026-09-25T23:12:30.176Z",
+    "_fetchTime": "2026-09-26T00:16:43.206Z",
     "_eventId": 212591,
     "_source": "self_api_raw"
   },
@@ -1272,7 +1272,7 @@
       "coach": ""
     },
     "players": [],
-    "updated_at": 1790377207.5870183,
+    "updated_at": 1790381803.8932788,
     "odds_by_bookmaker": {
       "bet365": {
         "胜平负": {
@@ -1550,8 +1550,376 @@
       "event_id": 212592
     },
     "odds_available": true,
-    "_fetchTime": "2026-09-25T23:12:30.977Z",
+    "_fetchTime": "2026-09-26T00:16:43.997Z",
     "_eventId": 212592,
+    "_source": "self_api_raw"
+  },
+  "604943": {
+    "event_id": 604943,
+    "league": "俱乐部友谊赛",
+    "league_zh": "俱乐部友谊赛",
+    "priority": 9,
+    "is_major": false,
+    "home_team": "佩纳菲耶尔",
+    "away_team": "拉科鲁尼亚",
+    "home_team_zh": "佩纳菲耶尔",
+    "away_team_zh": "拉科鲁尼亚",
+    "date": "26/09/2026",
+    "time": "02:00",
+    "status": "ft",
+    "status_zh": "全场结束",
+    "score": "2-2",
+    "home_score": 2,
+    "away_score": 2,
+    "minute": 0,
+    "venue": "",
+    "referee": "",
+    "odds": {
+      "home_win": 2.7,
+      "draw": 3.75,
+      "away_win": 2.1,
+      "asian_handicap": 0.5,
+      "asian_home": 1.87,
+      "asian_away": 1.86,
+      "over_25": null,
+      "under_25": null,
+      "btts_yes": 1.54,
+      "btts_no": 2.31
+    },
+    "odds_multi": {
+      "胜平负": {
+        "主队": 2.7,
+        "平局": 3.75,
+        "客队": 2.1
+      }
+    },
+    "polymarket": {},
+    "lineups": {
+      "home": {
+        "formation": "3-4-3",
+        "players": [
+          "1. Miguel Oliveira",
+          "5. Jaime Sánchez",
+          "3. Cláudio Silva",
+          "4. João Miguel",
+          "27. Goncalo Negrao",
+          "2. Iano Simão",
+          "17. João Pinto",
+          "85. Carlinhos Augusto",
+          "10. Davo",
+          "33. André Schutte",
+          "9. Max Svensson"
+        ],
+        "count": 11,
+        "players_by_pos": {
+          "门将": [
+            "1. Miguel Oliveira"
+          ],
+          "后卫": [
+            "5. Jaime Sánchez",
+            "3. Cláudio Silva",
+            "4. João Miguel",
+            "27. Goncalo Negrao",
+            "2. Iano Simão"
+          ],
+          "中场": [
+            "17. João Pinto",
+            "85. Carlinhos Augusto"
+          ],
+          "前锋": [
+            "10. Davo",
+            "33. André Schutte",
+            "9. Max Svensson"
+          ]
+        }
+      },
+      "away": {
+        "formation": "4-4-2",
+        "players": [
+          "13. Leo Román",
+          "12. Giacomo Quagliata",
+          "4. Lucas Noubi",
+          "22. Bright Ede",
+          "23. Ximo Navarro",
+          "18. Jonathan Asp Jensen",
+          "21. Mario Soriano",
+          "14. Riki Rodríguez",
+          "19. Luismi Cruz",
+          "32. Bil Nsongo",
+          "10. Kevin Sánchez"
+        ],
+        "count": 11,
+        "players_by_pos": {
+          "门将": [
+            "13. Leo Román"
+          ],
+          "后卫": [
+            "12. Giacomo Quagliata",
+            "4. Lucas Noubi",
+            "22. Bright Ede",
+            "23. Ximo Navarro"
+          ],
+          "中场": [
+            "21. Mario Soriano",
+            "14. Riki Rodríguez",
+            "19. Luismi Cruz",
+            "10. Kevin Sánchez"
+          ],
+          "前锋": [
+            "18. Jonathan Asp Jensen",
+            "32. Bil Nsongo"
+          ]
+        }
+      }
+    },
+    "injuries": [
+      {
+        "team": "客队",
+        "player_name": "Lorenzo Amatucci",
+        "position": "",
+        "impact": "rotation",
+        "reason": "Muscle Injury"
+      },
+      {
+        "team": "客队",
+        "player_name": "Marc Casadó",
+        "position": "",
+        "impact": "rotation",
+        "reason": "Muscle Injury"
+      },
+      {
+        "team": "客队",
+        "player_name": "奥巴梅扬",
+        "position": "",
+        "impact": "rotation",
+        "reason": "Meniscus Injury"
+      },
+      {
+        "team": "客队",
+        "player_name": "Zakaria Eddahchouri",
+        "position": "",
+        "impact": "rotation",
+        "reason": "Broken Wrist"
+      }
+    ],
+    "stats": [
+      {
+        "team": "客队",
+        "possession": null,
+        "shots": 0,
+        "shots_on_target": 0,
+        "xg": 0.971,
+        "xg_is_estimate": true,
+        "xg_note": "系统估算值(队均收缩+主场修正),非真实比赛xG,仅供参考",
+        "passes": 0,
+        "corners": 4,
+        "fouls": 0,
+        "yellow": 0,
+        "red": 0,
+        "xg_h1": null,
+        "xg_h2": null
+      },
+      {
+        "team": "主队",
+        "possession": null,
+        "shots": 0,
+        "shots_on_target": 0,
+        "xg": 1.625,
+        "xg_is_estimate": true,
+        "xg_note": "系统估算值(队均收缩+主场修正),非真实比赛xG,仅供参考",
+        "passes": 0,
+        "corners": 3,
+        "fouls": 0,
+        "yellow": 0,
+        "red": 0,
+        "xg_h1": null,
+        "xg_h2": null
+      }
+    ],
+    "events": [
+      {
+        "minute": 9,
+        "type": "goal",
+        "team": "佩纳菲耶尔",
+        "player": "Davo",
+        "detail": ""
+      },
+      {
+        "minute": 28,
+        "type": "goal",
+        "team": "拉科鲁尼亚",
+        "player": "K. Sánchez",
+        "detail": ""
+      },
+      {
+        "minute": 28,
+        "type": "goal",
+        "team": "拉科鲁尼亚",
+        "player": "Unknown",
+        "detail": ""
+      },
+      {
+        "minute": 45,
+        "type": "period",
+        "team": "",
+        "player": "",
+        "detail": ""
+      },
+      {
+        "minute": 49,
+        "type": "goal",
+        "team": "佩纳菲耶尔",
+        "player": "J. Fuentes",
+        "detail": ""
+      },
+      {
+        "minute": 49,
+        "type": "goal",
+        "team": "佩纳菲耶尔",
+        "player": "Unknown",
+        "detail": ""
+      },
+      {
+        "minute": 55,
+        "type": "goal",
+        "team": "拉科鲁尼亚",
+        "player": "K. Sánchez",
+        "detail": ""
+      },
+      {
+        "minute": 90,
+        "type": "period",
+        "team": "",
+        "player": "",
+        "detail": ""
+      }
+    ],
+    "h2h": {
+      "w": 0,
+      "d": 0,
+      "l": 0,
+      "total": 0,
+      "last_meetings": []
+    },
+    "money": {},
+    "broadcasts": [],
+    "team_home": {
+      "name": "佩纳菲耶尔",
+      "country": "葡萄牙",
+      "logo": "",
+      "venue": "",
+      "coach": ""
+    },
+    "team_away": {
+      "name": "拉科鲁尼亚",
+      "country": "西班牙",
+      "logo": "",
+      "venue": "",
+      "coach": ""
+    },
+    "players": [],
+    "updated_at": 1790381804.6838999,
+    "odds_by_bookmaker": {
+      "bet365": {
+        "胜平负": {
+          "主队": 2.7,
+          "平局": 3.75,
+          "客队": 2.1
+        }
+      }
+    },
+    "match_stats": [
+      {
+        "id": 226996,
+        "event_id": 604943,
+        "team": "away",
+        "possession": null,
+        "shots": 0,
+        "shots_on_target": 0,
+        "xg": null,
+        "passes": 0,
+        "corners": 4,
+        "fouls": 0,
+        "offsides": 2,
+        "yellow": 0,
+        "red": 0,
+        "updated_at": 1790366272.5675752,
+        "xg_h1": null,
+        "xg_h2": null,
+        "xg_est": 0.971,
+        "xg_est_src": "v1_home",
+        "team_zh": "客队"
+      },
+      {
+        "id": 226995,
+        "event_id": 604943,
+        "team": "home",
+        "possession": null,
+        "shots": 0,
+        "shots_on_target": 0,
+        "xg": null,
+        "passes": 0,
+        "corners": 3,
+        "fouls": 0,
+        "offsides": 0,
+        "yellow": 0,
+        "red": 0,
+        "updated_at": 1790366272.5675752,
+        "xg_h1": null,
+        "xg_h2": null,
+        "xg_est": 1.625,
+        "xg_est_src": "v1_home",
+        "team_zh": "主队"
+      }
+    ],
+    "expected_xg": {
+      "found": true,
+      "event_id": 604943,
+      "home_team": "佩纳菲耶尔",
+      "away_team": "拉科鲁尼亚",
+      "expected_xg": {
+        "home": 1.41,
+        "away": 0.87,
+        "home_h1": 0.8,
+        "away_h1": 0.38,
+        "home_h2": 0.61,
+        "away_h2": 0.5
+      },
+      "home_form": {
+        "n": 5,
+        "xg_for_avg": 1.57,
+        "xg_against_avg": 0.788,
+        "xg_for_h1_avg": 0.909,
+        "xg_against_h1_avg": 0.323,
+        "xg_for_h2_avg": 0.661,
+        "xg_against_h2_avg": 0.465,
+        "home_xg_for_avg": 1.24,
+        "away_xg_for_avg": 1.79
+      },
+      "away_form": {
+        "n": 10,
+        "xg_for_avg": 0.96,
+        "xg_against_avg": 1.251,
+        "xg_for_h1_avg": 0.442,
+        "xg_against_h1_avg": 0.681,
+        "xg_for_h2_avg": 0.542,
+        "xg_against_h2_avg": 0.568,
+        "home_xg_for_avg": 0.887,
+        "away_xg_for_avg": 1.13
+      },
+      "note": "基于双方近10场赛后xG形态(攻击/防守)算术均值估算的赛前预期值, 仅描述历史表现, 非比赛结果预测"
+    },
+    "historical_xg": {
+      "found": false,
+      "event_id": 604943
+    },
+    "historical_odds": {
+      "found": false,
+      "event_id": 604943
+    },
+    "odds_available": true,
+    "_fetchTime": "2026-09-26T00:16:44.781Z",
+    "_eventId": 604943,
     "_source": "self_api_raw"
   }
 }
