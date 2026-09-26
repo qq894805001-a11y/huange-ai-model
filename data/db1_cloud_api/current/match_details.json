@@ -8999,6 +8999,55 @@
         "detail": ""
       },
       {
+        "minute": 75,
+        "type": "substitution",
+        "team": "拉科鲁尼亚",
+        "player": "G. Parreño 替下 Á. Ferllo",
+        "detail": ""
+      },
+      {
+        "minute": 75,
+        "type": "substitution",
+        "team": "拉科鲁尼亚",
+        "player": "M. M. Valeiro 替下 F. Varela",
+        "detail": ""
+      },
+      {
+        "minute": 75,
+        "type": "substitution",
+        "team": "拉科鲁尼亚",
+        "player": "M. Soriano 替下 J. A. Jensen",
+        "detail": ""
+      },
+      {
+        "minute": 75,
+        "type": "substitution",
+        "team": "拉科鲁尼亚",
+        "player": "R. Rodríguez 替下 M. Loureiro",
+        "detail": ""
+      },
+      {
+        "minute": 82,
+        "type": "substitution",
+        "team": "拉科鲁尼亚",
+        "player": "D. Mella 替下 A. Traoré",
+        "detail": ""
+      },
+      {
+        "minute": 82,
+        "type": "substitution",
+        "team": "拉科鲁尼亚",
+        "player": "L. Altieri 替下 Y. Hernández",
+        "detail": ""
+      },
+      {
+        "minute": 86,
+        "type": "substitution",
+        "team": "拉科鲁尼亚",
+        "player": "G. Quagliata 替下 K. Sánchez",
+        "detail": ""
+      },
+      {
         "minute": 90,
         "type": "period",
         "team": "",
@@ -9030,7 +9079,7 @@
       "coach": ""
     },
     "players": [],
-    "updated_at": 1790389710.0239801,
+    "updated_at": 1790393458.6668227,
     "odds_by_bookmaker": {
       "bet365": {
         "胜平负": {
@@ -9130,7 +9179,7 @@
       "event_id": 604943
     },
     "odds_available": true,
-    "_fetchTime": "2026-09-26T02:28:30.170Z",
+    "_fetchTime": "2026-09-26T03:30:58.751Z",
     "_eventId": 604943,
     "_source": "self_api_raw"
   },
