@@ -7861,7 +7861,7 @@
       "coach": ""
     },
     "players": [],
-    "updated_at": 1790392452.7341545,
+    "updated_at": 1790396961.409006,
     "odds_by_bookmaker": {
       "bet365": {
         "胜平负": {
@@ -8127,7 +8127,7 @@
       "event_id": 223080
     },
     "odds_available": true,
-    "_fetchTime": "2026-09-26T03:14:12.884Z",
+    "_fetchTime": "2026-09-26T04:29:21.550Z",
     "_eventId": 223080,
     "_source": "self_api_raw"
   },
@@ -8528,7 +8528,7 @@
       "coach": ""
     },
     "players": [],
-    "updated_at": 1790392453.5560648,
+    "updated_at": 1790396962.2280588,
     "odds_by_bookmaker": {
       "bet365": {
         "胜平负": {
@@ -8762,7 +8762,7 @@
       "event_id": 223082
     },
     "odds_available": true,
-    "_fetchTime": "2026-09-26T03:14:13.691Z",
+    "_fetchTime": "2026-09-26T04:29:22.366Z",
     "_eventId": 223082,
     "_source": "self_api_raw"
   },
