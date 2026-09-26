@@ -1,4 +1,583 @@
 {
+  "10150": {
+    "event_id": 10150,
+    "league": "巴乙",
+    "league_zh": "巴乙",
+    "priority": 9,
+    "is_major": false,
+    "home_team": "新奥里藏特",
+    "away_team": "圣贝纳多",
+    "home_team_zh": "新奥里藏特",
+    "away_team_zh": "圣贝纳多",
+    "date": "26/09/2026",
+    "time": "06:30",
+    "status": "ft",
+    "status_zh": "全场结束",
+    "score": "0-0",
+    "home_score": 0,
+    "away_score": 0,
+    "minute": 0,
+    "venue": "Estádio Dr. Jorge Ismael de Biasi",
+    "referee": "Lucas Canetto Bellote",
+    "odds": {
+      "home_win": 1.51,
+      "draw": 3.75,
+      "away_win": 6,
+      "asian_handicap": -1,
+      "asian_home": 1.95,
+      "asian_away": 1.95,
+      "over_25": null,
+      "under_25": null,
+      "btts_yes": 1.83,
+      "btts_no": 1.88
+    },
+    "odds_multi": {
+      "胜平负": {
+        "主队": 1.51,
+        "平局": 3.75,
+        "客队": 6
+      },
+      "亚盘": {
+        "主队-0.75": 1.7,
+        "客队-0.75": 2.1,
+        "主队-1.0": 1.98,
+        "客队-1.0": 1.82,
+        "主队-1.75": 3,
+        "客队-1.75": 1.38,
+        "主队-1.25": 2.25,
+        "客队-1.25": 1.62,
+        "主队0.25": 1.16,
+        "客队0.25": 5.25,
+        "主队0.75": 1.05,
+        "客队0.75": 7.12,
+        "主队-2.75": 6.4,
+        "客队-2.75": 1.12,
+        "主队-2.25": 4.4,
+        "客队-2.25": 1.2,
+        "主队-1.5": 2.5,
+        "客队-1.5": 1.55,
+        "主队-3.5": 8.7,
+        "主队-2.5": 4.8,
+        "客队-2.5": 1.18,
+        "主队0.0": 1.2,
+        "客队0.0": 4.4,
+        "主队-2.0": 4,
+        "客队-2.0": 1.23,
+        "主队-3.0": 8.2,
+        "客队-3.0": 1.02,
+        "客队1.0": 9.8,
+        "主队-0.25": 1.38,
+        "客队-0.25": 3,
+        "主队-0.5": 1.55,
+        "客队-0.5": 2.42,
+        "主队0.5": 1.15,
+        "客队0.5": 5.75
+      },
+      "双方进球": {
+        "是": 1.84,
+        "否": 1.95
+      },
+      "平局退款": {
+        "主队": 1.22,
+        "客队": 4.33
+      }
+    },
+    "polymarket": {},
+    "lineups": {
+      "home": {
+        "formation": "4-2-3-1",
+        "players": [
+          "93. Jordi",
+          "22. Alexis Alvarino",
+          "26. Gabriel Bahia",
+          "14. Eduardo Brock (C)",
+          "5. Sander",
+          "6. Luís Oyama",
+          "18. Leo Naldi",
+          "41. Reidiney",
+          "10. Rômulo",
+          "30. Nicolas Careca",
+          "11. Robson"
+        ],
+        "count": 11,
+        "players_by_pos": {
+          "门将": [
+            "93. Jordi"
+          ],
+          "后卫": [
+            "22. Alexis Alvarino",
+            "26. Gabriel Bahia",
+            "14. Eduardo Brock (C)",
+            "5. Sander"
+          ],
+          "中场": [
+            "6. Luís Oyama",
+            "18. Leo Naldi",
+            "41. Reidiney",
+            "10. Rômulo",
+            "30. Nicolas Careca"
+          ],
+          "前锋": [
+            "11. Robson"
+          ]
+        }
+      },
+      "away": {
+        "formation": "3-4-3",
+        "players": [
+          "1. Alex Alves",
+          "97. Augusto",
+          "35. Jemerson",
+          "3. Helder Maciel",
+          "2. Rodrigo Ferreira",
+          "8. Foguinho (C)",
+          "26. Dudu Miraíma",
+          "33. Mário Sergio",
+          "11. Pedro Vitor",
+          "9. Felipe Garcia",
+          "29. Pedrinho"
+        ],
+        "count": 11,
+        "players_by_pos": {
+          "门将": [
+            "1. Alex Alves"
+          ],
+          "后卫": [
+            "97. Augusto",
+            "35. Jemerson",
+            "3. Helder Maciel"
+          ],
+          "中场": [
+            "2. Rodrigo Ferreira",
+            "8. Foguinho (C)",
+            "26. Dudu Miraíma",
+            "33. Mário Sergio"
+          ],
+          "前锋": [
+            "11. Pedro Vitor",
+            "9. Felipe Garcia",
+            "29. Pedrinho"
+          ]
+        }
+      }
+    },
+    "injuries": [
+      {
+        "team": "客队",
+        "player_name": "Matheus Salustiano",
+        "position": "",
+        "impact": "rotation",
+        "reason": "Knee Injury"
+      },
+      {
+        "team": "客队",
+        "player_name": "Rodrigo Andrade",
+        "position": "",
+        "impact": "rotation",
+        "reason": "ACL Knee Injury"
+      }
+    ],
+    "stats": [
+      {
+        "team": "客队",
+        "possession": 51,
+        "shots": 5,
+        "shots_on_target": 1,
+        "xg": 0.25,
+        "xg_is_estimate": false,
+        "xg_note": null,
+        "passes": 365,
+        "corners": 0,
+        "fouls": 5,
+        "yellow": 2,
+        "red": 0,
+        "xg_h1": 0.212,
+        "xg_h2": null
+      },
+      {
+        "team": "主队",
+        "possession": 49,
+        "shots": 9,
+        "shots_on_target": 2,
+        "xg": 0.25,
+        "xg_is_estimate": false,
+        "xg_note": null,
+        "passes": 351,
+        "corners": 4,
+        "fouls": 3,
+        "yellow": 0,
+        "red": 0,
+        "xg_h1": 0.221,
+        "xg_h2": null
+      }
+    ],
+    "events": [
+      {
+        "minute": 38,
+        "type": "card",
+        "team": "圣贝纳多",
+        "player": "H. Maciel",
+        "detail": "yellow"
+      },
+      {
+        "minute": 45,
+        "type": "injuryTime",
+        "team": "",
+        "player": "",
+        "detail": ""
+      },
+      {
+        "minute": 45,
+        "type": "period",
+        "team": "",
+        "player": "",
+        "detail": ""
+      },
+      {
+        "minute": 52,
+        "type": "varDecision",
+        "team": "新奥里藏特",
+        "player": "Robson",
+        "detail": ""
+      },
+      {
+        "minute": 58,
+        "type": "card",
+        "team": "圣贝纳多",
+        "player": "Augusto",
+        "detail": "yellow"
+      },
+      {
+        "minute": 60,
+        "type": "substitution",
+        "team": "圣贝纳多",
+        "player": "Fabrício Daniel 替下 F. Garcia",
+        "detail": ""
+      },
+      {
+        "minute": 60,
+        "type": "substitution",
+        "team": "新奥里藏特",
+        "player": "Juninho 替下 Reidiney",
+        "detail": ""
+      },
+      {
+        "minute": 60,
+        "type": "substitution",
+        "team": "新奥里藏特",
+        "player": "Vinicius Paiva 替下 N. Careca",
+        "detail": ""
+      },
+      {
+        "minute": 70,
+        "type": "substitution",
+        "team": "新奥里藏特",
+        "player": "Carlão 替下 L. Naldi",
+        "detail": ""
+      },
+      {
+        "minute": 74,
+        "type": "substitution",
+        "team": "圣贝纳多",
+        "player": "D. D. S. Roque 替下 Pedrinho",
+        "detail": ""
+      },
+      {
+        "minute": 74,
+        "type": "substitution",
+        "team": "圣贝纳多",
+        "player": "L. Lima 替下 Foguinho",
+        "detail": ""
+      },
+      {
+        "minute": 85,
+        "type": "substitution",
+        "team": "新奥里藏特",
+        "player": "D. Galo 替下 Robson",
+        "detail": ""
+      },
+      {
+        "minute": 85,
+        "type": "substitution",
+        "team": "圣贝纳多",
+        "player": "Echaporã 替下 P. Vitor",
+        "detail": ""
+      },
+      {
+        "minute": 85,
+        "type": "substitution",
+        "team": "新奥里藏特",
+        "player": "L. O. Maria 替下 Rômulo",
+        "detail": ""
+      },
+      {
+        "minute": 85,
+        "type": "substitution",
+        "team": "圣贝纳多",
+        "player": "Pará 替下 M. Sergio",
+        "detail": ""
+      },
+      {
+        "minute": 90,
+        "type": "injuryTime",
+        "team": "",
+        "player": "",
+        "detail": ""
+      },
+      {
+        "minute": 90,
+        "type": "period",
+        "team": "",
+        "player": "",
+        "detail": ""
+      }
+    ],
+    "h2h": {
+      "w": 0,
+      "d": 1,
+      "l": 0,
+      "total": 1,
+      "last_meetings": [
+        {
+          "away": "Grêmio Novorizontino",
+          "date": "2026-05-31T14:00:00+00:00",
+          "home": "São Bernardo",
+          "score": "1-1",
+          "event_id": 9963,
+          "away_score": 1,
+          "home_score": 1,
+          "away_team_id": 836,
+          "home_team_id": 841,
+          "home_team": "São Bernardo",
+          "away_team": "Grêmio Novorizontino",
+          "home_team_zh": "圣贝纳多",
+          "away_team_zh": "新奥里藏特"
+        }
+      ]
+    },
+    "money": {},
+    "broadcasts": [],
+    "team_home": {
+      "name": "新奥里藏特",
+      "country": "巴西",
+      "logo": "",
+      "venue": "Estádio Dr. Jorge Ismael de Biasi",
+      "coach": ""
+    },
+    "team_away": {
+      "name": "圣贝纳多",
+      "country": "巴西",
+      "logo": "",
+      "venue": "Estádio Dr. Jorge Ismael de Biasi",
+      "coach": ""
+    },
+    "players": [],
+    "updated_at": 1790397874.9984338,
+    "odds_by_bookmaker": {
+      "bet365": {
+        "胜平负": {
+          "主队": 1.51,
+          "平局": 3.75,
+          "客队": 6
+        },
+        "亚盘": {
+          "主队-1.75": 3,
+          "客队-1.75": 1.38,
+          "主队-1.25": 2.25,
+          "客队-1.25": 1.62,
+          "主队-0.75": 1.7,
+          "客队-0.75": 2.1,
+          "主队0.25": 1.16,
+          "客队0.25": 5.25,
+          "主队-2.75": 6.4,
+          "客队-2.75": 1.12,
+          "主队-2.25": 4.4,
+          "客队-2.25": 1.2,
+          "主队-1.5": 2.38,
+          "客队-1.5": 1.55,
+          "主队-2.5": 4.8,
+          "客队-2.5": 1.18,
+          "主队-0.5": 1.52,
+          "客队-0.5": 2.42,
+          "主队0.0": 1.2,
+          "客队0.0": 4.4,
+          "主队0.5": 1.14,
+          "客队0.5": 5.75,
+          "主队-2.0": 4,
+          "客队-2.0": 1.23,
+          "主队-1.0": 1.98,
+          "客队-1.0": 1.82,
+          "主队-0.25": 1.38,
+          "客队-0.25": 3
+        },
+        "双方进球": {
+          "是": 1.83,
+          "否": 1.83
+        },
+        "平局退款": {
+          "主队": 1.2,
+          "客队": 4.33
+        }
+      },
+      "bwin": {
+        "亚盘": {
+          "主队-0.5": 1.52,
+          "客队-0.5": 2.35
+        },
+        "双方进球": {
+          "是": 1.83,
+          "否": 1.85
+        },
+        "平局退款": {
+          "主队": 1.2,
+          "客队": 4.1
+        }
+      },
+      "unibet": {
+        "亚盘": {
+          "主队-1.5": 2.5,
+          "客队-1.5": 1.48,
+          "主队-0.5": 1.54,
+          "客队-0.5": 2.38,
+          "主队0.5": 1.15,
+          "客队0.5": 5
+        },
+        "双方进球": {
+          "是": 1.83,
+          "否": 1.88
+        },
+        "平局退款": {
+          "主队": 1.22,
+          "客队": 3.9
+        }
+      },
+      "william-hill": {
+        "亚盘": {
+          "主队-0.5": 1.55,
+          "客队-0.5": 2.3
+        },
+        "双方进球": {
+          "是": 1.8,
+          "否": 1.95
+        },
+        "平局退款": {
+          "主队": 1.2,
+          "客队": 4.2
+        }
+      }
+    },
+    "match_stats": [
+      {
+        "id": 226974,
+        "event_id": 10150,
+        "team": "away",
+        "possession": 51,
+        "shots": 5,
+        "shots_on_target": 1,
+        "xg": 0.25,
+        "passes": 365,
+        "corners": 0,
+        "fouls": 5,
+        "offsides": 0,
+        "yellow": 2,
+        "red": 0,
+        "updated_at": 1790380664.617197,
+        "xg_h1": 0.212,
+        "xg_h2": null,
+        "xg_est": null,
+        "xg_est_src": null,
+        "team_zh": "客队"
+      },
+      {
+        "id": 226973,
+        "event_id": 10150,
+        "team": "home",
+        "possession": 49,
+        "shots": 9,
+        "shots_on_target": 2,
+        "xg": 0.25,
+        "passes": 351,
+        "corners": 4,
+        "fouls": 3,
+        "offsides": 1,
+        "yellow": 0,
+        "red": 0,
+        "updated_at": 1790380664.617197,
+        "xg_h1": 0.221,
+        "xg_h2": null,
+        "xg_est": null,
+        "xg_est_src": null,
+        "team_zh": "主队"
+      }
+    ],
+    "expected_xg": {
+      "found": true,
+      "event_id": 10150,
+      "home_team": "新奥里藏特",
+      "away_team": "圣贝纳多",
+      "expected_xg": {
+        "home": 1.6,
+        "away": 0.81,
+        "home_h1": 0.83,
+        "away_h1": 0.36,
+        "home_h2": 0.87,
+        "away_h2": 0.5
+      },
+      "home_form": {
+        "n": 9,
+        "xg_for_avg": 1.926,
+        "xg_against_avg": 0.741,
+        "xg_for_h1_avg": 1.01,
+        "xg_against_h1_avg": 0.358,
+        "xg_for_h2_avg": 1.027,
+        "xg_against_h2_avg": 0.426,
+        "home_xg_for_avg": 2.152,
+        "away_xg_for_avg": 1.643
+      },
+      "away_form": {
+        "n": 8,
+        "xg_for_avg": 0.875,
+        "xg_against_avg": 1.284,
+        "xg_for_h1_avg": 0.368,
+        "xg_against_h1_avg": 0.654,
+        "xg_for_h2_avg": 0.573,
+        "xg_against_h2_avg": 0.715,
+        "home_xg_for_avg": 0.973,
+        "away_xg_for_avg": 0.816
+      },
+      "note": "基于双方近10场赛后xG形态(攻击/防守)算术均值估算的赛前预期值, 仅描述历史表现, 非比赛结果预测"
+    },
+    "historical_xg": {
+      "found": false,
+      "event_id": 10150
+    },
+    "historical_odds": {
+      "found": false,
+      "event_id": 10150
+    },
+    "odds_available": true,
+    "_fetchTime": "2026-09-26T04:44:35.162Z",
+    "_eventId": 10150,
+    "_source": "self_api_raw",
+    "_sources": [
+      "db1_cloud_api"
+    ],
+    "team_ability": {
+      "home": {
+        "overall": 65,
+        "attacking": 65,
+        "defending": 65,
+        "depth": 0
+      },
+      "away": {
+        "overall": 65,
+        "attacking": 65,
+        "defending": 65,
+        "depth": 0
+      },
+      "diff": 0
+    }
+  },
   "212591": {
     "event_id": 212591,
     "league": "欧国联",
@@ -7590,6 +8169,689 @@
     "odds_available": true,
     "_fetchTime": "2026-09-26T04:12:19.940Z",
     "_eventId": 214837,
+    "_source": "self_api_raw",
+    "_sources": [
+      "db1_cloud_api"
+    ],
+    "team_ability": {
+      "home": {
+        "overall": 65,
+        "attacking": 65,
+        "defending": 65,
+        "depth": 0
+      },
+      "away": {
+        "overall": 65,
+        "attacking": 65,
+        "defending": 65,
+        "depth": 0
+      },
+      "diff": 0
+    }
+  },
+  "216459": {
+    "event_id": 216459,
+    "league": "美国女足联赛",
+    "league_zh": "美国女足联赛",
+    "priority": 9,
+    "is_major": false,
+    "home_team": "路易斯维尔竞技",
+    "away_team": "圣迭戈波浪",
+    "home_team_zh": "路易斯维尔竞技",
+    "away_team_zh": "圣迭戈波浪",
+    "date": "26/09/2026",
+    "time": "06:30",
+    "status": "ft",
+    "status_zh": "全场结束",
+    "score": "0-2",
+    "home_score": 0,
+    "away_score": 2,
+    "minute": 0,
+    "venue": "",
+    "referee": "Joshua Encarnacion",
+    "odds": {
+      "home_win": 4.02,
+      "draw": 3.95,
+      "away_win": 1.8,
+      "asian_handicap": 0.75,
+      "asian_home": 1.799,
+      "asian_away": 1.9,
+      "over_25": 1.57,
+      "under_25": 2.43,
+      "btts_yes": 1.49,
+      "btts_no": 2.34
+    },
+    "odds_multi": {
+      "胜平负": {
+        "主队": 4.34,
+        "平局": 4,
+        "客队": 1.74
+      },
+      "亚盘": {
+        "主队0.75": 1.8,
+        "客队0.75": 1.9,
+        "主队0.25": 2.33,
+        "客队0.25": 1.48,
+        "主队1.25": 1.43,
+        "客队1.25": 2.46,
+        "主队1.75": 1.24,
+        "客队1.75": 3.34,
+        "主队-1.5": 8.2,
+        "客队-1.5": 1.02,
+        "主队2.5": 1.09,
+        "客队2.5": 5.25,
+        "主队1.5": 1.35,
+        "客队1.5": 2.74,
+        "客队3.5": 9.4,
+        "主队0.0": 2.97,
+        "客队0.0": 1.3,
+        "主队2.0": 1.13,
+        "客队2.0": 4.5,
+        "主队-1.0": 7.3,
+        "客队-1.0": 1.03,
+        "主队1.0": 1.57,
+        "客队1.0": 2.19,
+        "主队-0.25": 3.34,
+        "客队-0.25": 1.24,
+        "主队0.5": 2.05,
+        "客队0.5": 1.73
+      },
+      "双方进球": {
+        "是": 1.61,
+        "否": 2.4
+      },
+      "双重机会": {
+        "主队不败": 2,
+        "客队不败": 1.2,
+        "分胜负": 1.25
+      },
+      "平局退款": {
+        "主队": 3.1,
+        "客队": 1.35
+      },
+      "大小球(0.5)": {
+        "大0.5": 1.02,
+        "小0.5": 17
+      },
+      "大小球(1.5)": {
+        "大1.5": 1.12,
+        "小1.5": 5.5
+      },
+      "大小球(2.5)": {
+        "大2.5": 1.53,
+        "小2.5": 2.43
+      },
+      "大小球(3.5)": {
+        "大3.5": 2.31,
+        "小3.5": 1.57
+      },
+      "总角球": {
+        "大7.5": 1.36,
+        "小7.5": 2.77,
+        "大8.5": 1.67,
+        "小8.5": 2.07,
+        "大9.5": 2.1,
+        "小9.5": 1.65,
+        "大10.5": 2.77,
+        "小10.5": 1.36,
+        "大11.5": 3.91,
+        "小11.5": 1.17
+      }
+    },
+    "polymarket": {},
+    "lineups": {
+      "home": {
+        "formation": "3-4-1-2",
+        "players": [
+          "24. Jordyn Bloomer",
+          "5. Elisabeth Charlotte Jean",
+          "3. Arin Wright (C)",
+          "15. Mirann Gacioch",
+          "21. Rachel Hill",
+          "10. Macey Hodge",
+          "20. Katie O'Kane",
+          "4. Makenna Morris",
+          "2. Lauren Milliet",
+          "9. Kayla Fischer",
+          "42. Sarah Weber"
+        ],
+        "count": 11,
+        "players_by_pos": {
+          "门将": [
+            "24. Jordyn Bloomer"
+          ],
+          "后卫": [
+            "5. Elisabeth Charlotte Jean",
+            "3. Arin Wright (C)",
+            "15. Mirann Gacioch"
+          ],
+          "中场": [
+            "21. Rachel Hill",
+            "10. Macey Hodge",
+            "20. Katie O'Kane",
+            "4. Makenna Morris"
+          ],
+          "前锋": [
+            "2. Lauren Milliet",
+            "9. Kayla Fischer",
+            "42. Sarah Weber"
+          ]
+        }
+      },
+      "away": {
+        "formation": "4-2-3-1",
+        "players": [
+          "12. Sandra Paños",
+          "16. Amelia Van Zanten",
+          "2. Kennedy Wesley (C)",
+          "14. Kristen McNabb",
+          "75. Perle Morroni",
+          "10. Kenza Dali",
+          "8. Kimmi Ascanio",
+          "7. Melanie Barcenas",
+          "22. Lia Godfrey",
+          "11. Gia Corley",
+          "15. Trinity Paula Byars"
+        ],
+        "count": 11,
+        "players_by_pos": {
+          "门将": [
+            "12. Sandra Paños"
+          ],
+          "后卫": [
+            "16. Amelia Van Zanten",
+            "2. Kennedy Wesley (C)",
+            "14. Kristen McNabb",
+            "75. Perle Morroni"
+          ],
+          "中场": [
+            "10. Kenza Dali",
+            "8. Kimmi Ascanio",
+            "7. Melanie Barcenas",
+            "22. Lia Godfrey",
+            "11. Gia Corley"
+          ],
+          "前锋": [
+            "15. Trinity Paula Byars"
+          ]
+        }
+      }
+    },
+    "injuries": [],
+    "stats": [
+      {
+        "team": "客队",
+        "possession": 60,
+        "shots": 19,
+        "shots_on_target": 8,
+        "xg": 1.69,
+        "xg_is_estimate": false,
+        "xg_note": null,
+        "passes": 508,
+        "corners": 6,
+        "fouls": 6,
+        "yellow": 0,
+        "red": 0,
+        "xg_h1": 0.763,
+        "xg_h2": null
+      },
+      {
+        "team": "主队",
+        "possession": 40,
+        "shots": 10,
+        "shots_on_target": 1,
+        "xg": 1.34,
+        "xg_is_estimate": false,
+        "xg_note": null,
+        "passes": 331,
+        "corners": 3,
+        "fouls": 10,
+        "yellow": 1,
+        "red": 0,
+        "xg_h1": 0.321,
+        "xg_h2": null
+      }
+    ],
+    "events": [
+      {
+        "minute": 27,
+        "type": "goal",
+        "team": "圣迭戈波浪",
+        "player": "G. Corley",
+        "detail": ""
+      },
+      {
+        "minute": 45,
+        "type": "injuryTime",
+        "team": "",
+        "player": "",
+        "detail": ""
+      },
+      {
+        "minute": 45,
+        "type": "period",
+        "team": "",
+        "player": "",
+        "detail": ""
+      },
+      {
+        "minute": 46,
+        "type": "substitution",
+        "team": "圣迭戈波浪",
+        "player": "Ludmila 替下 T. P. Byars",
+        "detail": ""
+      },
+      {
+        "minute": 49,
+        "type": "goal",
+        "team": "圣迭戈波浪",
+        "player": "Ludmila",
+        "detail": ""
+      },
+      {
+        "minute": 49,
+        "type": "goal",
+        "team": "圣迭戈波浪",
+        "player": "T. P. Byars",
+        "detail": ""
+      },
+      {
+        "minute": 57,
+        "type": "substitution",
+        "team": "圣迭戈波浪",
+        "player": "L. Harbert 替下 K. Ascanio",
+        "detail": ""
+      },
+      {
+        "minute": 63,
+        "type": "card",
+        "team": "路易斯维尔竞技",
+        "player": "K. Fischer",
+        "detail": "yellow"
+      },
+      {
+        "minute": 64,
+        "type": "substitution",
+        "team": "路易斯维尔竞技",
+        "player": "A. McKeen 替下 K. O'Kane",
+        "detail": ""
+      },
+      {
+        "minute": 64,
+        "type": "substitution",
+        "team": "路易斯维尔竞技",
+        "player": "E. Sears 替下 S. Weber",
+        "detail": ""
+      },
+      {
+        "minute": 64,
+        "type": "substitution",
+        "team": "路易斯维尔竞技",
+        "player": "Q. McMahon 替下 M. Morris",
+        "detail": ""
+      },
+      {
+        "minute": 68,
+        "type": "substitution",
+        "team": "圣迭戈波浪",
+        "player": "G. Portilho 替下 L. Godfrey",
+        "detail": ""
+      },
+      {
+        "minute": 74,
+        "type": "substitution",
+        "team": "路易斯维尔竞技",
+        "player": "M. Blackburn 替下 R. Hill",
+        "detail": ""
+      },
+      {
+        "minute": 74,
+        "type": "substitution",
+        "team": "路易斯维尔竞技",
+        "player": "M. Lardner 替下 K. Fischer",
+        "detail": ""
+      },
+      {
+        "minute": 81,
+        "type": "substitution",
+        "team": "圣迭戈波浪",
+        "player": "B. Bonansea 替下 G. Corley",
+        "detail": ""
+      },
+      {
+        "minute": 81,
+        "type": "substitution",
+        "team": "圣迭戈波浪",
+        "player": "B. J. Courtnall 替下 P. Morroni",
+        "detail": ""
+      },
+      {
+        "minute": 90,
+        "type": "injuryTime",
+        "team": "",
+        "player": "",
+        "detail": ""
+      },
+      {
+        "minute": 90,
+        "type": "period",
+        "team": "",
+        "player": "",
+        "detail": ""
+      }
+    ],
+    "h2h": {
+      "w": 2,
+      "d": 3,
+      "l": 4,
+      "total": 9,
+      "last_meetings": [
+        {
+          "away": "Racing Louisville",
+          "date": "2026-08-29T02:00:00+00:00",
+          "home": "San Diego Wave FC",
+          "score": "3-2",
+          "event_id": 216426,
+          "away_score": 2,
+          "home_score": 3,
+          "away_team_id": 3935,
+          "home_team_id": 3936,
+          "home_team": "San Diego Wave FC",
+          "away_team": "Racing Louisville",
+          "home_team_zh": "圣迭戈波浪",
+          "away_team_zh": "路易斯维尔竞技"
+        },
+        {
+          "away": "Racing Louisville",
+          "date": "2025-08-25T00:00:00+00:00",
+          "home": "San Diego Wave FC",
+          "score": "0-1",
+          "event_id": 229261,
+          "away_score": 1,
+          "home_score": 0,
+          "away_team_id": 3935,
+          "home_team_id": 3936,
+          "home_team": "San Diego Wave FC",
+          "away_team": "Racing Louisville",
+          "home_team_zh": "圣迭戈波浪",
+          "away_team_zh": "路易斯维尔竞技"
+        },
+        {
+          "away": "San Diego Wave FC",
+          "date": "2025-04-19T19:00:00+00:00",
+          "home": "Racing Louisville",
+          "score": "1-4",
+          "event_id": 229174,
+          "away_score": 4,
+          "home_score": 1,
+          "away_team_id": 3936,
+          "home_team_id": 3935,
+          "home_team": "Racing Louisville",
+          "away_team": "San Diego Wave FC",
+          "home_team_zh": "路易斯维尔竞技",
+          "away_team_zh": "圣迭戈波浪"
+        },
+        {
+          "away": "Racing Louisville",
+          "date": "2024-11-03T22:30:00+00:00",
+          "home": "San Diego Wave FC",
+          "score": "3-1",
+          "event_id": 237887,
+          "away_score": 1,
+          "home_score": 3,
+          "away_team_id": 3935,
+          "home_team_id": 3936,
+          "home_team": "San Diego Wave FC",
+          "away_team": "Racing Louisville",
+          "home_team_zh": "圣迭戈波浪",
+          "away_team_zh": "路易斯维尔竞技"
+        },
+        {
+          "away": "San Diego Wave FC",
+          "date": "2024-04-13T23:30:00+00:00",
+          "home": "Racing Louisville",
+          "score": "0-0",
+          "event_id": 237730,
+          "away_score": 0,
+          "home_score": 0,
+          "away_team_id": 3936,
+          "home_team_id": 3935,
+          "home_team": "Racing Louisville",
+          "away_team": "San Diego Wave FC",
+          "home_team_zh": "路易斯维尔竞技",
+          "away_team_zh": "圣迭戈波浪"
+        }
+      ]
+    },
+    "money": {},
+    "broadcasts": [],
+    "team_home": {
+      "name": "路易斯维尔竞技",
+      "country": "美国",
+      "logo": "",
+      "venue": "",
+      "coach": ""
+    },
+    "team_away": {
+      "name": "圣迭戈波浪",
+      "country": "美国",
+      "logo": "",
+      "venue": "",
+      "coach": ""
+    },
+    "players": [],
+    "updated_at": 1790397875.863545,
+    "odds_by_bookmaker": {
+      "bet365": {
+        "胜平负": {
+          "主队": 3.8,
+          "平局": 3.75,
+          "客队": 1.72
+        },
+        "双方进球": {
+          "是": 1.61,
+          "否": 2.2
+        },
+        "大小球(2.5)": {
+          "大2.5": 1.53,
+          "小2.5": 2.37
+        }
+      },
+      "betfair": {
+        "胜平负": {
+          "主队": 4,
+          "平局": 3.9,
+          "客队": 1.67
+        },
+        "双方进球": {
+          "是": 1.5,
+          "否": 2.4
+        },
+        "双重机会": {
+          "主队不败": 2,
+          "客队不败": 1.2,
+          "分胜负": 1.2
+        },
+        "大小球(0.5)": {
+          "小0.5": 17
+        },
+        "大小球(1.5)": {
+          "大1.5": 1.11,
+          "小1.5": 5.5
+        },
+        "大小球(2.5)": {
+          "大2.5": 1.5,
+          "小2.5": 2.4
+        },
+        "大小球(3.5)": {
+          "大3.5": 2.25,
+          "小3.5": 1.57
+        }
+      },
+      "macauslot": {
+        "胜平负": {
+          "主队": 4.34,
+          "平局": 4,
+          "客队": 1.59
+        }
+      },
+      "pinnacle": {
+        "胜平负": {
+          "主队": 4.02,
+          "平局": 3.73,
+          "客队": 1.74
+        },
+        "大小球(2.5)": {
+          "大2.5": 1.51,
+          "小2.5": 2.43
+        },
+        "大小球(3.5)": {
+          "大3.5": 2.31,
+          "小3.5": 1.56
+        }
+      },
+      "unibet": {
+        "胜平负": {
+          "主队": 3.9,
+          "平局": 3.7,
+          "客队": 1.68
+        },
+        "亚盘": {
+          "主队0.5": 1.95,
+          "客队0.5": 1.73
+        },
+        "双方进球": {
+          "是": 1.5,
+          "否": 2.35
+        },
+        "平局退款": {
+          "主队": 2.8,
+          "客队": 1.35
+        }
+      },
+      "william-hill": {
+        "胜平负": {
+          "主队": 3.9,
+          "平局": 3.5,
+          "客队": 1.7
+        },
+        "亚盘": {
+          "主队0.5": 2.05,
+          "客队0.5": 1.67
+        },
+        "双方进球": {
+          "是": 1.44,
+          "否": 2.4
+        },
+        "双重机会": {
+          "主队不败": 2,
+          "客队不败": 1.2,
+          "分胜负": 1.25
+        },
+        "平局退款": {
+          "主队": 3.1,
+          "客队": 1.3
+        }
+      },
+      "bwin": {
+        "双方进球": {
+          "是": 1.5,
+          "否": 2.37
+        }
+      }
+    },
+    "match_stats": [
+      {
+        "id": 226972,
+        "event_id": 216459,
+        "team": "away",
+        "possession": 60,
+        "shots": 19,
+        "shots_on_target": 8,
+        "xg": 1.69,
+        "passes": 508,
+        "corners": 6,
+        "fouls": 6,
+        "offsides": 1,
+        "yellow": 0,
+        "red": 0,
+        "updated_at": 1790382475.9301038,
+        "xg_h1": 0.763,
+        "xg_h2": null,
+        "xg_est": null,
+        "xg_est_src": null,
+        "team_zh": "客队"
+      },
+      {
+        "id": 226971,
+        "event_id": 216459,
+        "team": "home",
+        "possession": 40,
+        "shots": 10,
+        "shots_on_target": 1,
+        "xg": 1.34,
+        "passes": 331,
+        "corners": 3,
+        "fouls": 10,
+        "offsides": 5,
+        "yellow": 1,
+        "red": 0,
+        "updated_at": 1790382475.9301038,
+        "xg_h1": 0.321,
+        "xg_h2": null,
+        "xg_est": null,
+        "xg_est_src": null,
+        "team_zh": "主队"
+      }
+    ],
+    "expected_xg": {
+      "found": true,
+      "event_id": 216459,
+      "home_team": "路易斯维尔竞技",
+      "away_team": "圣迭戈波浪",
+      "expected_xg": {
+        "home": 1.42,
+        "away": 1.87,
+        "home_h1": 0.61,
+        "away_h1": 0.69,
+        "home_h2": 0.7,
+        "away_h2": 1.17
+      },
+      "home_form": {
+        "n": 8,
+        "xg_for_avg": 1.695,
+        "xg_against_avg": 2.001,
+        "xg_for_h1_avg": 0.626,
+        "xg_against_h1_avg": 0.786,
+        "xg_for_h2_avg": 1.065,
+        "xg_against_h2_avg": 1.228,
+        "home_xg_for_avg": 1.884,
+        "away_xg_for_avg": 1.38
+      },
+      "away_form": {
+        "n": 7,
+        "xg_for_avg": 1.744,
+        "xg_against_avg": 1.141,
+        "xg_for_h1_avg": 0.593,
+        "xg_against_h1_avg": 0.591,
+        "xg_for_h2_avg": 1.103,
+        "xg_against_h2_avg": 0.331,
+        "home_xg_for_avg": 1.832,
+        "away_xg_for_avg": 1.525
+      },
+      "note": "基于双方近10场赛后xG形态(攻击/防守)算术均值估算的赛前预期值, 仅描述历史表现, 非比赛结果预测"
+    },
+    "historical_xg": {
+      "found": false,
+      "event_id": 216459
+    },
+    "historical_odds": {
+      "found": false,
+      "event_id": 216459
+    },
+    "odds_available": true,
+    "_fetchTime": "2026-09-26T04:44:36.022Z",
+    "_eventId": 216459,
     "_source": "self_api_raw",
     "_sources": [
       "db1_cloud_api"
