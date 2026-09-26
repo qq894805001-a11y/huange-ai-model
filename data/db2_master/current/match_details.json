@@ -7610,6 +7610,707 @@
       "diff": 0
     }
   },
+  "223080": {
+    "event_id": 223080,
+    "league": "65",
+    "league_zh": "65",
+    "priority": 9,
+    "is_major": false,
+    "home_team": "百慕大",
+    "away_team": "瓜德罗普",
+    "home_team_zh": "百慕大",
+    "away_team_zh": "瓜德罗普",
+    "date": "26/09/2026",
+    "time": "03:00",
+    "status": "ft",
+    "status_zh": "全场结束",
+    "score": "1-2",
+    "home_score": 1,
+    "away_score": 2,
+    "minute": 0,
+    "venue": "",
+    "referee": "",
+    "odds": {
+      "home_win": 2.6,
+      "draw": 3.35,
+      "away_win": 3.6,
+      "asian_handicap": -0.25,
+      "asian_home": 2.1,
+      "asian_away": 1.831,
+      "over_25": 2.1,
+      "under_25": 1.8,
+      "btts_yes": 1.83,
+      "btts_no": 1.86
+    },
+    "odds_multi": {
+      "胜平负": {
+        "主队": 2.8,
+        "平局": 3.1,
+        "客队": 2.89
+      },
+      "亚盘": {
+        "主队-2.5": 10.5,
+        "主队-1.75": 6.8,
+        "客队-1.75": 1.1,
+        "主队-1.25": 4.5,
+        "客队-1.25": 1.19,
+        "主队-0.75": 3,
+        "客队-0.75": 1.41,
+        "主队0.25": 1.55,
+        "客队0.25": 2.58,
+        "主队0.75": 1.3,
+        "客队0.75": 3.78,
+        "主队1.25": 1.15,
+        "客队1.25": 6.1,
+        "主队1.75": 1.1,
+        "客队1.75": 8.5,
+        "主队-1.5": 4.4,
+        "客队-1.5": 1.2,
+        "主队1.5": 1.13,
+        "客队1.5": 6.55,
+        "主队0.0": 1.62,
+        "客队0.0": 2.38,
+        "主队2.0": 1.02,
+        "客队2.0": 10,
+        "主队-2.0": 8.1,
+        "客队-2.0": 1.02,
+        "主队-1.0": 3.55,
+        "客队-1.0": 1.27,
+        "主队1.0": 1.17,
+        "客队1.0": 5.65,
+        "主队-0.25": 2.1,
+        "客队-0.25": 1.83,
+        "主队-0.5": 2.25,
+        "客队-0.5": 1.67,
+        "主队0.5": 1.44,
+        "客队0.5": 2.75
+      },
+      "双方进球": {
+        "是": 1.87,
+        "否": 1.9
+      },
+      "双重机会": {
+        "主队不败": 1.73,
+        "客队不败": 1.49,
+        "分胜负": 1.36
+      },
+      "平局退款": {
+        "主队": 1.73,
+        "客队": 2.2
+      },
+      "大小球(0.5)": {
+        "大0.5": 1.07,
+        "小0.5": 8.5
+      },
+      "大小球(1.5)": {
+        "大1.5": 1.36,
+        "小1.5": 3.1
+      },
+      "大小球(2.5)": {
+        "大2.5": 2.2,
+        "小2.5": 1.67
+      },
+      "大小球(3.5)": {
+        "大3.5": 4.1,
+        "小3.5": 1.22
+      }
+    },
+    "polymarket": {},
+    "lineups": {
+      "home": {
+        "formation": "4-4-2",
+        "players": [
+          "1. Milai Perott",
+          "7. Lejuan Simmons (C)",
+          "16. Jorj Dublin",
+          "17. Harry Twite",
+          "11. Deniche Hill",
+          "19. Ajani Burchall",
+          "5. Ne-Jai Tucker",
+          "18. Luke Robinson",
+          "8. Djair Parfitt-Williams",
+          "6. Sincere Hall",
+          "9. Enrique Russell"
+        ],
+        "count": 11,
+        "players_by_pos": {
+          "门将": [
+            "1. Milai Perott"
+          ],
+          "后卫": [
+            "7. Lejuan Simmons (C)",
+            "16. Jorj Dublin",
+            "17. Harry Twite",
+            "11. Deniche Hill"
+          ],
+          "中场": [
+            "19. Ajani Burchall",
+            "5. Ne-Jai Tucker",
+            "18. Luke Robinson",
+            "8. Djair Parfitt-Williams"
+          ],
+          "前锋": [
+            "6. Sincere Hall",
+            "9. Enrique Russell"
+          ]
+        }
+      },
+      "away": {
+        "formation": "4-1-4-1",
+        "players": [
+          "23. Davy Rouyard (C)",
+          "22. Sulyvan Darase",
+          "5. Yonel Raddas",
+          "4. Kenjy Montantin",
+          "21. Fabien Geran",
+          "20. Thomas Davillars",
+          "11. Jonathan Gamby",
+          "6. Willis Francillonne",
+          "8. Ange-Freddy Plumain",
+          "10. Djamalee Boisné",
+          "9. Tairyk Arconte"
+        ],
+        "count": 11,
+        "players_by_pos": {
+          "门将": [
+            "23. Davy Rouyard (C)"
+          ],
+          "后卫": [
+            "22. Sulyvan Darase",
+            "5. Yonel Raddas",
+            "4. Kenjy Montantin",
+            "21. Fabien Geran"
+          ],
+          "中场": [
+            "20. Thomas Davillars",
+            "11. Jonathan Gamby",
+            "6. Willis Francillonne",
+            "8. Ange-Freddy Plumain",
+            "10. Djamalee Boisné"
+          ],
+          "前锋": [
+            "9. Tairyk Arconte"
+          ]
+        }
+      }
+    },
+    "injuries": [],
+    "stats": [
+      {
+        "team": "客队",
+        "possession": 53,
+        "shots": 21,
+        "shots_on_target": 11,
+        "xg": 1.92,
+        "xg_is_estimate": false,
+        "xg_note": null,
+        "passes": 340,
+        "corners": 7,
+        "fouls": 22,
+        "yellow": 2,
+        "red": 0,
+        "xg_h1": 0.176,
+        "xg_h2": null
+      },
+      {
+        "team": "主队",
+        "possession": 47,
+        "shots": 11,
+        "shots_on_target": 4,
+        "xg": 1.29,
+        "xg_is_estimate": false,
+        "xg_note": null,
+        "passes": 302,
+        "corners": 4,
+        "fouls": 12,
+        "yellow": 4,
+        "red": 2,
+        "xg_h1": 1.093,
+        "xg_h2": null
+      }
+    ],
+    "events": [
+      {
+        "minute": 13,
+        "type": "card",
+        "team": "瓜德罗普",
+        "player": "T. Davillars",
+        "detail": "yellow"
+      },
+      {
+        "minute": 18,
+        "type": "goal",
+        "team": "百慕大",
+        "player": "E. Russell",
+        "detail": ""
+      },
+      {
+        "minute": 26,
+        "type": "card",
+        "team": "百慕大",
+        "player": "L. Simmons",
+        "detail": "yellow"
+      },
+      {
+        "minute": 45,
+        "type": "injuryTime",
+        "team": "",
+        "player": "",
+        "detail": ""
+      },
+      {
+        "minute": 45,
+        "type": "period",
+        "team": "",
+        "player": "",
+        "detail": ""
+      },
+      {
+        "minute": 46,
+        "type": "substitution",
+        "team": "瓜德罗普",
+        "player": "K. Giblaca 替下 T. Davillars",
+        "detail": ""
+      },
+      {
+        "minute": 46,
+        "type": "substitution",
+        "team": "百慕大",
+        "player": "Z. Lewis 替下 L. Robinson",
+        "detail": ""
+      },
+      {
+        "minute": 53,
+        "type": "card",
+        "team": "瓜德罗普",
+        "player": "J. Gamby",
+        "detail": "yellow"
+      },
+      {
+        "minute": 55,
+        "type": "card",
+        "team": "百慕大",
+        "player": "D. Hill",
+        "detail": "yellow"
+      },
+      {
+        "minute": 55,
+        "type": "card",
+        "team": "百慕大",
+        "player": "Z. Lewis",
+        "detail": "yellow"
+      },
+      {
+        "minute": 59,
+        "type": "substitution",
+        "team": "瓜德罗普",
+        "player": "D. Capraja 替下 J. Gamby",
+        "detail": ""
+      },
+      {
+        "minute": 63,
+        "type": "substitution",
+        "team": "百慕大",
+        "player": "B. Borgesson 替下 S. Hall",
+        "detail": ""
+      },
+      {
+        "minute": 63,
+        "type": "substitution",
+        "team": "百慕大",
+        "player": "J. Donawa 替下 D. Parfitt-Williams",
+        "detail": ""
+      },
+      {
+        "minute": 64,
+        "type": "card",
+        "team": "百慕大",
+        "player": "J. Dublin",
+        "detail": "red"
+      },
+      {
+        "minute": 66,
+        "type": "substitution",
+        "team": "瓜德罗普",
+        "player": "M. Alphonse 替下 F. Geran",
+        "detail": ""
+      },
+      {
+        "minute": 70,
+        "type": "substitution",
+        "team": "百慕大",
+        "player": "L. Steede-Jackson 替下 A. Burchall",
+        "detail": ""
+      },
+      {
+        "minute": 77,
+        "type": "substitution",
+        "team": "瓜德罗普",
+        "player": "A. Vulgaire 替下 S. Darase",
+        "detail": ""
+      },
+      {
+        "minute": 84,
+        "type": "goal",
+        "team": "瓜德罗普",
+        "player": "A. Vulgaire",
+        "detail": ""
+      },
+      {
+        "minute": 86,
+        "type": "card",
+        "team": "百慕大",
+        "player": "Z. Lewis",
+        "detail": "yellow"
+      },
+      {
+        "minute": 87,
+        "type": "substitution",
+        "team": "百慕大",
+        "player": "D. Richardson 替下 E. Russell",
+        "detail": ""
+      },
+      {
+        "minute": 89,
+        "type": "goal",
+        "team": "瓜德罗普",
+        "player": "D. Boisné",
+        "detail": ""
+      },
+      {
+        "minute": 90,
+        "type": "injuryTime",
+        "team": "",
+        "player": "",
+        "detail": ""
+      },
+      {
+        "minute": 90,
+        "type": "period",
+        "team": "",
+        "player": "",
+        "detail": ""
+      },
+      {
+        "minute": 90,
+        "type": "card",
+        "team": "百慕大",
+        "player": "L. Simmons",
+        "detail": "yellowRed"
+      }
+    ],
+    "h2h": {
+      "w": 0,
+      "d": 0,
+      "l": 0,
+      "total": 0,
+      "last_meetings": []
+    },
+    "money": {},
+    "broadcasts": [],
+    "team_home": {
+      "name": "百慕大",
+      "country": "百慕大",
+      "logo": "",
+      "venue": "",
+      "coach": ""
+    },
+    "team_away": {
+      "name": "瓜德罗普",
+      "country": "瓜德罗普",
+      "logo": "",
+      "venue": "",
+      "coach": ""
+    },
+    "players": [],
+    "updated_at": 1790385040.2452264,
+    "odds_by_bookmaker": {
+      "bet365": {
+        "胜平负": {
+          "主队": 2.8,
+          "平局": 3.1,
+          "客队": 2.3
+        },
+        "亚盘": {
+          "主队-1.75": 6.8,
+          "客队-1.75": 1.1,
+          "主队-1.25": 4.5,
+          "客队-1.25": 1.19,
+          "主队-0.75": 3,
+          "客队-0.75": 1.38,
+          "主队0.25": 1.55,
+          "客队0.25": 2.38,
+          "主队0.75": 1.3,
+          "客队0.75": 3.45,
+          "主队1.25": 1.15,
+          "客队1.25": 5.5,
+          "主队1.75": 1.1,
+          "客队1.75": 7,
+          "主队-1.5": 4.4,
+          "客队-1.5": 1.2,
+          "主队1.5": 1.13,
+          "客队1.5": 5.9,
+          "主队-0.5": 2.25,
+          "客队-0.5": 1.62,
+          "主队0.0": 1.62,
+          "客队0.0": 2.25,
+          "主队0.5": 1.43,
+          "客队0.5": 2.75,
+          "主队-1.0": 3.55,
+          "客队-1.0": 1.27,
+          "主队1.0": 1.17,
+          "客队1.0": 5,
+          "主队-0.25": 2.1,
+          "客队-0.25": 1.7
+        },
+        "双方进球": {
+          "是": 1.83,
+          "否": 1.83
+        },
+        "双重机会": {
+          "主队不败": 1.73,
+          "客队不败": 1.25,
+          "分胜负": 1.33
+        },
+        "平局退款": {
+          "主队": 1.73,
+          "客队": 2
+        },
+        "大小球(0.5)": {
+          "大0.5": 1.07,
+          "小0.5": 8.5
+        },
+        "大小球(1.5)": {
+          "大1.5": 1.36,
+          "小1.5": 3
+        },
+        "大小球(2.5)": {
+          "大2.5": 2.2,
+          "小2.5": 1.65
+        },
+        "大小球(3.5)": {
+          "大3.5": 4,
+          "小3.5": 1.22
+        }
+      },
+      "betfair": {
+        "胜平负": {
+          "主队": 2.5,
+          "平局": 3.1,
+          "客队": 2.6
+        },
+        "双方进球": {
+          "是": 1.87,
+          "否": 1.87
+        },
+        "双重机会": {
+          "主队不败": 1.44,
+          "客队不败": 1.44,
+          "分胜负": 1.29
+        },
+        "大小球(0.5)": {
+          "大0.5": 1.06,
+          "小0.5": 8.5
+        },
+        "大小球(1.5)": {
+          "大1.5": 1.36,
+          "小1.5": 3.1
+        },
+        "大小球(2.5)": {
+          "大2.5": 2.1,
+          "小2.5": 1.65
+        },
+        "大小球(3.5)": {
+          "大3.5": 4.1,
+          "小3.5": 1.22
+        }
+      },
+      "macauslot": {
+        "胜平负": {
+          "主队": 2.45,
+          "平局": 3.08,
+          "客队": 2.88
+        }
+      },
+      "pinnacle": {
+        "胜平负": {
+          "主队": 2.37,
+          "平局": 3.06,
+          "客队": 2.87
+        },
+        "大小球(1.5)": {
+          "大1.5": 1.34,
+          "小1.5": 2.98
+        },
+        "大小球(2.5)": {
+          "大2.5": 2.13,
+          "小2.5": 1.67
+        }
+      },
+      "unibet": {
+        "胜平负": {
+          "主队": 2.6,
+          "平局": 3.05,
+          "客队": 2.45
+        },
+        "亚盘": {
+          "主队-0.5": 2.1,
+          "客队-0.5": 1.65
+        },
+        "双方进球": {
+          "是": 1.8,
+          "否": 1.9
+        },
+        "平局退款": {
+          "主队": 1.6,
+          "客队": 2.15
+        }
+      },
+      "william-hill": {
+        "胜平负": {
+          "主队": 2.6,
+          "平局": 2.9,
+          "客队": 2.75
+        },
+        "亚盘": {
+          "主队-0.5": 2.1,
+          "客队-0.5": 1.67,
+          "主队0.5": 1.44,
+          "客队0.5": 2.62
+        },
+        "双方进球": {
+          "是": 1.85,
+          "否": 1.85
+        },
+        "双重机会": {
+          "主队不败": 1.4,
+          "客队不败": 1.44,
+          "分胜负": 1.36
+        },
+        "平局退款": {
+          "主队": 1.61,
+          "客队": 2.2
+        }
+      },
+      "bwin": {
+        "平局退款": {
+          "主队": 1.62,
+          "客队": 2.15
+        }
+      }
+    },
+    "match_stats": [
+      {
+        "id": 226978,
+        "event_id": 223080,
+        "team": "away",
+        "possession": 53,
+        "shots": 21,
+        "shots_on_target": 11,
+        "xg": 1.92,
+        "passes": 340,
+        "corners": 7,
+        "fouls": 22,
+        "offsides": 1,
+        "yellow": 2,
+        "red": 0,
+        "updated_at": 1790369859.0662854,
+        "xg_h1": 0.176,
+        "xg_h2": null,
+        "xg_est": null,
+        "xg_est_src": null,
+        "team_zh": "客队"
+      },
+      {
+        "id": 226977,
+        "event_id": 223080,
+        "team": "home",
+        "possession": 47,
+        "shots": 11,
+        "shots_on_target": 4,
+        "xg": 1.29,
+        "passes": 302,
+        "corners": 4,
+        "fouls": 12,
+        "offsides": 1,
+        "yellow": 4,
+        "red": 2,
+        "updated_at": 1790369859.0662854,
+        "xg_h1": 1.093,
+        "xg_h2": null,
+        "xg_est": null,
+        "xg_est_src": null,
+        "team_zh": "主队"
+      }
+    ],
+    "expected_xg": {
+      "found": true,
+      "event_id": 223080,
+      "home_team": "百慕大",
+      "away_team": "瓜德罗普",
+      "expected_xg": {
+        "home": 1.29,
+        "away": 1.92,
+        "home_h1": 1.09,
+        "away_h1": 0.18,
+        "home_h2": null,
+        "away_h2": null
+      },
+      "home_form": {
+        "n": 1,
+        "xg_for_avg": 1.29,
+        "xg_against_avg": 1.92,
+        "xg_for_h1_avg": 1.093,
+        "xg_against_h1_avg": 0.176,
+        "xg_for_h2_avg": null,
+        "xg_against_h2_avg": null,
+        "home_xg_for_avg": 1.29,
+        "away_xg_for_avg": null
+      },
+      "away_form": {
+        "n": 1,
+        "xg_for_avg": 1.92,
+        "xg_against_avg": 1.29,
+        "xg_for_h1_avg": 0.176,
+        "xg_against_h1_avg": 1.093,
+        "xg_for_h2_avg": null,
+        "xg_against_h2_avg": null,
+        "home_xg_for_avg": null,
+        "away_xg_for_avg": 1.92
+      },
+      "note": "基于双方近10场赛后xG形态(攻击/防守)算术均值估算的赛前预期值, 仅描述历史表现, 非比赛结果预测"
+    },
+    "historical_xg": {
+      "found": false,
+      "event_id": 223080
+    },
+    "historical_odds": {
+      "found": false,
+      "event_id": 223080
+    },
+    "odds_available": true,
+    "_fetchTime": "2026-09-26T01:10:40.391Z",
+    "_eventId": 223080,
+    "_source": "self_api_raw",
+    "_sources": [
+      "db1_cloud_api"
+    ],
+    "team_ability": {
+      "home": {
+        "overall": 65,
+        "attacking": 65,
+        "defending": 65,
+        "depth": 0
+      },
+      "away": {
+        "overall": 65,
+        "attacking": 65,
+        "defending": 65,
+        "depth": 0
+      },
+      "diff": 0
+    }
+  },
   "604943": {
     "event_id": 604943,
     "league": "俱乐部友谊赛",
