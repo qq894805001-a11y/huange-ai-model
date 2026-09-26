@@ -8023,7 +8023,7 @@
       "coach": ""
     },
     "players": [],
-    "updated_at": 1790388732.3192778,
+    "updated_at": 1790392452.7341545,
     "odds_by_bookmaker": {
       "bet365": {
         "胜平负": {
@@ -8289,8 +8289,661 @@
       "event_id": 223080
     },
     "odds_available": true,
-    "_fetchTime": "2026-09-26T02:12:12.454Z",
+    "_fetchTime": "2026-09-26T03:14:12.884Z",
     "_eventId": 223080,
+    "_source": "self_api_raw",
+    "_sources": [
+      "db1_cloud_api"
+    ],
+    "team_ability": {
+      "home": {
+        "overall": 65,
+        "attacking": 65,
+        "defending": 65,
+        "depth": 0
+      },
+      "away": {
+        "overall": 65,
+        "attacking": 65,
+        "defending": 65,
+        "depth": 0
+      },
+      "diff": 0
+    }
+  },
+  "223082": {
+    "event_id": 223082,
+    "league": "65",
+    "league_zh": "65",
+    "priority": 9,
+    "is_major": false,
+    "home_team": "格林纳达",
+    "away_team": "古巴",
+    "home_team_zh": "格林纳达",
+    "away_team_zh": "古巴",
+    "date": "26/09/2026",
+    "time": "05:00",
+    "status": "ft",
+    "status_zh": "全场结束",
+    "score": "0-3",
+    "home_score": 0,
+    "away_score": 3,
+    "minute": 0,
+    "venue": "",
+    "referee": "",
+    "odds": {
+      "home_win": 3.2,
+      "draw": 3.25,
+      "away_win": 2.45,
+      "asian_handicap": 0.25,
+      "asian_home": 1.8,
+      "asian_away": 2,
+      "over_25": 2.2,
+      "under_25": 1.65,
+      "btts_yes": 1.88,
+      "btts_no": 1.82
+    },
+    "odds_multi": {
+      "胜平负": {
+        "主队": 3.05,
+        "平局": 3.16,
+        "客队": 2.46
+      },
+      "亚盘": {
+        "主队-1.75": 8.6,
+        "主队-1.25": 5.9,
+        "客队-1.25": 1.12,
+        "主队-0.75": 3.55,
+        "客队-0.75": 1.27,
+        "主队0.25": 1.75,
+        "客队0.25": 2.05,
+        "主队0.75": 1.4,
+        "客队0.75": 2.85,
+        "主队1.25": 1.2,
+        "客队1.25": 4.59,
+        "主队1.75": 1.11,
+        "客队1.75": 8.05,
+        "主队-1.5": 6.4,
+        "客队-1.5": 1.11,
+        "客队2.5": 11,
+        "主队1.5": 1.17,
+        "客队1.5": 5.1,
+        "主队0.0": 2.08,
+        "客队0.0": 1.73,
+        "主队2.0": 1.02,
+        "客队2.0": 10,
+        "主队-1.0": 5.5,
+        "客队-1.0": 1.15,
+        "主队1.0": 1.24,
+        "客队1.0": 4.1,
+        "主队-0.25": 2.42,
+        "客队-0.25": 1.52,
+        "主队-0.5": 2.85,
+        "客队-0.5": 1.4,
+        "主队0.5": 1.57,
+        "客队0.5": 2.35
+      },
+      "双方进球": {
+        "是": 1.91,
+        "否": 1.84
+      },
+      "双重机会": {
+        "主队不败": 1.5,
+        "客队不败": 1.5,
+        "分胜负": 1.36
+      },
+      "平局退款": {
+        "主队": 2.05,
+        "客队": 1.73
+      },
+      "大小球(0.5)": {
+        "小0.5": 9,
+        "大0.5": 1.07
+      },
+      "大小球(1.5)": {
+        "大1.5": 1.37,
+        "小1.5": 3
+      },
+      "大小球(2.5)": {
+        "大2.5": 2.22,
+        "小2.5": 1.65
+      },
+      "大小球(3.5)": {
+        "大3.5": 4,
+        "小3.5": 1.22
+      }
+    },
+    "polymarket": {},
+    "lineups": {
+      "home": {
+        "formation": "4-2-3-1",
+        "players": [
+          "12. Chad Phillip",
+          "16. A.J. Paterson",
+          "4. Dorrel Pierre",
+          "5. Kayden Harrack",
+          "21. Josh Gabriel",
+          "11. Shavon John-Brown",
+          "14. Parish Muirhead",
+          "13. Greg Sandiford",
+          "7. Darius Johnson",
+          "8. Myles Hippolyte (C)",
+          "9. Lucas Akins"
+        ],
+        "count": 11,
+        "players_by_pos": {
+          "门将": [
+            "12. Chad Phillip"
+          ],
+          "后卫": [
+            "16. A.J. Paterson",
+            "4. Dorrel Pierre",
+            "5. Kayden Harrack",
+            "21. Josh Gabriel"
+          ],
+          "中场": [
+            "11. Shavon John-Brown",
+            "14. Parish Muirhead",
+            "13. Greg Sandiford",
+            "7. Darius Johnson",
+            "8. Myles Hippolyte (C)"
+          ],
+          "前锋": [
+            "9. Lucas Akins"
+          ]
+        }
+      },
+      "away": {
+        "formation": "4-2-3-1",
+        "players": [
+          "1. Ismel Morgado",
+          "2. Elvis Casanova",
+          "14. Karel Espino (C)",
+          "15. Yunior Pérez",
+          "5. Karel Pérez",
+          "13. Diego Catasus",
+          "6. Marcos Campos",
+          "10. Dairon Reyes",
+          "17. Eloy Nebreda",
+          "18. Yasniel Matos",
+          "23. Luis Paradela"
+        ],
+        "count": 11,
+        "players_by_pos": {
+          "门将": [
+            "1. Ismel Morgado"
+          ],
+          "后卫": [
+            "2. Elvis Casanova",
+            "14. Karel Espino (C)",
+            "15. Yunior Pérez",
+            "5. Karel Pérez"
+          ],
+          "中场": [
+            "13. Diego Catasus",
+            "6. Marcos Campos",
+            "10. Dairon Reyes",
+            "17. Eloy Nebreda",
+            "18. Yasniel Matos"
+          ],
+          "前锋": [
+            "23. Luis Paradela"
+          ]
+        }
+      }
+    },
+    "injuries": [
+      {
+        "team": "主队",
+        "player_name": "Darius Johnson",
+        "position": "",
+        "impact": "rotation",
+        "reason": "Muscle Injury"
+      }
+    ],
+    "stats": [
+      {
+        "team": "客队",
+        "possession": 65,
+        "shots": 11,
+        "shots_on_target": 3,
+        "xg": 0.74,
+        "xg_is_estimate": false,
+        "xg_note": null,
+        "passes": 393,
+        "corners": 4,
+        "fouls": 12,
+        "yellow": 2,
+        "red": 0,
+        "xg_h1": 0.446,
+        "xg_h2": null
+      },
+      {
+        "team": "主队",
+        "possession": 35,
+        "shots": 9,
+        "shots_on_target": 1,
+        "xg": 0.76,
+        "xg_is_estimate": false,
+        "xg_note": null,
+        "passes": 214,
+        "corners": 3,
+        "fouls": 8,
+        "yellow": 2,
+        "red": 0,
+        "xg_h1": 0.619,
+        "xg_h2": null
+      }
+    ],
+    "events": [
+      {
+        "minute": 17,
+        "type": "substitution",
+        "team": "格林纳达",
+        "player": "J. Isaac 替下 L. Akins",
+        "detail": ""
+      },
+      {
+        "minute": 19,
+        "type": "goal",
+        "team": "古巴",
+        "player": "G. Sandiford",
+        "detail": ""
+      },
+      {
+        "minute": 38,
+        "type": "card",
+        "team": "格林纳达",
+        "player": "J. Gabriel",
+        "detail": "yellow"
+      },
+      {
+        "minute": 38,
+        "type": "card",
+        "team": "古巴",
+        "player": "L. Paradela",
+        "detail": "yellow"
+      },
+      {
+        "minute": 40,
+        "type": "card",
+        "team": "古巴",
+        "player": "K. Espino",
+        "detail": "yellow"
+      },
+      {
+        "minute": 45,
+        "type": "injuryTime",
+        "team": "",
+        "player": "",
+        "detail": ""
+      },
+      {
+        "minute": 45,
+        "type": "period",
+        "team": "",
+        "player": "",
+        "detail": ""
+      },
+      {
+        "minute": 46,
+        "type": "substitution",
+        "team": "古巴",
+        "player": "A. Delgado 替下 E. Casanova",
+        "detail": ""
+      },
+      {
+        "minute": 55,
+        "type": "substitution",
+        "team": "格林纳达",
+        "player": "B. Ettienne 替下 A. Paterson",
+        "detail": ""
+      },
+      {
+        "minute": 55,
+        "type": "substitution",
+        "team": "格林纳达",
+        "player": "J. Francis 替下 D. Johnson",
+        "detail": ""
+      },
+      {
+        "minute": 67,
+        "type": "card",
+        "team": "格林纳达",
+        "player": "G. Sandiford",
+        "detail": "yellow"
+      },
+      {
+        "minute": 70,
+        "type": "substitution",
+        "team": "古巴",
+        "player": "D. Diaz 替下 D. Catasus",
+        "detail": ""
+      },
+      {
+        "minute": 70,
+        "type": "substitution",
+        "team": "古巴",
+        "player": "D. Reyes 替下 E. Nebreda",
+        "detail": ""
+      },
+      {
+        "minute": 76,
+        "type": "substitution",
+        "team": "古巴",
+        "player": "D. Reinoso 替下 Y. Matos",
+        "detail": ""
+      },
+      {
+        "minute": 86,
+        "type": "substitution",
+        "team": "格林纳达",
+        "player": "J. Gittens 替下 D. Pierre",
+        "detail": ""
+      },
+      {
+        "minute": 86,
+        "type": "substitution",
+        "team": "古巴",
+        "player": "M. Camejo 替下 L. Paradela",
+        "detail": ""
+      },
+      {
+        "minute": 89,
+        "type": "card",
+        "team": "格林纳达",
+        "player": "J. Gittens",
+        "detail": "yellow"
+      },
+      {
+        "minute": 90,
+        "type": "injuryTime",
+        "team": "",
+        "player": "",
+        "detail": ""
+      },
+      {
+        "minute": 90,
+        "type": "period",
+        "team": "",
+        "player": "",
+        "detail": ""
+      },
+      {
+        "minute": 90,
+        "type": "goal",
+        "team": "古巴",
+        "player": "D. Diaz",
+        "detail": ""
+      },
+      {
+        "minute": 90,
+        "type": "goal",
+        "team": "古巴",
+        "player": "D. Reinoso",
+        "detail": ""
+      }
+    ],
+    "h2h": {
+      "w": 0,
+      "d": 0,
+      "l": 0,
+      "total": 0,
+      "last_meetings": []
+    },
+    "money": {},
+    "broadcasts": [],
+    "team_home": {
+      "name": "格林纳达",
+      "country": "格林纳达",
+      "logo": "",
+      "venue": "",
+      "coach": ""
+    },
+    "team_away": {
+      "name": "古巴",
+      "country": "古巴",
+      "logo": "",
+      "venue": "",
+      "coach": ""
+    },
+    "players": [],
+    "updated_at": 1790392453.5560648,
+    "odds_by_bookmaker": {
+      "bet365": {
+        "胜平负": {
+          "主队": 2.8,
+          "平局": 3.1,
+          "客队": 2.3
+        },
+        "亚盘": {
+          "主队-1.25": 5.9,
+          "客队-1.25": 1.12,
+          "主队-0.75": 3.55,
+          "客队-0.75": 1.27,
+          "主队0.25": 1.75,
+          "客队0.25": 2.05,
+          "主队0.75": 1.4,
+          "客队0.75": 2.85,
+          "主队1.25": 1.2,
+          "客队1.25": 4.4,
+          "主队1.75": 1.11,
+          "客队1.75": 6.6,
+          "主队-1.5": 6.4,
+          "客队-1.5": 1.11,
+          "主队1.5": 1.17,
+          "客队1.5": 5,
+          "主队-0.5": 2.85,
+          "客队-0.5": 1.4,
+          "主队0.0": 2.08,
+          "客队0.0": 1.73,
+          "主队0.5": 1.57,
+          "客队0.5": 2.35,
+          "主队-1.0": 5.5,
+          "客队-1.0": 1.15,
+          "主队1.0": 1.24,
+          "客队1.0": 3.9,
+          "主队-0.25": 2.42,
+          "客队-0.25": 1.52
+        },
+        "双方进球": {
+          "是": 1.9,
+          "否": 1.8
+        },
+        "双重机会": {
+          "主队不败": 1.4,
+          "客队不败": 1.5,
+          "分胜负": 1.33
+        },
+        "平局退款": {
+          "主队": 2,
+          "客队": 1.73
+        },
+        "大小球(0.5)": {
+          "大0.5": 1.07,
+          "小0.5": 9
+        },
+        "大小球(1.5)": {
+          "大1.5": 1.36,
+          "小1.5": 3
+        },
+        "大小球(2.5)": {
+          "大2.5": 2.2,
+          "小2.5": 1.65
+        },
+        "大小球(3.5)": {
+          "大3.5": 4,
+          "小3.5": 1.22
+        }
+      },
+      "macauslot": {
+        "胜平负": {
+          "主队": 2.85,
+          "平局": 3.16,
+          "客队": 2.42
+        }
+      },
+      "pinnacle": {
+        "胜平负": {
+          "主队": 2.79,
+          "平局": 3.06,
+          "客队": 2.46
+        },
+        "大小球(1.5)": {
+          "大1.5": 1.37,
+          "小1.5": 2.88
+        },
+        "大小球(2.5)": {
+          "大2.5": 2.22,
+          "小2.5": 1.63
+        }
+      },
+      "unibet": {
+        "胜平负": {
+          "主队": 3.05,
+          "平局": 2.95,
+          "客队": 2.2
+        },
+        "亚盘": {
+          "主队0.5": 1.55,
+          "客队0.5": 2.3
+        },
+        "双方进球": {
+          "是": 1.85,
+          "否": 1.84
+        },
+        "平局退款": {
+          "主队": 2.05,
+          "客队": 1.65
+        }
+      },
+      "william-hill": {
+        "胜平负": {
+          "主队": 3,
+          "平局": 2.9,
+          "客队": 2.4
+        },
+        "亚盘": {
+          "主队0.5": 1.55,
+          "客队0.5": 2.3
+        },
+        "双方进球": {
+          "是": 1.91,
+          "否": 1.83
+        },
+        "双重机会": {
+          "主队不败": 1.5,
+          "客队不败": 1.36,
+          "分胜负": 1.36
+        },
+        "平局退款": {
+          "主队": 2,
+          "客队": 1.7
+        }
+      },
+      "bwin": {
+        "双方进球": {
+          "是": 1.85,
+          "否": 1.82
+        },
+        "平局退款": {
+          "主队": 2.05,
+          "客队": 1.66
+        }
+      }
+    },
+    "match_stats": [
+      {
+        "id": 226976,
+        "event_id": 223082,
+        "team": "away",
+        "possession": 65,
+        "shots": 11,
+        "shots_on_target": 3,
+        "xg": 0.74,
+        "passes": 393,
+        "corners": 4,
+        "fouls": 12,
+        "offsides": 2,
+        "yellow": 2,
+        "red": 0,
+        "updated_at": 1790375264.1306534,
+        "xg_h1": 0.446,
+        "xg_h2": null,
+        "xg_est": null,
+        "xg_est_src": null,
+        "team_zh": "客队"
+      },
+      {
+        "id": 226975,
+        "event_id": 223082,
+        "team": "home",
+        "possession": 35,
+        "shots": 9,
+        "shots_on_target": 1,
+        "xg": 0.76,
+        "passes": 214,
+        "corners": 3,
+        "fouls": 8,
+        "offsides": 0,
+        "yellow": 2,
+        "red": 0,
+        "updated_at": 1790375264.1306534,
+        "xg_h1": 0.619,
+        "xg_h2": null,
+        "xg_est": null,
+        "xg_est_src": null,
+        "team_zh": "主队"
+      }
+    ],
+    "expected_xg": {
+      "found": true,
+      "event_id": 223082,
+      "home_team": "格林纳达",
+      "away_team": "古巴",
+      "expected_xg": {
+        "home": 0.76,
+        "away": 0.74,
+        "home_h1": 0.62,
+        "away_h1": 0.45,
+        "home_h2": null,
+        "away_h2": null
+      },
+      "home_form": {
+        "n": 1,
+        "xg_for_avg": 0.76,
+        "xg_against_avg": 0.74,
+        "xg_for_h1_avg": 0.619,
+        "xg_against_h1_avg": 0.446,
+        "xg_for_h2_avg": null,
+        "xg_against_h2_avg": null,
+        "home_xg_for_avg": 0.76,
+        "away_xg_for_avg": null
+      },
+      "away_form": {
+        "n": 1,
+        "xg_for_avg": 0.74,
+        "xg_against_avg": 0.76,
+        "xg_for_h1_avg": 0.446,
+        "xg_against_h1_avg": 0.619,
+        "xg_for_h2_avg": null,
+        "xg_against_h2_avg": null,
+        "home_xg_for_avg": null,
+        "away_xg_for_avg": 0.74
+      },
+      "note": "基于双方近10场赛后xG形态(攻击/防守)算术均值估算的赛前预期值, 仅描述历史表现, 非比赛结果预测"
+    },
+    "historical_xg": {
+      "found": false,
+      "event_id": 223082
+    },
+    "historical_odds": {
+      "found": false,
+      "event_id": 223082
+    },
+    "odds_available": true,
+    "_fetchTime": "2026-09-26T03:14:13.691Z",
+    "_eventId": 223082,
     "_source": "self_api_raw",
     "_sources": [
       "db1_cloud_api"
