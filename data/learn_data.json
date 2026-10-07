@@ -1,1 +1,10 @@
-{}
+{
+  "preds": {},
+  "settled": {},
+  "teamAdj": {},
+  "stats": {
+    "n": 0,
+    "brier": 0,
+    "hit": 0
+  }
+}
