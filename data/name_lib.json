@@ -1273,7 +1273,16 @@
     "gaziantepfk": "Gaziantep FK",
     "corumfk": "Çorum FK",
     "besiktas": "Besiktas",
-    "kocaelispor": "Kocaelispor"
+    "kocaelispor": "Kocaelispor",
+    "coventrycity": "Coventry City",
+    "levante": "Levante",
+    "venezia": "Venezia",
+    "torino": "Torino",
+    "udinese": "Udinese",
+    "fcfamalicao": "FC Famalicao",
+    "alverca": "Alverca",
+    "eyupspor": "Eyupspor",
+    "goztepe": "Goztepe"
   },
   "leagues": {
     "premierleague": "英超",
