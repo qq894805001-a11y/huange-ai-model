@@ -1,5 +1,0 @@
-name: huange-ai-model
-env: node
-plan: free
-buildCommand: ""
-startCommand: node server-cloud.js
